@@ -12,6 +12,8 @@
 
 We need to represent lyrics as vectors to compute similarity, sentiment analysis, etc. We can try a simple bag of words representation so that other people can start on the visualization part, then, we can try a more sophisticated representation such as word embeddings.
 
+For similarity, we can cluster lyrics. Depending on how fast we can fit the model we may be able to try different ones and explore results, would also be a good idea to use nonparametric clustering to see how many "natural" groups we find.
+
 ## How can we get that representation?
 
 * Bag of words is pretty simple, the dataset is already in that format
