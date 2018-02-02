@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+## download raw data
+mkdir data
+curl http://labrosa.ee.columbia.edu/millionsong/sites/default/files/AdditionalFiles/mxm_dataset_train.txt.zip -o data/mxm_dataset_train.txt.zip
+curl http://labrosa.ee.columbia.edu/millionsong/sites/default/files/AdditionalFiles/mxm_dataset_test.txt.zip -o data/mxm_dataset_test.txt.zip
