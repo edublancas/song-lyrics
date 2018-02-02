@@ -1,5 +1,10 @@
 data/**
 
+*.txt
+*.zip
+*.csv
+*.npy
+
 #### joe made this: https://goel.io/joe
 
 #####=== Python ===#####
@@ -74,4 +79,3 @@ target/
 # produced vignettes
 vignettes/*.html
 vignettes/*.pdf
-
