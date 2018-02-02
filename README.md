@@ -2,6 +2,8 @@
 
 Song lyrics project
 
+[musiXmatch dataset](https://labrosa.ee.columbia.edu/millionsong/musixmatch)
+
 ## Quickstart
 
 ```shell
@@ -10,5 +12,3 @@ cd song-lyrics
 
 ./get_data
 ```
-
-[musiXmatch dataset](https://labrosa.ee.columbia.edu/millionsong/musixmatch)
