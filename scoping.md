@@ -7,6 +7,8 @@
 * Which are the most happy/sad song?
 * How different are lyrics from the same artist?
 * Which artists are most similar to each other?
+* Can we link certain historical events to an increase in lyrics themes?
+* Do artists that are geographically close share themes in common?
 
 ## Which data representation we need to answer such questions?
 
@@ -36,7 +38,8 @@ For similarity, we can cluster lyrics. Depending on how fast we can fit the mode
     - Evaluate results - is this representation good enough?
 * Word embeddings
     - Represent lyrics as real-valued vectors using word embeddings
-    - Cluster
+    - Clustering
+    - [Topic modeling](https://en.wikipedia.org/wiki/Topic_mode)
     - Sentiment analysis
     - Evaluate results
 * Plotting
