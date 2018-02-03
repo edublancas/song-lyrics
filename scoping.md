@@ -41,3 +41,19 @@ For similarity, we can cluster lyrics. Depending on how fast we can fit the mode
     - Evaluate results
 * Plotting
     - Once we have reasonable results we can start making nice plots/interactive visualizations for the final delivery
+
+## Areas
+
+We can split the project in five parts:
+
+1. Processing
+    - Get all the datasets
+    - Merge
+2. Representation
+    - Represent every song as vectors
+    - Bag of words, word embeddings, dimensionality reduction
+3. Modeling
+    - Find pattern in the data for visualization
+    - Clustering, sentiment analysis
+4. Visualization
+    - Visualize our findings
