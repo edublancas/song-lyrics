@@ -26,5 +26,6 @@ We are using the [Million Song Dataset](https://labrosa.ee.columbia.edu/millions
 git clone https://github.com/edublancas/song-lyrics
 cd song-lyrics
 
-./get_data
+# get all the data
+./process/download/get_data
 ```
