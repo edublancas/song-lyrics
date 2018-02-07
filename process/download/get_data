@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+
+# musixmatch data (lyrics)
 mkdir data
 wget -O data/raw/mxm_dataset_train.txt.zip \
     http://labrosa.ee.columbia.edu/millionsong/sites/default/files/AdditionalFiles/mxm_dataset_train.txt.zip
@@ -7,3 +9,8 @@ wget -O data/raw/mxm_dataset_test.txt.zip \
 
 unzip data/raw/mxm_dataset_train.txt.zip -d data/raw
 unzip data/raw/mxm_dataset_test.txt.zip -d data/raw
+
+# song data
+rsync -avzuP publicdata.opensciencedatacloud.org::ark:/31807/osdc-c1c763e4/AdditionalFiles.tar.gz \
+    data/raw/AdditionalFiles.tar.gz
+tar xzf data/raw/AdditionalFiles.tar.gz -C data/raw/
