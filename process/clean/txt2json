@@ -1,7 +1,9 @@
 #!/usr/bin/env python
 
 """
-Parses musixmatch txt files and outputs a json file
+Parses musixmatch txt files and outputs a json file with two keys:
+words (list of words) and songs (dictionary with track_id,
+track_id_musixmatch and bag_of_words (in {word: count} format))
 """
 import logging
 import argparse

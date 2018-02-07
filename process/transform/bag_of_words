@@ -1,9 +1,10 @@
 #!/usr/bin/env python
 
 """
-Parse musixmatch dataset in txt format and output a Apache Feather file
-where each row is a song and each column is the word count, optionally,
-cut the number of words to only output up to the n-th most popular word.
+Parse musixmatch dataset in json format and output a Apache Feather file
+where each row is a song and each column is the word count, also adds a column
+for the track id. Optionally, cut the number of words to only output up to
+the n-th most popular word.
 """
 import json
 import logging

@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 mkdir data
-wget -O data/mxm_dataset_train.txt.zip http://labrosa.ee.columbia.edu/millionsong/sites/default/files/AdditionalFiles/mxm_dataset_train.txt.zip
-wget -O data/mxm_dataset_test.txt.zip http://labrosa.ee.columbia.edu/millionsong/sites/default/files/AdditionalFiles/mxm_dataset_test.txt.zip
+wget -O data/raw/mxm_dataset_train.txt.zip \
+    http://labrosa.ee.columbia.edu/millionsong/sites/default/files/AdditionalFiles/mxm_dataset_train.txt.zip
+wget -O data/raw/mxm_dataset_test.txt.zip \
+    http://labrosa.ee.columbia.edu/millionsong/sites/default/files/AdditionalFiles/mxm_dataset_test.txt.zip
 
-unzip data/mxm_dataset_train.txt.zip -d data/
-unzip data/mxm_dataset_test.txt.zip -d data/
+unzip data/raw/mxm_dataset_train.txt.zip -d data/raw
+unzip data/raw/mxm_dataset_test.txt.zip -d data/raw
