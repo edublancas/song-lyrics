@@ -1,4 +1,14 @@
+#!/usr/bin/env python
+
+"""
+Parses a <SEP> separated txt file and outputs an Apache Feather binary file
+"""
+
 import pandas as pd
+
+
+def main():
+    pass
 
 location = pd.read_csv('subset_artist_location.txt', sep='<SEP>',
                        names=['artist_id', 'lat', 'long', 'track_id',
@@ -14,3 +24,7 @@ per_year.head()
 
 # some songs do not appear cause the do not have year information
 per_year[per_year.track_id == 'TRAKZMB128F427B44F']
+
+
+if __name__ == "__main__":
+    main()

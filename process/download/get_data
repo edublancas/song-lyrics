@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # musixmatch data (lyrics)
-mkdir data
+mkdir -p data/raw
 wget -O data/raw/mxm_dataset_train.txt.zip \
     http://labrosa.ee.columbia.edu/millionsong/sites/default/files/AdditionalFiles/mxm_dataset_train.txt.zip
 wget -O data/raw/mxm_dataset_test.txt.zip \
