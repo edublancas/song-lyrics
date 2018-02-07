@@ -9,11 +9,11 @@ WIP
 ## Folder structure
 
 * `data/` - Data is dumped here, not included in the repository
-* `processing/` - Scripts for downloading and processing the data (Python 3)
-    - `processing/download/` - Getting the raw data
-    - `processing/clean/` - Cleaning the raw data
-    - `processing/transform/` - Code for generating various song vector representations
-    - `processing/cluster/` - Clustering songs
+* `process/` - Scripts for downloading and processing the data (Python 3)
+    - `process/download/` - Getting the raw data
+    - `process/clean/` - Cleaning the raw data
+    - `process/transform/` - Code for generating various song vector representations
+    - `process/cluster/` - Clustering songs
 * `viz/` - Scripts for for generating visualizations (R)
 
 ## Data
