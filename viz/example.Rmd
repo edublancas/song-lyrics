@@ -15,8 +15,8 @@ colnames(df)
 
 
 ```{r}
-first_song_top_20 <- data.frame(words=colnames(df[1, 1:20]),
-                                count=as.numeric(df[1, 1:20]))
+first_song_top_20 <- data.frame(words=colnames(df[1, 2:21]),
+                                count=as.numeric(df[1, 2:21]))
 
 ggplot(first_song_top_20, aes(words, count)) + geom_col()
 ```

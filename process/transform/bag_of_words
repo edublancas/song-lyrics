@@ -5,11 +5,12 @@ Parse musixmatch dataset in txt format and output a Apache Feather file
 where each row is a song and each column is the word count, optionally,
 cut the number of words to only output up to the n-th most popular word.
 """
+import json
 import logging
 import argparse
 import numpy as np
 import pandas as pd
-from util import parse_song_line, bow2vector
+from song_lyrics.transform import bow2vector
 
 
 def main():
@@ -23,9 +24,9 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
 
     parser.add_argument('path_to_data', type=str,
-                        help='Path to the txt data')
+                        help='Path to the json data')
     parser.add_argument('path_to_output', type=str,
-                        help='Output path')
+                        help='Output path for the feather file')
     parser.add_argument('--max_words',  default=5000,
                         help='How many words to include (most popular)')
 
@@ -37,14 +38,10 @@ def main():
     MAX_WORDS = args.max_words
 
     with open(path_to_data) as f:
-        lines = f.read().splitlines()
+        data = json.loads(f.read())
 
-    # first 16 lines are comments, ignore them
-    # ignore first character (%) and split words
-    words_all = lines[17][1:].split(',')
-    lines_songs = lines[18:]
-
-    songs = [parse_song_line(line) for line in lines_songs]
+    words = data['words']
+    songs = data['songs']
 
     # how to reduce dimensionality?
     # we don't really need the exact words, we can first cluster words
@@ -52,18 +49,18 @@ def main():
     # the 5,000 dimensions
 
     # get all track ids
-    track_ids = [s[0] for s in songs]
+    track_ids = [s['track_id'] for s in songs]
 
     # get all bag of words
-    bows = [s[2] for s in songs]
+    bows = [s['bag_of_words'] for s in songs]
 
     # create matrix with all the songs up to the 50 most popular word
     X = np.stack([bow2vector(bow, max_words=MAX_WORDS) for bow in bows],
                  axis=0)
-    X = X.astype('int8')
+    X = X.astype('int16')
 
-    df = pd.DataFrame(X, columns=words_all)
-    df['track_id'] = track_ids
+    df = pd.DataFrame(X, columns=words)
+    df.insert(0, 'track_id', track_ids)
 
     logger.info('Saving file in {}'.format(path_to_output))
     df.to_feather(path_to_output)

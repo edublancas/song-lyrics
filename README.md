@@ -10,6 +10,7 @@ WIP
 
 * `data/` - Data is dumped here, not included in the repository
 * `process/` - Scripts for downloading and processing the data (Python 3)
+    - `process/pkg/` - Small Python package with utility functions
     - `process/download/` - Getting the raw data
     - `process/clean/` - Cleaning the raw data
     - `process/transform/` - Code for generating various song vector representations
@@ -21,6 +22,8 @@ WIP
 We are using the [Million Song Dataset](https://labrosa.ee.columbia.edu/millionsong/), specifically the [musiXmatch dataset](https://labrosa.ee.columbia.edu/millionsong/musixmatch) which contains lyics data for 237,662 tracks.
 
 ## Quickstart
+
+TODO: environment setup
 
 ```shell
 git clone https://github.com/edublancas/song-lyrics

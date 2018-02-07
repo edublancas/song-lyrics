@@ -4,6 +4,8 @@ data/**
 *.zip
 *.csv
 *.npy
+*.json
+*.feather
 
 #### joe made this: https://goel.io/joe
 
