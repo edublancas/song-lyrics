@@ -6,6 +6,8 @@ data/**
 *.npy
 *.json
 *.feather
+*.html
+*.pdf
 
 #### joe made this: https://goel.io/joe
 

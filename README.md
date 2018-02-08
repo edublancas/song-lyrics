@@ -24,7 +24,17 @@ We are using the [Million Song Dataset](https://labrosa.ee.columbia.edu/millions
 
 ## Quickstart
 
-TODO: environment setup
+## 0. Software requirements
+
+* Install [miniconda](https://github.com/edublancas/commons/blob/master/repos/conda.md)
+* Install [R](https://www.r-project.org/)
+
+Create conda environment and requirements for the project:
+
+```shell
+conda create --name=song-lyrics python=3
+pip install -r requirements.txt
+```
 
 ## 1. Get raw data
 
@@ -35,9 +45,7 @@ cd song-lyrics
 # this will create a new data/ folder in the current
 # working directory raw data will be stored in data/raw
 ./process/download/get_data
-
 ```
-
 
 ## 2. Process data
 
@@ -61,7 +69,7 @@ mkdir data/transform
 ./process/transform/bag_of_words data/clean/mxm_dataset.json \
     data/transform/mxm_dataset.feather
 
-# song dataset
+# prase songs dataset
 ./process/clean/txt2feather data/raw/AdditionalFiles/artist_location.txt \
     data/transform/artist_location.feather \
     artist_id,latitude,longitude,artist_name,location
@@ -75,4 +83,10 @@ mkdir data/transform
 
 ./process/clean/txt2feather data/raw/AdditionalFiles/unique_tracks.txt \
     data/transform/unique_tracks.feather track_id,song_id,artist_name,title
+
+
+# At this point you should have a lot of .feather files in data/transform/
+# let's start exploring those with ggplot2. put your findings in the
+# experiments/[your name]/ folder (only include Rmd or jnb files, not html
+# pdf, etc)
 ```
