@@ -28,7 +28,7 @@ def main():
                         help='Path to the json data')
     parser.add_argument('path_to_output', type=str,
                         help='Output path for the feather file')
-    parser.add_argument('--max_words',  default=5000,
+    parser.add_argument('--max_words',  default=5000, type=int,
                         help='How many words to include (most popular)')
 
     args = parser.parse_args()
@@ -41,7 +41,7 @@ def main():
     with open(path_to_data) as f:
         data = json.loads(f.read())
 
-    words = data['words']
+    words = data['words'][:MAX_WORDS]
     songs = data['songs']
 
     # how to reduce dimensionality?

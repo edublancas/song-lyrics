@@ -66,8 +66,14 @@ mkdir data/clean
 
 # convert json data to bag of words representation
 mkdir data/transform
+
+# all 500  words
 ./process/transform/bag_of_words data/clean/mxm_dataset.json \
     data/transform/mxm_dataset.feather
+
+# just top 50
+./process/transform/bag_of_words data/clean/mxm_dataset.json \
+    --max_words 50 data/transform/mxm_dataset_50.feather
 
 # prase songs dataset
 ./process/clean/txt2feather data/raw/AdditionalFiles/artist_location.txt \

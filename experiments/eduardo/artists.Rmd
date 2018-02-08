@@ -1,0 +1,92 @@
+
+```{r}
+library(feather)
+library(dplyr)
+```
+
+
+```{r}
+tracks <- read_feather('data/transform/unique_tracks.feather')
+lyrics <- read_feather('data/transform/mxm_dataset_100.feather')
+```
+
+```{r}
+sub_tracks <- filter(tracks, artist_name == 'Phoenix')
+```
+
+```{r}
+df <- left_join(lyrics, tracks, by='track_id')
+
+sub <- filter(df, artist_name == 'Phoenix')
+
+sub$title
+
+t(sub[34, ])
+
+t(filter(df, title == 'Wonderwall'))
+```
+
+```{r}
+t(df[which.max(df$love), ])
+
+# weird counts...
+t(df[which.max(df$me), ])
+
+# Maroon 5, Oasis, The Kooks, Arctic Monkeys
+one_artist <-filter(df, artist_name == 'Maroon 5')
+one_artist$title
+cor(one_artist$she, one_artist$love)
+
+cor_ <- function(df, a, b){
+    artist_name <- df$artist_name[1]
+
+    # at least 20 songs and at least 3 points to plot
+    if (nrow(df) > 20 & sum(df[[a]] & df[[b]]) > 3){
+        return(data.frame(artist_name=artist_name,
+               val=cor(df[[a]], df[[b]])))
+    }else{
+        return(data.frame(artist_name=artist_name,
+                          val=0))
+    }
+}
+
+colnames(df)
+
+s <- sample_n(df, 40000)
+a <- s$love > 0
+b <- s$she > 0
+idx <- a & b
+plot(s$love[idx], s$she[idx])
+cor(s$love[idx], s$she[idx])
+
+
+df_ <- filter(df, artist_name %in% c('Maroon 5', 'Oasis'))
+
+test <- df %>% group_by(artist_name) %>% do(cor_(., 'you', 'love'))
+
+filter(test, val > .4)
+
+arrange(test, desc(val))[1:20, ]
+arrange(test, desc(val))[20:30, ]
+arrange(test, desc(val))[30:40, ]
+arrange(test, desc(val))[40:50, ]
+arrange(test, desc(val))[50:60, ]
+arrange(test, val)
+
+m <- filter(df, artist_name == 'Metallica')
+nrow(m)
+plot(m$you, m$love)
+cor(m$you, m$love)
+
+
+dist_matrix <- as.matrix(dist(one_artist[, 2:51]))
+
+apply(dist_matrix, 1, which.max)
+
+t(one_artist[21,])
+t(one_artist[37,])
+
+t(one_artist[which.max(one_artist$love), ])
+t(one_artist[which.max(one_artist$she), ])
+t(one_artist[which.max(one_artist$die), ])
+```
