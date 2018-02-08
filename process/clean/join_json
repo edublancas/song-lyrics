@@ -1,0 +1,53 @@
+#!/usr/bin/env python
+
+"""
+Joins musixmatch test and train datasets, outputs a JSON file
+with words and songs
+"""
+import logging
+import argparse
+import json
+
+
+def main():
+    # instantiate a logger to print useful information about the progress
+    logger = logging.getLogger(__name__)
+
+    # config logger to INFO level
+    logging.basicConfig(level=logging.INFO)
+
+    # use docstring at the top as description for the script
+    parser = argparse.ArgumentParser(description=__doc__)
+
+    parser.add_argument('path_to_train', type=str,
+                        help='Path to musixmatch train data')
+    parser.add_argument('path_to_test', type=str,
+                        help='Path to the musixmatch test data')
+    parser.add_argument('path_to_output', type=str,
+                        help='Path to the output json file')
+
+    args = parser.parse_args()
+    path_to_train = args.path_to_train
+    path_to_test = args.path_to_test
+    path_to_output = args.path_to_output
+
+    with open(path_to_train) as f:
+        train = json.load(f)
+
+    with open(path_to_test) as f:
+        test = json.load(f)
+
+    # they are the same in the test dataset
+    words = train['words']
+    songs = train['songs'] + test['songs']
+
+    output = dict(words=words, songs=songs)
+
+    with open(path_to_output, 'w') as f:
+            json.dump(output, f)
+
+    logger.info('Output saved in {}'.format(path_to_output))
+
+
+if __name__ == "__main__":
+    main()

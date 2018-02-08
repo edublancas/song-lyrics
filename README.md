@@ -53,9 +53,26 @@ mkdir data/clean
     data/clean/mxm_dataset_test.json
 
 # join the two json files
+./process/clean/join_json data/clean/mxm_dataset_train.json \
+    data/clean/mxm_dataset_test.json data/clean/mxm_dataset.json
 
 # convert json data to bag of words representation
 mkdir data/transform
-./process/transform/bag_of_words data/clean/mxm_dataset_test.json \
-    data/transform/mxm_dataset_test.feather
+./process/transform/bag_of_words data/clean/mxm_dataset.json \
+    data/transform/mxm_dataset.feather
+
+# song dataset
+./process/clean/txt2feather data/raw/AdditionalFiles/artist_location.txt \
+    data/transform/artist_location.feather \
+    artist_id,latitude,longitude,artist_name,location
+
+./process/clean/txt2feather data/raw/AdditionalFiles/tracks_per_year.txt \
+    data/transform/tracks_per_year.feather \
+    year,track_id,artist_name,title
+
+./process/clean/txt2feather data/raw/AdditionalFiles/unique_artists.txt \
+    data/transform/unique_artists.feather artist_id,artist_id2,track_id,artist_name
+
+./process/clean/txt2feather data/raw/AdditionalFiles/unique_tracks.txt \
+    data/transform/unique_tracks.feather track_id,song_id,artist_name,title
 ```
