@@ -60,3 +60,15 @@ We can split the project in five parts:
     - Clustering, sentiment analysis
 4. Visualization
     - Visualize our findings
+
+
+## Tentative calendar
+
+* By the end of February
+    - Report using bag of words and simple clustering models
+    - Song representation using word embeddings
+    - Report using word embeddings and more complex clustering
+* By the end of March
+    - 
+* By the end of the first week of April
+    - 
