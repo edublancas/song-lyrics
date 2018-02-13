@@ -1,0 +1,55 @@
+---
+title: "180212_first_exploration"
+output: html_notebook
+---
+
+```{r}
+library(feather)
+library(tidyverse)
+
+#read feather files
+df_artist_location <- read_feather("artist_location.feather")
+df_track_per_year <- read_feather("tracks_per_year.feather")
+df_unique_artists <- read_feather("unique_artists.feather")
+df_unique_tracks <- read_feather("unique_tracks.feather")
+```
+
+
+
+```{r}
+#plotting artist location on world map
+
+#source: https://www.r-bloggers.com/r-beginners-plotting-locations-on-to-a-world-map/
+library("ggmap")
+library("maptools")
+library("maps")
+
+lon <- select(df_artist_location, longitude)
+lat <- select(df_artist_location, latitude)
+
+
+mp <- NULL
+mapWorld <- borders("world", colour="gray50", fill="gray50") 
+mp <- ggplot() +  mapWorld
+
+mp <- mp+ geom_point(aes(x=lon, y=lat) ,color="blue", size=0.25, alpha=0.05)+ggtitle('Artist Location')
+mp
+```
+
+
+```{r}
+#this code chunk plots top artists each year by number of songs
+plot_year <- 2006
+no_artists <- 25
+
+song_count_data <- select(df_track_per_year, artist_name, year) %>% filter( year==plot_year) %>% 
+  group_by(artist_name)%>% 
+  summarize(song_count = n())%>% 
+  arrange(desc(song_count))%>%
+  head(no_artists)
+
+ggplot(song_count_data, aes(x = reorder(artist_name, song_count), y=song_count)) +
+  geom_col()+
+  coord_flip()+
+  xlab('Artist')
+```
