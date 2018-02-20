@@ -75,7 +75,7 @@ mkdir data/transform
 ./process/transform/bag_of_words data/clean/mxm_dataset.json \
     --max_words 50 data/transform/mxm_dataset_50.feather
 
-# prase songs dataset
+# parse songs dataset
 ./process/clean/txt2feather data/raw/AdditionalFiles/artist_location.txt \
     data/transform/artist_location.feather \
     artist_id,latitude,longitude,artist_name,location
@@ -95,4 +95,9 @@ mkdir data/transform
 # let's start exploring those with ggplot2. put your findings in the
 # experiments/[your name]/ folder (only include Rmd or jnb files, not html
 # pdf, etc)
+
+
+# building word embeddings vocabulary
+./process/clean/subset_embeddings data/clean/mxm_dataset.json \
+    data/raw/glove.6B/glove.6B.50d.txt data/clean/embeddings_subset.json
 ```
