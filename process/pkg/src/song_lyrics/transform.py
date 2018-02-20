@@ -1,3 +1,4 @@
+import pandas as pd
 import numpy as np
 
 
@@ -35,17 +36,36 @@ def glovetxt2dict(path='glove.6B.50d.txt'):
     return mapping
 
 
-def make_word_embeddings(train, test, we, **kwargs):
-    """Make word embeddings representation
+def bow2embedding(bow, words, glove, max_words):
     """
-    # make unigrams and keep only the top 1000 (in terms of frequency)
-    X_train_, X_test_, vectorizer = make_unigrams(train, test,
-                                                  **kwargs)
+    Replace counts in a bag of words representation with an embedding
+    and convert it to a numpy vector
+    """
+    (dim,) = list(glove.values())[0].shape
 
-    vecs = np.stack([we[word] for word in vectorizer.get_feature_names()],
-                    axis=0)
+    vector = np.zeros(dim)
 
-    X_train = np.dot(X_train_, vecs)
-    X_test = np.dot(X_test_, vecs)
+    # parse bag of words and replace the word index with the dense vector
+    # for the sum of [count in bag of words] * [embedding] for the
+    # top max_words
+    for idx, count in bow.items():
 
-    return X_train, X_test, vectorizer
+        idx = int(idx)
+
+        if idx < max_words:
+            word = words[idx]
+            embedding = glove[word]
+            vector = vector + count * embedding
+
+    return vector
+
+
+def bows2embeddings(bows, words, track_ids, glove, max_words):
+    """Convert a list of bag of words into a data DataFrame
+    """
+    X = np.stack([bow2embedding(bow, words, glove, max_words=max_words)
+                  for bow in bows], axis=0)
+    df = pd.DataFrame(X, columns=words)
+    df.insert(0, 'track_id', track_ids)
+
+    return df

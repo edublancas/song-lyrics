@@ -31,12 +31,12 @@ def song_line(line):
                 bag_of_words=bag_of_words_dict)
 
 
-def load_json_data(path_to_data, MAX_WORDS):
+def load_json_data(path_to_data):
 
     with open(path_to_data) as f:
         data = json.loads(f.read())
 
-    words = data['words'][:MAX_WORDS]
+    words = data['words']
     songs = data['songs']
 
     # get all track ids

@@ -40,6 +40,8 @@ def main():
 
     words, track_ids, bows = load_json_data(path_to_data, MAX_WORDS)
 
+    words = words[:MAX_WORDS]
+
     # create matrix with all the songs up to the 50 most popular word
     X = np.stack([bow2vector(bow, max_words=MAX_WORDS) for bow in bows],
                  axis=0)
