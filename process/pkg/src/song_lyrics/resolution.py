@@ -5,8 +5,6 @@ import logging
 from fuzzywuzzy import process
 from fuzzywuzzy import fuzz
 
-logger = logging.getLogger(__name__)
-
 
 # TODO: add some tests
 # x = ['c', 'a', 'a', 'b', 'a', 'j', 'z']
@@ -45,6 +43,8 @@ def find_interval(words, start):
 def match(to_match, words_glove_sorted):
     """Build a mapping between words using fuzze matching
     """
+    logger = logging.getLogger(__name__)
+
     mapping = dict()
 
     for i, word in enumerate(to_match):

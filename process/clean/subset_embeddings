@@ -6,7 +6,6 @@ so it loads faster, also, some words do not match so we need to do entity
 resolution
 """
 from pathlib import Path
-import os.path as path
 import json
 import logging
 import logging.config
