@@ -4,16 +4,25 @@
 Parse musixmatch dataset in json format and output a Apache Feather file
 where each row is a song in dense format throught word embeddings
 """
-from song_lyrics.parse import load_json_data
-from song_lyrics.transform import glovetxt2dict
+import logging
+
+from song_lyrics.parse import load_json_data, glovetxt2dict
+from song_lyrics.transform import bows2embeddings
+
+
+logging.basicConfig(level=logging.INFO)
 
 # load word embeddings
 glove = glovetxt2dict('../../data/raw/glove.6B/glove.6B.50d.txt')
 
 path_to_data = '../../data/clean/mxm_dataset.json'
-MAX_WORDS = 500
+
+# maybe for embeddings makes more sense to use top words within each song
+# than overall, also add the possibility to select words
+MAX_WORDS = 100
 
 # parse json data
 words, track_ids, bows = load_json_data(path_to_data, MAX_WORDS)
 
 # convert bag of words to dense representation using embeddings
+bows2embeddings(bows[:100], words, track_ids[:100], glove, MAX_WORDS)

@@ -1,3 +1,4 @@
+import numpy as np
 import json
 
 
@@ -46,3 +47,22 @@ def load_json_data(path_to_data):
     bows = [s['bag_of_words'] for s in songs]
 
     return words, track_ids, bows
+
+
+def glovetxt2dict(path='glove.6B.50d.txt'):
+    """Load word embeddings txt file and convert to a dictionary
+    """
+    with open(path) as f:
+        glove = f.read().splitlines()
+
+    def process_line(l):
+        tokens = l.split()
+
+        word = tokens[0]
+        values = [float(val) for val in tokens[1:]]
+
+        return word, np.array(values)
+
+    mapping = {k: v for k, v in (process_line(l) for l in glove)}
+
+    return mapping

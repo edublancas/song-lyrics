@@ -1,5 +1,10 @@
+import logging
+
+
 import pandas as pd
 import numpy as np
+
+logger = logging.getLogger(__name__)
 
 
 def bow2vector(bow, max_words):
@@ -15,25 +20,6 @@ def bow2vector(bow, max_words):
             vector[idx] = count
 
     return vector
-
-
-def glovetxt2dict(path='glove.6B.50d.txt'):
-    """Load word embeddings txt file and convert to a dictionary
-    """
-    with open(path) as f:
-        glove = f.read().splitlines()
-
-    def process_line(l):
-        tokens = l.split()
-
-        word = tokens[0]
-        values = [float(val) for val in tokens[1:]]
-
-        return word, np.array(values)
-
-    mapping = {k: v for k, v in (process_line(l) for l in glove)}
-
-    return mapping
 
 
 def bow2embedding(bow, words, glove, max_words):
@@ -63,9 +49,17 @@ def bow2embedding(bow, words, glove, max_words):
 def bows2embeddings(bows, words, track_ids, glove, max_words):
     """Convert a list of bag of words into a data DataFrame
     """
-    X = np.stack([bow2embedding(bow, words, glove, max_words=max_words)
-                  for bow in bows], axis=0)
-    df = pd.DataFrame(X, columns=words)
+    def _bow2embedding(*args, i, n, **kwargs):
+        if i % 1000 == 0:
+            logger.info('{:,} out of {:,}...'.format(i, n))
+        return bow2embedding(*args, **kwargs)
+
+    n = len(bows)
+
+    X = np.stack([_bow2embedding(bow, words, glove, max_words=max_words,
+                                 i=i, n=n)
+                  for i, bow in enumerate(bows)], axis=0)
+    df = pd.DataFrame(X)
     df.insert(0, 'track_id', track_ids)
 
     return df
