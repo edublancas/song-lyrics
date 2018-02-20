@@ -1,0 +1,7 @@
+#!/usr/bin/env python
+
+"""
+Parse musixmatch dataset in json format and output a Apache Feather file
+where each row is a song in dense format throught word embeddings
+"""
+
