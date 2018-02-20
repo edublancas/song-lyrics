@@ -5,18 +5,18 @@ GLOVE contains 400K words and our dataset only 5K, we need to subset GLOVE
 so it loads faster, also, some words do not match so we need to do entity
 resolution
 """
+from pathlib import Path
+import os.path as path
 import json
 import logging
+import logging.config
 import argparse
 from song_lyrics.parse import load_json_data, glovetxt2dict
 from song_lyrics.resolution import match
+from song_lyrics.util import load_logging_config_file
 
 
 def main():
-    logging.basicConfig(level=logging.INFO)
-
-    logger = logging.getLogger(__name__)
-
     # use docstring at the top as description for the script
     parser = argparse.ArgumentParser(description=__doc__)
 
@@ -32,6 +32,16 @@ def main():
     path_to_data = args.path_to_data
     path_to_glove = args.path_to_glove
     path_to_output = args.path_to_output
+
+    logging_config = load_logging_config_file()
+
+    folder = Path(path_to_output).parent
+    filename = '{}.log'.format(Path(__file__).name)
+    logging_config['handlers']['file']['filename'] = str(folder / filename)
+
+    logging.config.dictConfig(logging_config)
+
+    logger = logging.getLogger(__name__)
 
     # load word embeddings
     logger.info('Loading GLOVE from: {}'.format(path_to_glove))

@@ -16,7 +16,7 @@ AUTHOR = ''
 LICENSE = 'GPL3'
 LONG_DESCRIPTION = ''
 
-REQUIRED = ['fuzzywuzzy', 'python-Levenshtein']
+REQUIRED = ['fuzzywuzzy', 'python-Levenshtein', 'pyyaml']
 
 here = os.path.abspath(os.path.dirname(__file__))
 
