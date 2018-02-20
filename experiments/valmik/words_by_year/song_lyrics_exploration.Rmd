@@ -1,0 +1,45 @@
+---
+title: "song_lyrics"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(feather)
+artist_location <- read_feather('song-lyrics/data/transform/artist_location.feather')
+mxm <- read_feather('song-lyrics/data/transform/mxm_dataset.feather')
+unique_artists <- read_feather('song-lyrics/data/transform/unique_artists.feather')
+unique_tracks <- read_feather('song-lyrics/data/transform/unique_tracks.feather')
+tracks_per_year <- read_feather('song-lyrics/data/transform/tracks_per_year.feather')
+```
+
+```{r}
+#rownames(mxm) <- mxm[,1]
+#mxm[,1] <- NULL
+#mxm_agg <- rbind(mxm, data.frame(track_id="Total",t(colSums(mxm[,-1]))))
+colnames(tracks_per_year)[1] <- "track_year"
+library(plyr)
+mxm_year <- join(mxm, tracks_per_year, by = "track_id")
+```
+
+
+```{r}
+drops <- c("track_id", "artist_name", "title")
+mxm_year <- mxm_year[ , !(names(mxm_year) %in% drops)]
+```
+
+```{r}
+library(dplyr)
+mxm_grouped <- group_by(mxm_year, track_year)
+```
+```{r}
+mxm_grouped <- summarise_all(mxm_grouped, sum)
+```
+
+```{r}
+saveRDS(mxm_grouped,file="words_per_year.Rda")
+```
+

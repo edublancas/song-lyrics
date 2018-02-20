@@ -1,0 +1,34 @@
+---
+title: "words_per_year"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+words_year <- readRDS(file = "words_per_year.Rda")
+```
+
+```{r}
+library(ggplot2)
+
+ggplot(words_year,aes(x=track_year)) + geom_line(aes(y = love, colour = 'love')) + geom_line(aes(y = hate, colour = 'hate')) +  ylim(0,20000) + xlim(1960,2010)
+
+```
+
+```{r}
+ggplot(words_year,aes(x=track_year)) + geom_line(aes(y = jesus, colour = 'jesus')) + geom_line(aes(y = god, colour = 'god')) +  ylim(0,3000) + xlim(1960,2010)
+
+```
+
+```{r}
+ggplot(words_year,aes(x=track_year)) + geom_line(aes(y = guitar, colour = 'guitar'))  + geom_line(aes(y = hate, colour = 'hate')) +  ylim(0,1500) 
+
+```
+
+```{r}
+sort(colnames(words_year))
+```
+
