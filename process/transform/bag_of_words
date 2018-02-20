@@ -6,11 +6,11 @@ where each row is a song and each column is the word count, also adds a column
 for the track id. Optionally, cut the number of words to only output up to
 the n-th most popular word.
 """
-import json
 import logging
 import argparse
 import numpy as np
 import pandas as pd
+from song_lyrics.parse import load_json_data
 from song_lyrics.transform import bow2vector
 
 
@@ -38,22 +38,7 @@ def main():
                       else args.path_to_output + '.feather')
     MAX_WORDS = args.max_words
 
-    with open(path_to_data) as f:
-        data = json.loads(f.read())
-
-    words = data['words'][:MAX_WORDS]
-    songs = data['songs']
-
-    # how to reduce dimensionality?
-    # we don't really need the exact words, we can first cluster words
-    # using word embeddings and merge the most similar to avoid working with
-    # the 5,000 dimensions
-
-    # get all track ids
-    track_ids = [s['track_id'] for s in songs]
-
-    # get all bag of words
-    bows = [s['bag_of_words'] for s in songs]
+    words, track_ids, bows = load_json_data(path_to_data, MAX_WORDS)
 
     # create matrix with all the songs up to the 50 most popular word
     X = np.stack([bow2vector(bow, max_words=MAX_WORDS) for bow in bows],

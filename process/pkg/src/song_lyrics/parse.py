@@ -1,3 +1,6 @@
+import json
+
+
 def song_line(line):
     """Parse one line
 
@@ -26,3 +29,20 @@ def song_line(line):
                          in bag_of_words}
     return dict(track_id=track_id, track_id_musixmatch=track_id_musixmatch,
                 bag_of_words=bag_of_words_dict)
+
+
+def load_json_data(path_to_data, MAX_WORDS):
+
+    with open(path_to_data) as f:
+        data = json.loads(f.read())
+
+    words = data['words'][:MAX_WORDS]
+    songs = data['songs']
+
+    # get all track ids
+    track_ids = [s['track_id'] for s in songs]
+
+    # get all bag of words
+    bows = [s['bag_of_words'] for s in songs]
+
+    return words, track_ids, bows

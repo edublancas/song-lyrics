@@ -4,4 +4,7 @@
 Parse musixmatch dataset in json format and output a Apache Feather file
 where each row is a song in dense format throught word embeddings
 """
+from song_lyrics.transform import glovetxt2dict
 
+# load word embeddings
+glove = glovetxt2dict('../../data/raw/glove.6B/glove.6B.50d.txt')
