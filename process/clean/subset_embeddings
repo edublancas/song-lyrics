@@ -1,0 +1,70 @@
+#!/usr/bin/env python
+
+"""
+GLOVE contains 400K words and our dataset only 5K, we need to subset GLOVE
+so it loads faster, also, some words do not match so we need to do entity
+resolution
+"""
+import json
+import logging
+from song_lyrics.parse import load_json_data, glovetxt2dict
+from song_lyrics.resolution import match
+
+
+def main():
+    logging.basicConfig(level=logging.INFO)
+
+    logger = logging.getLogger(__name__)
+
+    path_to_data = '../../data/clean/mxm_dataset.json'
+    path_to_glove = '../../data/raw/glove.6B/glove.6B.50d.txt'
+    path_to_output = '../../data/clean/embeddings_subset.json'
+
+    # load word embeddings
+    logger.info('Loading GLOVE from: {}'.format(path_to_glove))
+    glove = glovetxt2dict(path_to_glove)
+
+    # parse json data
+    logger.info('Loading Musixmatch data from {}'.format(path_to_data))
+    words, track_ids, bows = load_json_data(path_to_data)
+
+    words_glove = set(glove.keys())
+    words_data = set(words)
+
+    logger.info('GLOVE contains {:,} words'.format(len(words_glove)))
+    logger.info('Musixmatch contains {:,} words'.format(len(words_data)))
+
+    # first find exact matches
+    both = words_data & words_glove
+    # now find the ones missing (we need to match this)
+    to_match = words_data - both
+
+    logger.info('Exact matches: {:,}'.format(len(both)))
+    logger.info('To match: {:,}'.format(len(to_match)))
+
+    # build subset with exact matches
+    subset = {k: v for k, v in glove.items() if k in both}
+
+    words_glove_sorted = sorted(list(words_glove))
+
+    mapping = match(list(to_match), words_glove_sorted)
+
+    subset_matched = {k: glove[v] for k, v in mapping.items() if v is not None}
+
+    res = {**subset, **subset_matched}
+
+    logger.info('Final vocabulary size {:,}, failed to match {:,}'
+                .format(len(res), len(to_match) - len(subset_matched)))
+
+    logger.info('Writing to disk...')
+
+    with open(path_to_output, 'w') as f:
+        json.dump(res, f)
+
+    logger.info('Output saved in {}'.format(path_to_output))
+
+    # TODO: send log to a file
+
+
+if __name__ == "__main__":
+    main()

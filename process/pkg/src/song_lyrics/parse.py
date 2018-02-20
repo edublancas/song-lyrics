@@ -49,20 +49,24 @@ def load_json_data(path_to_data):
     return words, track_ids, bows
 
 
-def glovetxt2dict(path='glove.6B.50d.txt'):
+def glovetxt2dict(path='glove.6B.50d.txt', convert_to_np_arrays=False):
     """Load word embeddings txt file and convert to a dictionary
     """
     with open(path) as f:
         glove = f.read().splitlines()
 
-    def process_line(l):
+    def process_line(l, convert_to_np_arrays):
         tokens = l.split()
 
         word = tokens[0]
-        values = [float(val) for val in tokens[1:]]
+        values = tokens[1:]
 
-        return word, np.array(values)
+        if convert_to_np_arrays:
+            values = np.array([float(val) for val in values])
 
-    mapping = {k: v for k, v in (process_line(l) for l in glove)}
+        return word, values
+
+    mapping = {k: v for k, v in (process_line(l, convert_to_np_arrays)
+               for l in glove)}
 
     return mapping

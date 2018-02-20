@@ -4,39 +4,20 @@ Entity resolution between the words in the Musixmatch dataset and GLOVE
 import logging
 from fuzzywuzzy import process
 from fuzzywuzzy import fuzz
-from song_lyrics.parse import load_json_data, glovetxt2dict
-
-logging.basicConfig(level=logging.INFO)
 
 logger = logging.getLogger(__name__)
 
-path_to_data = '../../data/clean/mxm_dataset.json'
-path_to_glove = '../../data/raw/glove.6B/glove.6B.50d.txt'
 
-# load word embeddings
-glove = glovetxt2dict(path_to_glove)
-
-# parse json data
-words, track_ids, bows = load_json_data(path_to_data)
-
-words_glove = set(glove.keys())
-words_data = set(words)
-
-logger.info('GLOVE contains {:,} words'.format(len(words_glove)))
-logger.info('Musixmatch contains {:,} words'.format(len(words_data)))
-
-# first find exact matches
-both = words_data & words_glove
-# now find the ones missing (we need to match this)
-to_match = words_data - both
-
-logger.info('Exact matches: {:,}'.format(len(both)))
-logger.info('To match: {:,}'.format(len(to_match)))
-
-words_glove_sorted = sorted(list(words_glove))
-
-
+# TODO: add some tests
+# x = ['c', 'a', 'a', 'b', 'a', 'j', 'z']
+# x[find_interval(x, 'z')]
+# x[find_interval(x, 'b')]
 def find_interval(words, start):
+    """
+    Given a list of ordered words return the indexes for the first word that
+    starts with certain character up until the first word (not included)
+    that starts with another character
+    """
     start_idx = None
     end_idx = None
 
@@ -61,18 +42,26 @@ def find_interval(words, start):
     return slice(start_idx, end_idx)
 
 
-x = ['c', 'a', 'a', 'b', 'a', 'j', 'z']
-x[find_interval(x, 'z')]
-x[find_interval(x, 'b')]
+def match(to_match, words_glove_sorted):
+    """Build a mapping between words using fuzze matching
+    """
+    mapping = dict()
 
-word = list(to_match)[0]
-word
+    for i, word in enumerate(to_match):
 
+        try:
+            idxs = find_interval(words_glove_sorted, word[0])
+        except ValueError as e:
+            logger.exception('Error finding interval in word "{}" (index {})'
+                             ', setting match to None...'.format(word, i))
+            mapping[word] = None
+        else:
+            match, score = process.extractOne(word, words_glove_sorted[idxs],
+                                              scorer=fuzz.ratio)
 
-for word in list(to_match):
-    idxs = find_interval(words_glove_sorted, word[0])
+            logger.info('Matched {} with {}, score: {}'.format(word, match,
+                                                               score))
 
-    match, score = process.extractOne(word, words_glove_sorted[idxs],
-                                      scorer=fuzz.ratio)
+            mapping[word] = match
 
-    logger.info('Matched {} with {}, score: {}'.format(word, match, score))
+    return mapping
