@@ -68,9 +68,16 @@ def bow2embedding(bow, words, glove, max_words=None, global_max=False):
         if ((max_words and global_max and idx < max_words) or
            (max_words and not global_max and idx in ids[:max_words]) or
            (max_words is None)):
+
             word = words[idx]
-            embedding = glove[word]
-            vector = vector + count * embedding
+
+            try:
+                embedding = glove[word]
+            except KeyError:
+                logger.exception("Coulnd't find embedding for '{}', "
+                                 "ignoring word...".format(word))
+            else:
+                vector = vector + count * embedding
 
     return vector
 

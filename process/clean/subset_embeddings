@@ -75,6 +75,9 @@ def main():
 
     subset_matched = {k: glove[v] for k, v in mapping.items() if v is not None}
 
+    non_matched = [k for k, v in mapping.items() if v is None]
+    logger.info('Non matches: {}'.format(non_matched))
+
     res = {**subset, **subset_matched}
 
     logger.info('Final vocabulary size {:,}, failed to match {:,}'

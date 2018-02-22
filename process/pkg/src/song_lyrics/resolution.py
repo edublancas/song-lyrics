@@ -26,7 +26,8 @@ def find_interval(words, start):
             break
 
     if start_idx is None:
-        raise ValueError("Couldn't find word starting with '{}'".format(start))
+        raise ValueError("Couldn't find word starting with '{}'"
+                         .format(start, word, idx))
 
     # find end index
     for idx, word in enumerate(words[start_idx + 1:]):
@@ -41,7 +42,7 @@ def find_interval(words, start):
 
 
 def match(to_match, words_glove_sorted):
-    """Build a mapping between words using fuzze matching
+    """Build a mapping between words using fuzzy matching
     """
     logger = logging.getLogger(__name__)
 
