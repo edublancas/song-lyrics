@@ -61,7 +61,7 @@ def main():
                          global_max=args.global_max)
 
     # feather doesn't like ints as column names
-    df.columns = [str(i) for i in range(df.shape[1])]
+    df.columns = [str(i) for i in df.columns]
 
     logger.info('Saving file in {}'.format(args.path_to_output))
     df.to_feather(args.path_to_output)
