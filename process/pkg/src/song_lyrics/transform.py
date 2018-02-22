@@ -49,7 +49,7 @@ def bow2embedding(bow, words, glove, max_words=None, global_max=False):
     """
     # TODO: add featutre toselect  specific words and cutoff in bag of words
 
-    (dim,) = list(glove.values())[0].shape
+    dim = len(list(glove.values())[0])
 
     vector = np.zeros(dim)
 
@@ -73,7 +73,10 @@ def bow2embedding(bow, words, glove, max_words=None, global_max=False):
 
 
 def bows2embeddings(bows, words, track_ids, glove, max_words):
-    """Convert a list of bag of words into a data DataFrame
+    """
+    Convert a list of bag of words into a data DataFrame, this is just
+    a wrapper arounf bow2embedding to handle many objects and convert
+    them to a pandas.DataFrame
     """
     def _bow2embedding(*args, i, n, **kwargs):
         if i % 1000 == 0:

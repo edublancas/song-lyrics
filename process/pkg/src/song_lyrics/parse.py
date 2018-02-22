@@ -33,6 +33,8 @@ def song_line(line):
 
 
 def load_json_data(path_to_data):
+    """Loads musixmatch data in JSON format
+    """
 
     with open(path_to_data) as f:
         data = json.loads(f.read())
@@ -70,3 +72,17 @@ def glovetxt2dict(path='glove.6B.50d.txt', convert_to_np_arrays=False):
                for l in glove)}
 
     return mapping
+
+
+def json_glove(path_to_data):
+    """Parses embeddings data in JSON format {word: ['values',]}, converts
+    ['values',] to numpy.ndarray
+    """
+
+    with open(path_to_data) as f:
+        glove = json.load(f)
+
+    def _2array(values):
+        return np.array([float(v) for v in values])
+
+    return {k: _2array(v) for k, v in glove.items()}
