@@ -7,10 +7,12 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+Reading words per year
 ```{r}
 words_year <- readRDS(file = "words_per_year.Rda")
 ```
 
+Plotting usage of 'love' and 'hate'
 ```{r}
 library(ggplot2)
 
@@ -18,17 +20,72 @@ ggplot(words_year,aes(x=track_year)) + geom_line(aes(y = love, colour = 'love'))
 
 ```
 
+Plotting usage of 'jesus' and 'god'
 ```{r}
 ggplot(words_year,aes(x=track_year)) + geom_line(aes(y = jesus, colour = 'jesus')) + geom_line(aes(y = god, colour = 'god')) +  ylim(0,3000) + xlim(1960,2010)
 
 ```
 
+Plotting usage of 'guitar' and 'hate'
 ```{r}
 ggplot(words_year,aes(x=track_year)) + geom_line(aes(y = guitar, colour = 'guitar'))  + geom_line(aes(y = hate, colour = 'hate')) +  ylim(0,1500) 
 
 ```
 
+
+Reading tracks per year
 ```{r}
-sort(colnames(words_year))
+library(feather)
+tracks_per_year <- read_feather('/Users/valmik/School/Spring\ 2018/EDAV/song-lyrics/data/transform/tracks_per_year.feather')
+```
+
+Reading mxm data
+```{r}
+mxm <- read_feather('/Users/valmik/School/Spring\ 2018/EDAV/song-lyrics/data/transform/mxm_dataset.feather')
+```
+
+Filtering tracks to include only those present in mxm
+```{r}
+tracks_per_year <- tracks_per_year[tracks_per_year$track_id %in% mxm$track_id,]
+```
+
+Gettings number of songs for each year
+```{r}
+library(dplyr)
+songs_year <- data.frame(table(tracks_per_year$year))
+colnames(songs_year)[1] <- 'track_year'
+```
+
+Adding number of songs to words per year
+```{r}
+words_year <- merge(words_year, songs_year)
+```
+
+Convertings to appearance of words per song
+```{r}
+cols = colnames(words_year)
+remove = c('track_year', 'Freq')
+cols <- cols[! cols %in% remove]
+```
+
+```{r}
+words_year[cols] <- lapply(words_year[cols], '/', words_year$Freq)
+```
+
+Plotting the same plots again with standardized values
+```{r}
+library(ggplot2)
+
+ggplot(words_year,aes(x=track_year)) + geom_line(aes(y = love, colour = 'love')) + geom_line(aes(y = hate, colour = 'hate')) +  ylim(0,4) + xlim(1960,2010)
+
+```
+```{r}
+ggplot(words_year,aes(x=track_year)) + geom_line(aes(y = jesus, colour = 'jesus')) + geom_line(aes(y = god, colour = 'god')) +  ylim(0,0.3) + xlim(1960,2010)
+
+```
+
+```{r}
+ggplot(words_year,aes(x=track_year)) + geom_line(aes(y = guitar, colour = 'guitar'))  + geom_line(aes(y = hate, colour = 'hate')) +  ylim(0,4) 
+
 ```
 
