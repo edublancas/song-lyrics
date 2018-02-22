@@ -7,18 +7,16 @@ word embeddings the dense vector is constructed as the sum of
 count * embedding for each word in the song. Some options are available
 to custom this behavior
 """
+from pathlib import Path
 import argparse
 import logging
 
 from song_lyrics.parse import load_json_data, json_glove
 from song_lyrics.transform import bows2embeddings
+from song_lyrics.util import load_logging_config_file
 
 
 def main():
-    logging.basicConfig(level=logging.INFO)
-
-    logger = logging.getLogger(__name__)
-
     # use docstring at the top as description for the script
     parser = argparse.ArgumentParser(description=__doc__)
 
@@ -34,6 +32,18 @@ def main():
                              'overall popularity of the word or based on the '
                              'popularity within each song')
     args = parser.parse_args()
+
+    logging_config = load_logging_config_file()
+
+    folder = Path(args.path_to_output).parent
+    filename = '{}.log'.format(Path(__file__).name)
+    logging_config['handlers']['file']['filename'] = str(folder / filename)
+
+    logging.config.dictConfig(logging_config)
+
+    logger = logging.getLogger(__name__)
+
+    logger.info('Log will be saved at: {}'.format(str(folder / filename)))
 
     # load word embeddings subset
     glove = json_glove('data/clean/embeddings_subset.json')
