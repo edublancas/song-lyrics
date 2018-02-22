@@ -10,6 +10,7 @@ to custom this behavior
 from pathlib import Path
 import argparse
 import logging
+import logging.config
 
 from song_lyrics.parse import load_json_data, json_glove
 from song_lyrics.transform import bows2embeddings
@@ -58,6 +59,9 @@ def main():
     df = bows2embeddings(bows, words, track_ids, glove,
                          max_words=args.max_words,
                          global_max=args.global_max)
+
+    # feather doesn't like ints as column names
+    df.columns = [str(i) for i in range(df.shape[1])]
 
     logger.info('Saving file in {}'.format(args.path_to_output))
     df.to_feather(args.path_to_output)

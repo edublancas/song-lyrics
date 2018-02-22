@@ -5,8 +5,6 @@ from operator import itemgetter
 import pandas as pd
 import numpy as np
 
-logger = logging.getLogger(__name__)
-
 
 def bow2vector(bow, max_words):
     """Convert a dictionary bag-of-words representation to a numpy vector
@@ -48,6 +46,8 @@ def bow2embedding(bow, words, glove, max_words=None, global_max=False):
         corpus, that is, taking words[:max_words], if False max_words is
         taken into account within each bag of words, defaults to False.
     """
+    logger = logging.getLogger(__name__)
+
     # TODO: verify max_words and global_max featutres
     # TODO: add featutre toselect  specific words and cutoff in bag of words
     # instead of just measuring popularity
@@ -88,6 +88,8 @@ def bows2embeddings(bows, words, track_ids, glove, max_words, global_max):
     a wrapper arounf bow2embedding to handle many objects and convert
     them to a pandas.DataFrame
     """
+    logger = logging.getLogger(__name__)
+
     def _bow2embedding(*args, i, n, **kwargs):
         if i % 1000 == 0:
             logger.info('{:,} out of {:,}...'.format(i, n))
