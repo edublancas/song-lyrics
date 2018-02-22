@@ -48,6 +48,7 @@ def bow2embedding(bow, words, glove, max_words=None, global_max=False):
         taken into account within each bag of words, defaults to False.
     """
     # TODO: add featutre toselect  specific words and cutoff in bag of words
+    # instead of just measuring popularity
 
     dim = len(list(glove.values())[0])
 
@@ -72,7 +73,7 @@ def bow2embedding(bow, words, glove, max_words=None, global_max=False):
     return vector
 
 
-def bows2embeddings(bows, words, track_ids, glove, max_words):
+def bows2embeddings(bows, words, track_ids, glove, max_words, global_max):
     """
     Convert a list of bag of words into a data DataFrame, this is just
     a wrapper arounf bow2embedding to handle many objects and convert
@@ -86,7 +87,7 @@ def bows2embeddings(bows, words, track_ids, glove, max_words):
     n = len(bows)
 
     X = np.stack([_bow2embedding(bow, words, glove, max_words=max_words,
-                                 i=i, n=n)
+                                 global_max=global_max, i=i, n=n)
                   for i, bow in enumerate(bows)], axis=0)
     df = pd.DataFrame(X)
     df.insert(0, 'track_id', track_ids)

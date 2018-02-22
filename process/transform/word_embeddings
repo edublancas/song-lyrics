@@ -4,17 +4,33 @@
 Parse musixmatch dataset in json format and output a Apache Feather file
 where each row is a song in dense format throught word embeddings
 """
+import argparse
 import logging
-import json
 
 from song_lyrics.parse import load_json_data, json_glove
-from song_lyrics.transform import bows2embeddings, bow2embedding
+from song_lyrics.transform import bows2embeddings
 
 
 def main():
     logging.basicConfig(level=logging.INFO)
 
     logger = logging.getLogger(__name__)
+
+    # use docstring at the top as description for the script
+    parser = argparse.ArgumentParser(description=__doc__)
+
+    parser.add_argument('path_to_glove', type=str,
+                        help='Path to the GLOVE json data')
+    parser.add_argument('path_to_output', type=str,
+                        help='Output path for the feather file')
+    parser.add_argument('--max_words',  default=None, type=int,
+                        help='How many words to include (most popular), '
+                             'includes all the words by default')
+    parser.add_argument('--global_max',  default=False, type=bool,
+                        help='Whether to take the max_words in terms of the '
+                             'overall popularity of the word or based on the '
+                             'popularity within each song')
+    args = parser.parse_args()
 
     # load word embeddings subset
     glove = json_glove('data/clean/embeddings_subset.json')
@@ -25,16 +41,13 @@ def main():
     path_to_data = 'data/clean/mxm_dataset.json'
     words, track_ids, bows = load_json_data(path_to_data)
 
-    # maybe for embeddings makes more sense to use top words within each song
-    # than overall, also add the possibility to select words. Or maybe do not
-    # select max words at all
-    MAX_WORDS = 100
-
     # convert bag of words to dense representation using embeddings
-    bows2embeddings(bows[:100], words, track_ids[:100], glove)
+    df = bows2embeddings(bows, words, track_ids, glove,
+                         max_words=args.max_words,
+                         global_max=args.global_max)
 
-
-    bow2embedding(bows[0], words, glove)
+    logger.info('Saving file in {}'.format(args.path_to_output))
+    df.to_feather(args.path_to_output)
 
 
 if __name__ == "__main__":
