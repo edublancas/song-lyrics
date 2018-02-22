@@ -97,7 +97,9 @@ mkdir data/transform
 # pdf, etc)
 
 
-# building word embeddings vocabulary
+# building word embeddings vocabulary by subsetting the GLOVE dataset
+# for exact matches in the musixmatch dataset and fuzzy matching the remaining
+# words
 ./process/clean/subset_embeddings data/clean/mxm_dataset.json \
     data/raw/glove.6B/glove.6B.50d.txt data/clean/embeddings_subset.json
 ```
