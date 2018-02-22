@@ -42,6 +42,8 @@ def main():
 
     logger = logging.getLogger(__name__)
 
+    logger.info('Log will be saved at: {}'.format(str(folder / filename)))
+
     # load word embeddings
     logger.info('Loading GLOVE from: {}'.format(path_to_glove))
     glove = glovetxt2dict(path_to_glove)
@@ -84,8 +86,6 @@ def main():
         json.dump(res, f)
 
     logger.info('Output saved in {}'.format(path_to_output))
-
-    # TODO: send log to a file
 
 
 if __name__ == "__main__":
