@@ -39,14 +39,16 @@ def bow2embedding(bow, words, glove, max_words=None, global_max=False):
     glove: dict
         Word embeddings in {word: vector} format
 
-    max_words: int
-        Maximum number of words to consider
+    max_words: int, optional
+        Maximum number of words to consider. Defaults to None, which means
+        all words are used
 
     global_max: bool, optional
         If True, max_words is determined by the popularity in the whole
         corpus, that is, taking words[:max_words], if False max_words is
         taken into account within each bag of words, defaults to False.
     """
+    # TODO: verify max_words and global_max featutres
     # TODO: add featutre toselect  specific words and cutoff in bag of words
     # instead of just measuring popularity
 
