@@ -1,8 +1,11 @@
 #!/usr/bin/env python
 
 """
-Parse musixmatch dataset in json format and output a Apache Feather file
-where each row is a song in dense format throught word embeddings
+Parse musixmatch dataset with bag of words in json format and output a
+Apache Feather file where each row is a song in dense format using
+word embeddings the dense vector is constructed as the sum of
+count * embedding for each word in the song. Some options are available
+to custom this behavior
 """
 import argparse
 import logging
