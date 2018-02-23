@@ -1,0 +1,26 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+library(feather)
+library(dplyr)
+```
+
+```{r}
+tracks <- read_feather('data/transform/unique_tracks.feather')
+lyrics <- read_feather('data/transform/mxm_embeddings.feather')
+```
+
+```{r}
+# not all tracks have lyrics so do a left join
+df <- left_join(lyrics, tracks, by='track_id')
+dim(df)
+```
+
+```{r}
+```
+
+
+

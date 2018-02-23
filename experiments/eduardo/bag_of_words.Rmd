@@ -1,9 +1,12 @@
-
 ```{r}
 library(feather)
 library(dplyr)
+library(ggplot2)
 ```
 
+```{r}
+song_cols <- c('artist_name', 'title')
+```
 
 ```{r}
 tracks <- read_feather('data/transform/unique_tracks.feather')
@@ -11,19 +14,46 @@ lyrics <- read_feather('data/transform/mxm_dataset_100.feather')
 ```
 
 ```{r}
-sub_tracks <- filter(tracks, artist_name == 'Phoenix')
+# not all tracks have lyrics so do a left join
+df <- left_join(lyrics, tracks, by='track_id')
+dim(df)
 ```
 
 ```{r}
-df <- left_join(lyrics, tracks, by='track_id')
+# normalize counts to have proportion instead...
+words_per_song <- apply(df[, 2:101], 1, sum)
 
-sub <- filter(df, artist_name == 'Phoenix')
+# if there are songs without words (it may be because we only got the top k
+# words), divide by one to avoid NAs
+words_per_song[words_per_song == 0] <- 1
 
-sub$title
+df[, 2:101] <- df[, 2:101] / words_per_song
+```
 
-t(sub[34, ])
+```{r}
+# which are the largest counts?
+max_counts <- apply(df[, 2:101], 2, max)
+max_counts
 
-t(filter(df, title == 'Wonderwall'))
+which_max <- apply(df[, 2:101], 2, which.max)
+
+print(df[which_max, song_cols], n=40)
+```
+
+```{r}
+df_ <- filter(df, love > 0)
+
+# take a look at the distribution of some words
+ggplot(df_, aes(me)) + geom_histogram(bins=30)
+```
+
+```{r}
+# let's check the particular use of a word in some artists
+a <- filter(df, artist_name=='Oasis')
+b <- filter(df, artist_name=='Maroon 5')
+
+mean(a$love)
+mean(b$love)
 ```
 
 ```{r}
