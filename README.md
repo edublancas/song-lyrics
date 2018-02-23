@@ -102,4 +102,10 @@ mkdir data/transform
 # words
 ./process/clean/subset_embeddings data/clean/mxm_dataset.json \
     data/raw/glove.6B/glove.6B.50d.txt data/clean/embeddings_subset.json
+
+# use word embeddings to represent songs, each song is represented as the
+# sum of the count * embedding vectors for every word, run --help
+# for more info
+./process/transform/word_embeddings data/clean/embeddings_subset.json \
+    data/transform/mxm_embeddings.feather
 ```
