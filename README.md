@@ -90,6 +90,9 @@ mkdir data/transform
 ./process/clean/txt2feather data/raw/AdditionalFiles/unique_tracks.txt \
     data/transform/unique_tracks.feather track_id,song_id,artist_name,title
 
+# join datasets with extra song information
+./process/clean/join_song_data data/transform \
+    data/transform/song_extra_data.feather
 
 # At this point you should have a lot of .feather files in data/transform/
 # let's start exploring those with ggplot2. put your findings in the
