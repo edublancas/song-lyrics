@@ -9,12 +9,12 @@ library(dplyr)
 ```
 
 ```{r}
-tracks <- read_feather('data/transform/unique_tracks.feather')
+tracks <- read_feather('data/transform/songs_data.feather')
 lyrics <- read_feather('data/transform/mxm_embeddings.feather')
 ```
 
 ```{r}
-# not all tracks have lyrics so do a left join
+# join songs data with embeddings
 df <- left_join(lyrics, tracks, by='track_id')
 dim(df)
 ```

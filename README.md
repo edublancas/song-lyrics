@@ -75,24 +75,9 @@ mkdir data/transform
 ./process/transform/bag_of_words data/clean/mxm_dataset.json \
     --max_words 50 data/transform/mxm_dataset_50.feather
 
-# parse songs dataset
-./process/clean/txt2feather data/raw/AdditionalFiles/artist_location.txt \
-    data/transform/artist_location.feather \
-    artist_id,latitude,longitude,artist_name,location
+# export track metadata
+./process/clean/export_track_metadata data/raw/AdditionalFiles/track_metadata.db data/transform/mxm_dataset_50.feather data/transform/track_metadata.feather
 
-./process/clean/txt2feather data/raw/AdditionalFiles/tracks_per_year.txt \
-    data/transform/tracks_per_year.feather \
-    year,track_id,artist_name,title
-
-./process/clean/txt2feather data/raw/AdditionalFiles/unique_artists.txt \
-    data/transform/unique_artists.feather artist_id,artist_id2,track_id,artist_name
-
-./process/clean/txt2feather data/raw/AdditionalFiles/unique_tracks.txt \
-    data/transform/unique_tracks.feather track_id,song_id,artist_name,title
-
-# join datasets with extra song information
-./process/clean/join_song_data data/transform \
-    data/transform/songs_data.feather
 
 # At this point you should have a lot of .feather files in data/transform/
 # let's start exploring those with ggplot2. put your findings in the

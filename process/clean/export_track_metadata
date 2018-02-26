@@ -1,0 +1,57 @@
+#!/usr/bin/env python
+
+"""
+Export track metadata from the SQLitef database
+"""
+import os.path as path
+import logging
+import sqlite3
+import argparse
+import numpy as np
+import pandas as pd
+
+
+def main():
+    logger = logging.getLogger(__name__)
+    logging.basicConfig(level=logging.INFO)
+
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('path_to_metadata', type=str,
+                        help='Path to SQLite database')
+    parser.add_argument('path_to_mxm_data', type=str,
+                        help='Path to musixmatch dataset')
+    parser.add_argument('path_to_output', type=str,
+                        help='Output path for the feather file')
+
+    args = parser.parse_args()
+    path_to_metadata = args.path_to_metadata
+    path_to_mxm_data = args.path_to_mxm_data
+    path_to_output = args.path_to_output
+
+    logger.info('Loading data...')
+
+    mxm = pd.read_feather(path_to_mxm_data)
+    mxm_tracks = mxm[['track_id']]
+
+    conn = sqlite3.connect(path_to_metadata)
+    songs = pd.read_sql("SELECT * FROM songs", conn)
+
+    logger.info('Replacing 0 with NAs in year column...')
+    songs['year'] = songs.year.replace(0, np.nan)
+
+    logger.info('Subsetting songs to match the musixmatch dataset...')
+    df = mxm_tracks.merge(songs, how='left', on='track_id')
+
+    nas = df.apply(lambda c: np.sum(c.isna()), axis=0) / df.shape[0] * 100
+    logger.info('NA stats: {}'.format(nas))
+
+    # save this
+    df = df.reset_index()
+    df.drop('index', axis=1, inplace=True)
+
+    logger.info('Saving file in {}'.format(path_to_output))
+    df.to_feather(path_to_output)
+
+
+if __name__ == "__main__":
+    main()
