@@ -1,3 +1,4 @@
+import numpy as np
 import pandas as pd
 
 mxm = pd.read_feather('data/transform/mxm_dataset.feather')
@@ -17,13 +18,7 @@ df = df.merge(unique_artists[['artist', 'artist_id']], how='left',
 df = df.merge(artist_location[['artist_id', 'latitude', 'longitude',
                                'location']], how='left', on='artist_id')
 
-# ?
-sum(df.artist_id.isna())
+df.apply(lambda c: np.sum(c.isna()), axis=0) / df.shape[0] * 100
 
 # save this
 df.head()
-
-
-df.year.value_counts()
-df.location.value_counts()
-df.artist_name.value_counts()
