@@ -8,6 +8,7 @@ data/**
 *.feather
 *.html
 *.pdf
+*.DS_STORE
 
 #### joe made this: https://goel.io/joe
 
@@ -83,3 +84,9 @@ target/
 # produced vignettes
 vignettes/*.html
 vignettes/*.pdf
+
+# R Project
+*.Rproj
+
+# R Markdown Output
+*.html
