@@ -30,6 +30,9 @@ def main():
                         help='Output path for the feather file')
     parser.add_argument('--max_words',  default=5000, type=int,
                         help='How many words to include (most popular)')
+    parser.add_argument('--normalize', action='store_true',
+                        help='Normalize counts by converting them to'
+                             ' proportions')
 
     args = parser.parse_args()
     path_to_data = args.path_to_data
@@ -38,7 +41,7 @@ def main():
                       else args.path_to_output + '.feather')
     MAX_WORDS = args.max_words
 
-    words, track_ids, bows = load_json_data(path_to_data, MAX_WORDS)
+    words, track_ids, bows = load_json_data(path_to_data)
 
     words = words[:MAX_WORDS]
 
@@ -46,6 +49,10 @@ def main():
     X = np.stack([bow2vector(bow, max_words=MAX_WORDS) for bow in bows],
                  axis=0)
     X = X.astype('int16')
+
+    if args.normalize:
+        sums = X.sum(axis=1, keepdims=True)
+        X = np.divide(X, sums, where=sums != 0)
 
     df = pd.DataFrame(X, columns=words)
     df.insert(0, 'track_id', track_ids)
