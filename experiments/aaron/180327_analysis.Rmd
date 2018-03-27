@@ -1,0 +1,92 @@
+---
+title: "180237_analysis"
+output: html_notebook
+---
+
+```{r}
+library(feather)
+library(tidyverse)
+
+#read feather files
+setwd("../../data/transform")
+df_artist_loc <- read_feather("artist_location.feather")
+df_mxm_dataset <- read_feather("mxm_dataset.feather")
+df_track_per_year <- read_feather("tracks_per_year.feather")
+df_unique_artists <- read_feather("unique_artists.feather")
+df_unique_tracks <- read_feather("unique_tracks.feather")
+```
+
+```{r}
+#look at relationsheip between track_id and song_id
+unique_tracks_count <- length(as.matrix(distinct(select(df_unique_tracks,track_id))))
+unique_songs_count  <- length(as.matrix(distinct(select(df_unique_tracks,song_id))))
+
+print(paste("Unique track_id's: ", unique_tracks_count))
+print(paste("Unique song_id's:  ", unique_songs_count))
+#looks as if there are very are less than 1000(0.1%) of track_id's with multiple song_id's
+```
+
+```{r}
+#function to print missing value counts
+print_na_count <- function(df){
+  cols <- colnames(df)
+  for (c in cols){
+    nullcount <- sum(is.na(select(df,c)))
+    print(paste("Null Count for ", c, 'is', nullcount))
+  }
+}
+```
+
+```{r}
+#Artist Location Missing Values
+#4 missing values for location, not a concern because latitude/longitude can be used if need be
+print_na_count(df_artist_loc)
+```
+
+
+
+```{r}
+#Unique Tracks Missing Values
+#15 missing titles is not of major concern. Data is still valid. We could remove these points, but I don't deem this neccessary
+print_na_count(df_unique_tracks)
+```
+
+```{r}
+#Track Per Year Missing Data
+print_na_count(df_track_per_year)
+```
+
+```{r}
+#Unique Artists
+#5981 missing artist_id2
+print_na_count(df_unique_artists)
+```
+
+```{r}
+#song word count
+mxm_dup <- df_mxm_dataset
+mxm_dup$track_id <-NULL
+mxm_dup <- transform(mxm_dup, sum=rowSums(mxm_dup))
+word_count <- data.frame(df_mxm_dataset$track_id, mxm_dup$sum) 
+```
+
+```{r}
+#Do you think it makes sense to remove songs with over 1000 words?
+ggplot(word_count, aes(mxm_dup.sum)) +
+  geom_histogram(binwidth=50)+
+  scale_x_continuous(limits = c(0,1250))+
+  ggtitle('Histogram of Song Word Counts')
+```
+
+```{r}
+#stopwords to remove
+#https://github.com/quanteda/stopwords/
+to_remove <- c(stopwords::stopwords('en', source='smart'), stopwords::stopwords('en', source='snowball'))
+
+#below code is not working
+#for (i in colnames(df_mxm_dataset)){
+#  if (i %in% to_remove){
+#    df_mxm_dataset$i <- NULL
+#  }
+#}
+```
