@@ -84,3 +84,9 @@ Columns are as follows:
 ### Removing count outliers
 
 ## Word distribution
+
+## What is the sentiment of the songs?
+
+## Which are the topics? How do they change?
+
+## Which bands are similar to each other?
