@@ -1,0 +1,86 @@
+# Main Analysis
+
+## Data cleaning
+
+### Importing data
+
+The first step to work with the datasets was to put them in a better format
+for cleaning.
+
+The Musixmatch dataset is divided in two files .txt files (train and test),
+these plain text files contain the counts for the 5,000 words. We first
+converted both files to JSON using the `txt2json` script and then combined
+them in a single file, the output is has the following format:
+
+```json
+[
+    {
+        "track_id": "a track id"
+        "bac_of_words": {
+            "word_id_1": "count for word with id 1",
+            "word_id_2": "count for word with id 2",
+            ...
+        }
+    },
+    ...
+]
+```
+
+After we got the data in JSON, we convert them to a binary format, we are
+using [Apache Feather](https://blog.cloudera.com/blog/2016/03/feather-a-fast-on-disk-format-for-data-frames-for-r-and-python-powered-by-apache-arrow/) since
+it has good interoperability with Python and R (conversion using the
+`bag_of_words` script). The data looks like this:
+
++------------------+----------------------------------+----------------------------------+
+| track_id         | word_id_1                        | word_id_2                        |
++==================+==================================+==================================+
+| a track id       | count for word with id 1         | count for word with id 2         |
++------------------+----------------------------------+----------------------------------+
+| another track id | another count for word with id 1 | another count for word with id 2 |
++------------------+----------------------------------+----------------------------------+
+| ...              | ...                              | ...                              |
++------------------+----------------------------------+----------------------------------+
+
+
+There is another datasource which contains track metadata. It is important
+to mention that the Musixmatch dataset (the one with the lyrics data) is a
+subset of the Million Song Dataset so we took the track IDs for such
+subset and only exported the metadata for those tracks
+(`export_track_metadata` script). These data is in SQLite file so we converted it to Apache Feather. It contains the following columns:
+
+* track_id - Unique identifier for the songs
+* title - track title
+* song_id - Another ID (undocumented)
+* release – Album name
+* artist_id - Artist unique ID
+* artist_mid - Musixmatch artist unique ID
+* artist_name - Artist name
+* duration - Track duration (seconds)
+* Artist familiarity - Undocumented
+* Artist hottnesss - Undocumented
+* year - Track release year
+
+Finally, we also converted a txt file containing artist locationto Apache
+Feather (`txt2feather` script), the file looks like this:
+
+```txt
+ARI6ZU51187FB4C041<SEP>29.76045<SEP>-95.36978<SEP>Solange Knowles<SEP>houston, Texas
+AR79DE81187FB4FA40<SEP>34.05349<SEP>-118.24532<SEP>Sylvester<SEP>Los Angeles, CA
+ARENMIP1187FB5638D<SEP>54.31407<SEP>-2.23001<SEP>Robbie Williams<SEP>UK
+AR7C8P41187B98C8E9<SEP>36.15398<SEP>-95.99277<SEP>Earl Bostic<SEP>Tulsa, OK
+ARRWJ0W1187B9B4CCE<SEP>34.05349<SEP>-118.24532<SEP>Holly Beth Vincent<SEP>California - LA
+```
+
+Columns are as follows:
+
+* artist_id
+* latitude
+* longitude
+* artist_name
+* location_string
+
+### Removing stopwords
+
+### Removing count outliers
+
+## Word distribution
