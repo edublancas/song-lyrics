@@ -79,6 +79,14 @@ ggplot(word_count, aes(mxm_dup.sum)) +
 ```
 
 ```{r}
+#Maybe less than 50 words too?
+ggplot(word_count, aes(mxm_dup.sum)) +
+  geom_histogram(binwidth=1)+
+  scale_x_continuous(limits = c(0,100))+
+  ggtitle('Histogram of Song Word Counts')
+```
+
+```{r}
 #stopwords to remove
 #https://github.com/quanteda/stopwords/
 to_remove <- c(stopwords::stopwords('en', source='smart'), stopwords::stopwords('en', source='snowball'))
