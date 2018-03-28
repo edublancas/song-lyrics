@@ -91,10 +91,5 @@ ggplot(word_count, aes(mxm_dup.sum)) +
 #https://github.com/quanteda/stopwords/
 to_remove <- c(stopwords::stopwords('en', source='smart'), stopwords::stopwords('en', source='snowball'))
 
-#below code is not working
-#for (i in colnames(df_mxm_dataset)){
-#  if (i %in% to_remove){
-#    df_mxm_dataset$i <- NULL
-#  }
-#}
+df_mxm_dataset_stopwords <- df_mxm_dataset[,-which(names(df_mxm_dataset) %in% to_remove)]
 ```
