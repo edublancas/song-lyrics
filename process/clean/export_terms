@@ -45,6 +45,9 @@ def main():
     nas = df.apply(lambda c: np.sum(c.isna()), axis=0) / df.shape[0] * 100
     logger.info('NA stats: %s', nas)
 
+    # remove rows with NAs
+    df.dropna(inplace=True)
+
     # save this
     df = df.reset_index()
     df.drop('index', axis=1, inplace=True)

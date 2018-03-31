@@ -36,6 +36,24 @@ dim(df)
 ```
 
 ```{r}
+terms <- read_feather('data/transform/track_terms.feather')
+
+# TODO: ADD PLOT
+sort(table(terms$mbtag), decreasing=TRUE)[1:10]
+```
+
+
+```{r}
+# artists tagged as
+artist_ids <- terms[terms$mbtag == 'disco', ]$artist_id
+
+# why this is giving me more than length(artist_ids)???
+# maybe there is not a 1-1 correspondence between artist id and name
+artist_names <- unique(filter(df, artist_id %in% artist_ids)$artist_name)
+
+```
+
+```{r}
 a <- filter(df, artist_name == 'Oasis')[, 'you']
 b <- filter(df, artist_name == 'Oasis')[, 'love']
 cor(a, b)
@@ -119,7 +137,9 @@ ggplot(distances, aes(x=row, y=col)) +
 ```{r}
 # subset artists - using genre is an easy way to group artists
 sub <- sample(df$artist_name, 50)
-df_ <- filter(df, artist_name %in% sub)
+
+# from tag
+df_ <- filter(df, artist_name %in% artist_names)
 ```
 
 ```{r}
