@@ -37,11 +37,13 @@ dim(df)
 
 ```{r}
 terms <- read_feather('data/transform/track_terms.feather')
-
-# TODO: ADD PLOT
 sort(table(terms$mbtag), decreasing=TRUE)[1:10]
 ```
 
+```{r}
+tags <- table(terms$mbtag)
+wordcloud(names(tags), tags)
+```
 
 ```{r}
 # artists tagged as
@@ -161,6 +163,14 @@ ggplot(distances, aes(x=row, y=col)) +
 
 ## Finding similar genres
 
-## Find similar songs
+```{r}
+# filter by tag and then sample artists
+```
+
+Cannot use the same approach since one tag corresponds to many artists.
+
+## Find similar songs (bag of words and embeddings)
+
+TODO: visualize artists in two dimensions using PCA
 
 ## Songs that talk about the same topic

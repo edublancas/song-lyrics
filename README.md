@@ -43,6 +43,7 @@ Install R requirements:
     * ggplot2
     * feather
     * reshape2
+    * wordcloud
 
 ## 1. Get raw data
 
