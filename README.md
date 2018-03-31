@@ -91,6 +91,9 @@ mkdir data/transform
 # export track metadata
 ./process/clean/export_track_metadata data/raw/AdditionalFiles/track_metadata.db data/transform/mxm_dataset_50.feather data/transform/track_metadata.feather
 
+# export artist terms (genre)
+./process/clean/export_terms data/raw/AdditionalFiles/artist_term.db data/transform/track_metadata.feather data/transform/track_terms.feather
+
 
 # At this point you should have a lot of .feather files in data/transform/
 # let's start exploring those with ggplot2. put your findings in the
