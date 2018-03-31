@@ -21,7 +21,8 @@ metadata_cols
 ```{r}
 # lyrics dataset
 lyrics <- read_feather('data/transform/mxm_dataset_1000.feather')
-lyrics_cols <- colnames(lyrics)
+# columns corresponding to the words (remove track_id)
+lyrics_cols <- colnames(lyrics)[2:1001]
 lyrics_cols
 ```
 
@@ -86,3 +87,32 @@ head(df_topic)
 head(filter(df_topic, artist_name == 'Maroon 5'))
 ```
 
+
+# Finding similar years
+
+```{r}
+mean_words <- function(df, cols){
+    data.frame(t(colSums(df[, cols])))
+}
+
+mean_words(df[1:10, ], lyrics_cols)
+
+by_year <- df %>% group_by(release_year) %>% do(mean_words(., lyrics_cols))
+by_year <- data.frame(by_year[1:87,])
+
+rownames(by_year) <- by_year$release_year
+distances <- as.matrix(dist(by_year))
+
+rownames(distances) <- rownames(by_year)
+colnames(distances) <- rownames(by_year)
+
+image(distances)
+```
+
+## Finding similar bands
+
+## Finding similar genres
+
+## Find similar songs
+
+## Songs that talk about the same topic
