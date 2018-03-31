@@ -3,24 +3,40 @@ title: "R Notebook"
 output: html_notebook
 ---
 
+# Analyzing word correlation
+
 ```{r}
 library(feather)
 library(dplyr)
+source('experiments/eduardo/util.R')
 ```
 
 ```{r}
+# dataset containing tracks metadata
 metadata <- read_feather('data/transform/track_metadata.feather')
-lyrics <- read_feather('data/transform/mxm_embeddings.feather')
+colnames(metadata)
 ```
 
 ```{r}
-# join songs data with embeddings
-df <- left_join(lyrics, tracks, by='track_id')
+# lyrics dataset
+lyrics <- read_feather('data/transform/mxm_dataset_50.feather')
+colnames(lyrics)
+```
+
+```{r}
+# join metadata with lyrics
+df <- left_join(lyrics, metadata, by='track_id')
 dim(df)
 ```
 
 ```{r}
+a <- filter(df, artist_name == 'Oasis')[, 'you']
+b <- filter(df, artist_name == 'Oasis')[, 'love']
+cor(a, b)
 ```
 
+```{r}
+
+```
 
 

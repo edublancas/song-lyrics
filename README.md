@@ -36,6 +36,13 @@ conda create --name=song-lyrics python=3
 pip install -r requirements.txt
 ```
 
+Install R requirements:
+
+    * rjson
+    * dplyr
+    * ggplot2
+    * feather
+
 ## 1. Get raw data
 
 ```shell
@@ -70,6 +77,11 @@ mkdir data/transform
 # all 500  words
 ./process/transform/bag_of_words data/clean/mxm_dataset.json \
     data/transform/mxm_dataset.feather
+
+
+# all 500  words but normalized (counts converted to proportions)
+./process/transform/bag_of_words data/clean/mxm_dataset.json \
+    data/transform/mxm_dataset_normalized.feather --normalize
 
 # just top 50
 ./process/transform/bag_of_words data/clean/mxm_dataset.json \
