@@ -26,7 +26,18 @@ closest_k <- function(distances, word, k=10){
     return(topic)
 }
 
-load_topic <- function(topic, df){
+
+load_topic <- function(topic, df, metadata_cols, mean=TRUE){
     inter <- intersect(topic, colnames(df))
-    return(df[, inter])
+
+    if(mean){
+        df_topic <- data.frame(rowMeans(df[, inter]))
+        names(df_topic)[1] <- paste(topic[1], 'topic', sep='_')
+    }else{
+        df_topic <- df[, inter]
+    }
+
+    df_res <- cbind(df_topic, df[, metadata_cols])
+
+    return(df_res)
 }

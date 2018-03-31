@@ -20,7 +20,7 @@ metadata_cols
 
 ```{r}
 # lyrics dataset
-lyrics <- read_feather('data/transform/mxm_dataset_1000_normalized.feather')
+lyrics <- read_feather('data/transform/mxm_dataset_1000.feather')
 lyrics_cols <- colnames(lyrics)
 lyrics_cols
 ```
@@ -73,13 +73,16 @@ Generating topics:
 ```{r}
 distances <- embeddings_distances('data/clean/embeddings_subset.json')
 
-topic <- closest_k(distances, 'love')
-df_topic_love <- load_topic(topic, df, metadata_cols)
-df_topic_love
+topic <- closest_k(distances, 'sun')
+topic
+
+df_topic <- load_topic(topic, df, metadata_cols)
+df_topic <- df_topic[order(-df_topic$sun_topic),]
 ```
 
 ```{r}
+head(df_topic)
 
-df[, names(topic)]
+head(filter(df_topic, artist_name == 'Maroon 5'))
 ```
 
