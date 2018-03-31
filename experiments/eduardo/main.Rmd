@@ -19,7 +19,7 @@ colnames(metadata)
 
 ```{r}
 # lyrics dataset
-lyrics <- read_feather('data/transform/mxm_dataset_50.feather')
+lyrics <- read_feather('data/transform/mxm_dataset_1000_normalized.feather')
 colnames(lyrics)
 ```
 
@@ -35,8 +35,21 @@ b <- filter(df, artist_name == 'Oasis')[, 'love']
 cor(a, b)
 ```
 
-```{r}
 
+Generating topics:
+
+```{r}
+distances <- embeddings_distances('data/clean/embeddings_subset.json')
+
+topic <- closest_k(distances, 'love')
+df_topic_love <- load_topic(topic, df)
+
+topic <- closest_k(distances, 'love')
+df_topic_love <- load_topic(topic, df)
 ```
 
+```{r}
+
+df[, names(topic)]
+```
 

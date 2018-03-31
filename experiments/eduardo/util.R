@@ -22,5 +22,11 @@ embeddings_distances <- function(path_to_embeddings){
 
 # find k closest words to a given word
 closest_k <- function(distances, word, k=10){
-    return(sort(distances[word, ])[1:k])
+    topic <- names(sort(distances[word, ])[1:k])
+    return(topic)
+}
+
+load_topic <- function(topic, df){
+    inter <- intersect(names(topic), colnames(df))
+    return(df[, inter])
 }
