@@ -42,6 +42,7 @@ Install R requirements:
     * dplyr
     * ggplot2
     * feather
+    * reshape2
 
 ## 1. Get raw data
 

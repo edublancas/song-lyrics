@@ -8,6 +8,9 @@ output: html_notebook
 ```{r}
 library(feather)
 library(dplyr)
+library(tidyr)
+library(reshape2)
+library(ggplot2)
 source('experiments/eduardo/util.R')
 ```
 
@@ -92,24 +95,49 @@ head(filter(df_topic, artist_name == 'Maroon 5'))
 
 ```{r}
 mean_words <- function(df, cols){
-    data.frame(t(colSums(df[, cols])))
+    data.frame(t(colMeans(df[, cols])))
 }
 
-mean_words(df[1:10, ], lyrics_cols)
-
 by_year <- df %>% group_by(release_year) %>% do(mean_words(., lyrics_cols))
-by_year <- data.frame(by_year[1:87,])
-
+by_year <- data.frame(by_year)
+by_year <- by_year[!is.na(by_year$release_year), ]
 rownames(by_year) <- by_year$release_year
-distances <- as.matrix(dist(by_year))
 
-rownames(distances) <- rownames(by_year)
-colnames(distances) <- rownames(by_year)
-
-image(distances)
+distances <- as.matrix(dist(by_year, diag=TRUE, upper=TRUE))
+distances <- melt(as.matrix(distances), varnames = c("row", "col"))
+# distances <- distances[distances$row > distances$col,]
 ```
 
-## Finding similar bands
+```{r}
+ggplot(distances, aes(x=row, y=col)) + 
+    geom_tile(aes(fill=value), color="white") + 
+    coord_fixed()
+```
+
+## Finding similar artists
+
+```{r}
+# subset artists - using genre is an easy way to group artists
+sub <- sample(df$artist_name, 50)
+df_ <- filter(df, artist_name %in% sub)
+```
+
+```{r}
+by_artist <- df_ %>% group_by(artist_name) %>% do(mean_words(., lyrics_cols))
+by_artist <- data.frame(by_artist)
+by_artist <- by_artist[!is.na(by_artist$artist_name), ]
+rownames(by_artist) <- by_artist$artist_name
+
+distances <- as.matrix(dist(by_artist, diag=TRUE, upper=TRUE))
+distances <- melt(as.matrix(distances), varnames = c("row", "col"))
+```
+
+```{r}
+ggplot(distances, aes(x=row, y=col)) + 
+    geom_tile(aes(fill=value), color="white") + 
+    coord_fixed() +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1))
+```
 
 ## Finding similar genres
 
