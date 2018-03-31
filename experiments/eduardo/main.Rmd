@@ -14,13 +14,15 @@ source('experiments/eduardo/util.R')
 ```{r}
 # dataset containing tracks metadata
 metadata <- read_feather('data/transform/track_metadata.feather')
-colnames(metadata)
+metadata_cols <- colnames(metadata)
+metadata_cols
 ```
 
 ```{r}
 # lyrics dataset
 lyrics <- read_feather('data/transform/mxm_dataset_1000_normalized.feather')
-colnames(lyrics)
+lyrics_cols <- colnames(lyrics)
+lyrics_cols
 ```
 
 ```{r}
@@ -36,16 +38,44 @@ cor(a, b)
 ```
 
 
+```{r}
+cor_ <- function(df, a, b){
+    artist_name <- df$artist_name[1]
+
+    # at least 20 songs and at least 3 points to plot
+    if (nrow(df) > 20 & sum(df[[a]] & df[[b]]) > 3){
+        return(data.frame(artist_name=artist_name,
+               val=cor(df[[a]], df[[b]])))
+    }else{
+        return(data.frame(artist_name=artist_name,
+                          val=0))
+    }
+}
+
+test <- df %>% group_by(artist_name) %>% do(cor_(., 'you', 'love'))
+
+# FIX NORMALIZATION IN YEAR COLUMN LYRICS DF
+cor_year <- df %>% group_by(year.y) %>% do(cor_(., 'you', 'love'))
+
+cor_year[order(cor_year$val)]
+
+cor_year[order(cor_year$val, decreasing=TRUE),] 
+
+
+selected <- c('Oasis', 'The Verve', 'Maroon 5', 'Sum 41')
+filter(test, artist_name %in% selected)
+```
+
+# Analyzing topics
+
 Generating topics:
 
 ```{r}
 distances <- embeddings_distances('data/clean/embeddings_subset.json')
 
 topic <- closest_k(distances, 'love')
-df_topic_love <- load_topic(topic, df)
-
-topic <- closest_k(distances, 'love')
-df_topic_love <- load_topic(topic, df)
+df_topic_love <- load_topic(topic, df, metadata_cols)
+df_topic_love
 ```
 
 ```{r}

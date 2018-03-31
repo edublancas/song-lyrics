@@ -27,6 +27,6 @@ closest_k <- function(distances, word, k=10){
 }
 
 load_topic <- function(topic, df){
-    inter <- intersect(names(topic), colnames(df))
+    inter <- intersect(topic, colnames(df))
     return(df[, inter])
 }

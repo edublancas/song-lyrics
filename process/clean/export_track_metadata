@@ -39,6 +39,9 @@ def main():
     logger.info('Replacing 0 with NAs in year column...')
     songs['year'] = songs.year.replace(0, np.nan)
 
+    # rename year column to avoid clashing with "year" word in bag of words
+    songs.rename(columns={'year': 'release_year'}, inplace=True)
+
     logger.info('Subsetting songs to match the musixmatch dataset...')
     df = mxm_tracks.merge(songs, how='left', on='track_id')
 
