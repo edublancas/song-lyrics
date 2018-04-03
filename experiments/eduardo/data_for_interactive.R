@@ -4,7 +4,8 @@ library(dplyr)
 # columns to use for grouping: year, genre (only top), artist (only top),
 # duration also use track_id for distances
 
-bow <- read_feather('data/transform/bag_of_words_top_100.feather')
+bow <- read_feather('data/transform/bow_100.feather')
+bow_ <- read_feather('data/transform/bow_100_sw.feather')
 
 genres_ <- table(bow$genre_)
 
@@ -85,6 +86,5 @@ sort(artist, decreasing=TRUE)
 d <- filter(bow, artist_name_ == 'Oasis', title_ == 'Songbird')
 t(select(d, -ends_with('_')))
 
-filter(bow, artist_name_ == 'Oasis', tu > 0)$tu
-filter(bow, artist_name_ == 'Oasis', tu > 0)$title_
-
+d <- filter(bow_, artist_name_ == 'Oasis', title_ == 'Songbird')
+t(select(d, -ends_with('_')))

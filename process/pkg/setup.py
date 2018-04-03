@@ -17,7 +17,7 @@ LICENSE = 'GPL3'
 LONG_DESCRIPTION = ''
 
 REQUIRED = ['fuzzywuzzy', 'python-Levenshtein', 'pyyaml', 'nltk',
-            'numpy', 'pandas']
+            'numpy', 'pandas', 'feather-format']
 
 here = os.path.abspath(os.path.dirname(__file__))
 

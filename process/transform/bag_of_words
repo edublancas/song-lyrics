@@ -46,30 +46,21 @@ def main():
     MAX_WORDS = args.max_words
 
     words, track_ids, bows = load_json_data(path_to_data)
-
-    if not args.keep_stopwords:
-        nltk.download('stopwords')
-
-        stop = stopwords.words('english')
-        keys_to_remove = [str(idx) for idx, word in enumerate(words, 1) if word
-                          in stop]
-        removed = [w for w in words if w in stop]
-        words = [word for word in words if word not in stop]
-
-        logger.info('Removing stopwords: %s', removed)
-
-        def remove_stop_indexes(bow):
-            for key in keys_to_remove:
-                bow.pop(key, None)
-
-        for bow in bows:
-            remove_stop_indexes(bow)
-
     words = words[:MAX_WORDS]
 
     # create matrix with all the songs and top words
-    X = np.stack([bow2vector(bow, max_words=MAX_WORDS) for bow in bows], axis=0)
+    X = np.stack([bow2vector(bow, max_words=MAX_WORDS) for bow in bows],
+                 axis=0)
     X = X.astype('int16')
+
+    if not args.keep_stopwords:
+        nltk.download('stopwords')
+        stop = stopwords.words('english')
+        idx = np.array([word not in stop for word in words])
+        to_remove_words = [word for word in words if word in stop]
+        words = [word for word in words if word not in stop]
+        logger.info('Removing stopwords: %s', to_remove_words)
+        X = X[:, idx]
 
     if args.normalize:
         sums = X.sum(axis=1, keepdims=True)
