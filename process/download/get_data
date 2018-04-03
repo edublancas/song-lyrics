@@ -10,6 +10,17 @@ wget -O data/raw/mxm_dataset_test.txt.zip \
 unzip data/raw/mxm_dataset_train.txt.zip -d data/raw
 unzip data/raw/mxm_dataset_test.txt.zip -d data/raw
 
+
+# unstemmed reverse mapping
+wget -O data/raw/mxm_reverse_mapping.txt \
+    https://labrosa.ee.columbia.edu/millionsong/sites/default/files/mxm_reverse_mapping.txt
+
+# genre
+wget -O data/raw/msd_beatunes_map.cls.zip \
+    http://www.tagtraum.com/genres/msd_beatunes_map.cls.zip
+unzip data/raw/msd_beatunes_map.cls.zip -d data/raw
+
+
 # song data
 rsync -avzuP publicdata.opensciencedatacloud.org::ark:/31807/osdc-c1c763e4/AdditionalFiles.tar.gz \
     data/raw/AdditionalFiles.tar.gz
