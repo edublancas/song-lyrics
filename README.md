@@ -56,6 +56,11 @@ cd song-lyrics
 ./process/download/get_data
 ```
 
+
+Some datasets ar hosted in unreliable websites, it's easier to download them using a web browser (put them in data/raw/):
+    * GLOVE: https://nlp.stanford.edu/projects/glove/
+    * Genre data: http://www.tagtraum.com/genres/msd_beatunes_map.cls.zip
+
 ## 2. Process data
 
 ```shell
