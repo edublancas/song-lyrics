@@ -82,7 +82,9 @@ names(artist) <- colnames(artist_means[1, 2:101])
 sort(artist, decreasing=TRUE)
 
 
-sort(as.numeric(artist[1, 1:101]))
+d <- filter(bow, artist_name_ == 'Oasis', title_ == 'Songbird')
+t(select(d, -ends_with('_')))
 
-select(artist, -ends_with('_'))
+filter(bow, artist_name_ == 'Oasis', tu > 0)$tu
+filter(bow, artist_name_ == 'Oasis', tu > 0)$title_
 
