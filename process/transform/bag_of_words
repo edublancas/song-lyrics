@@ -48,7 +48,7 @@ def main():
 
     if not args.keep_stopwords:
         stop = stopwords.words('english')
-        keys_to_remove = [str(idx) for idx, word in enumerate(words) if word
+        keys_to_remove = [str(idx) for idx, word in enumerate(words, 1) if word
                           in stop]
         removed = [w for w in words if w in stop]
         words = [word for word in words if word not in stop]
