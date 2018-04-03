@@ -54,11 +54,10 @@ def main():
         words = [word for word in words if word not in stop]
 
         logger.info('Removing stopwords: %s', removed)
-                    
 
-        def remove_stop_indexes(d):
+        def remove_stop_indexes(bow):
             for key in keys_to_remove:
-                d.pop(key, None)
+                bow.pop(key, None)
 
         for bow in bows:
             remove_stop_indexes(bow)
