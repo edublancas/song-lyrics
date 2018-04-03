@@ -67,11 +67,11 @@ cat data/raw/msd_beatunes_map.cls | awk -F  '\t' '{ print $1 "\t" $2}' > data/cl
     data/transform/bag_of_words.feather
 
 # top 100 bag of words (normalized and stopwords removed) + metadata
-./process/transform/join mxm_dataset_100_normalized.feather \
+./process/transform/join data/transform/mxm_dataset_100_normalized.feather \
     data/transform/track_metadata.feather \
     data/transform/embeddings.feather
 
 # word embeddings + metadata
-./process/transform/join mxm_embeddings_100_normalized.feather \
+./process/transform/join data/transform/mxm_embeddings_100_normalized.feather \
     data/transform/track_metadata.feather \
     data/transform/embeddings.feather
