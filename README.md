@@ -98,6 +98,8 @@ mkdir data/transform
 # export artist terms (genre) - probably remove, use infered genre instead
 ./process/clean/export_terms data/raw/AdditionalFiles/artist_term.db data/transform/track_metadata.feather data/transform/track_terms.feather
 
+# TODO: add infered genre and language...
+
 # At this point you should have a lot of .feather files in data/transform/
 # let's start exploring those with ggplot2. put your findings in the
 # experiments/[your name]/ folder (only include Rmd or jnb files, not html

@@ -13,7 +13,7 @@ import logging
 import logging.config
 import pandas as pd
 
-from song_lyrics.parse import load_json_data, json_glove
+from song_lyrics.parse import json_glove
 from song_lyrics.transform import bows2embeddings
 from song_lyrics.util import load_logging_config_file
 
@@ -31,13 +31,6 @@ def main():
                         help='Path to the GLOVE json data')
     parser.add_argument('path_to_output', type=str,
                         help='Output path for the feather file')
-    parser.add_argument('--max_words',  default=None, type=int,
-                        help='How many words to include (most popular), '
-                             'includes all the words by default')
-    parser.add_argument('--global_max',  default=False, type=bool,
-                        help='Whether to take the max_words in terms of the '
-                             'overall popularity of the word or based on the '
-                             'popularity within each song')
     args = parser.parse_args()
 
     logging_config = load_logging_config_file()
@@ -66,9 +59,7 @@ def main():
     bows = [row.to_dict() for idx, row in mxm.iterrows()]
 
     # convert bag of words to dense representation using embeddings
-    df = bows2embeddings(bows, words, track_ids, glove,
-                         max_words=args.max_words,
-                         global_max=args.global_max)
+    df = bows2embeddings(bows, track_ids, glove)
 
     # feather doesn't like ints as column names
     df.columns = [str(i) for i in df.columns]
