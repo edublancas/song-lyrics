@@ -56,7 +56,7 @@ cat data/raw/msd_beatunes_map.cls | awk -F  '\t' '{ print $1 "\t" $2}' > data/cl
 ./process/transform/word_embeddings \
     data/transform/mxm_dataset_100_normalized.feather \
     data/clean/embeddings_subset.json \
-    data/transform/mxm_embeddings_100_normalized.feather
+    data/transform/mxm_embeddings.feather
 
 
 # join all datasets to create the ones that we will use
@@ -69,9 +69,9 @@ cat data/raw/msd_beatunes_map.cls | awk -F  '\t' '{ print $1 "\t" $2}' > data/cl
 # top 100 bag of words (normalized and stopwords removed) + metadata
 ./process/transform/join data/transform/mxm_dataset_100_normalized.feather \
     data/transform/track_metadata.feather \
-    data/transform/embeddings.feather
+    data/transform/bag_of_words_top_100_normalized.feather
 
 # word embeddings + metadata
-./process/transform/join data/transform/mxm_embeddings_100_normalized.feather \
+./process/transform/join data/transform/mxm_embeddings.feather \
     data/transform/track_metadata.feather \
     data/transform/embeddings.feather

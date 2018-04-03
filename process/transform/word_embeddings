@@ -62,7 +62,8 @@ def main():
     df = bows2embeddings(bows, track_ids, glove)
 
     # feather doesn't like ints as column names
-    df.columns = ['D'+str(i) for i in df.columns]
+    df.rename(columns={c: 'D'+str(c) for c in df.columns
+                       if c != 'track_id'}, inplace=True)
 
     logger.info('Saving file in {}'.format(args.path_to_output))
     df.to_feather(args.path_to_output)
