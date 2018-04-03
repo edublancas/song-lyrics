@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 """
-Export artist terms
+Export artist terms - Unused, we are using indered genres instead,
+see export_track_metadata script
 """
 import logging
 import sqlite3
