@@ -64,12 +64,12 @@ GLOVE gives some problems when trying to download it using `wget`, it's better t
 # install the python package
 pip install -e process/pkg
 
-# parse txt files and convert them to json
+# parse txt files, unstem and convert them to json
 mkdir data/clean
 ./process/clean/txt2json data/raw/mxm_dataset_train.txt \
-    data/clean/mxm_dataset_train.json
+    data/raw/mxm_reverse_mapping.txt data/clean/mxm_dataset_train.json
 ./process/clean/txt2json data/raw/mxm_dataset_test.txt \
-    data/clean/mxm_dataset_test.json
+    data/raw/mxm_reverse_mapping.txt data/clean/mxm_dataset_test.json
 
 # join the two json files
 ./process/clean/join_json data/clean/mxm_dataset_train.json \
@@ -91,10 +91,10 @@ mkdir data/transform
 ./process/transform/bag_of_words data/clean/mxm_dataset.json \
     --max_words 50 data/transform/mxm_dataset_50.feather
 
-# export track metadata
+# export track metadata - Are we using this?
 ./process/clean/export_track_metadata data/raw/AdditionalFiles/track_metadata.db data/transform/mxm_dataset_50.feather data/transform/track_metadata.feather
 
-# export artist terms (genre)
+# export artist terms (genre) - probably remove, use infered genre instead
 ./process/clean/export_terms data/raw/AdditionalFiles/artist_term.db data/transform/track_metadata.feather data/transform/track_terms.feather
 
 
@@ -115,4 +115,7 @@ mkdir data/transform
 # for more info
 ./process/transform/word_embeddings data/clean/embeddings_subset.json \
     data/transform/mxm_embeddings.feather
+
+
+# join all datasets to create a final one
 ```

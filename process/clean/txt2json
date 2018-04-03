@@ -3,12 +3,14 @@
 """
 Parses musixmatch txt files and outputs a json file with two keys:
 words (list of words) and songs (dictionary with track_id,
-track_id_musixmatch and bag_of_words (in {word: count} format))
+track_id_musixmatch and bag_of_words (in {word: count} format)).
+Words are unstemmed using the reverse mapper from the data source website
 """
 import logging
 import argparse
 import json
 from song_lyrics import parse
+import pandas as pd
 
 
 def main():
@@ -23,11 +25,15 @@ def main():
 
     parser.add_argument('path_to_data', type=str,
                         help='Path to the txt data')
+    parser.add_argument('path_to_reverse_mapping', type=str,
+                        help='Path to file with reverse mapping for '
+                             'unstemming')
     parser.add_argument('path_to_output', type=str,
                         help='Output json path')
 
     args = parser.parse_args()
     path_to_data = args.path_to_data
+    path_to_reverse_mapping = args.path_to_reverse_mapping
     path_to_output = (args.path_to_output
                       if args.path_to_output.endswith('.json')
                       else args.path_to_output + '.json')
@@ -41,6 +47,13 @@ def main():
     # ignore first character (%) and split words
     words_all = lines[17][1:].split(',')
     lines_songs = lines[18:]
+
+    # unstem words
+    logger.info('Unstemming words...')
+    unstemmer = pd.read_csv(path_to_reverse_mapping, sep='<SEP>',
+                            engine='python', names=['stemmed', 'word'])
+    mapping = {row.stemmed: row.word for idx, row in unstemmer.iterrows()}
+    words_all = [mapping[w] for w in words_all]
 
     # parse every song line
     songs = [parse.song_line(line) for line in lines_songs]
