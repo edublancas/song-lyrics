@@ -10,6 +10,7 @@ import logging
 import argparse
 import numpy as np
 import pandas as pd
+import nltk
 from nltk.corpus import stopwords
 from song_lyrics.parse import load_json_data
 from song_lyrics.transform import bow2vector
@@ -47,6 +48,8 @@ def main():
     words, track_ids, bows = load_json_data(path_to_data)
 
     if not args.keep_stopwords:
+        nltk.download('stopwords')
+
         stop = stopwords.words('english')
         keys_to_remove = [str(idx) for idx, word in enumerate(words, 1) if word
                           in stop]

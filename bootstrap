@@ -5,8 +5,10 @@ pip install -e process/pkg
 
 # parse txt files, unstem and convert them to json
 mkdir data/clean
+
 ./process/clean/txt2json data/raw/mxm_dataset_train.txt \
     data/raw/mxm_reverse_mapping.txt data/clean/mxm_dataset_train.json
+
 ./process/clean/txt2json data/raw/mxm_dataset_test.txt \
     data/raw/mxm_reverse_mapping.txt data/clean/mxm_dataset_test.json
 
@@ -40,14 +42,14 @@ mkdir data/transform
 # parse genre file
 cat data/raw/msd_beatunes_map.cls | awk -F  '\t' '{ print $1 "\t" $2}' > data/clean/genre.tsv
 
-# export track metadata
+# export track metadata: fields in the sqlite db and genre
 ./process/clean/export_track_metadata \
     data/raw/AdditionalFiles/track_metadata.db \
     data/clean/genre.tsv \
     data/transform/mxm_dataset_100_normalized.feather \
     data/transform/track_metadata.feather
 
-# TODO: impute language and sentiment
+# TODO: impute language, sentiment
 
 # entity resolution for embeddings: take the glove dataset and get only
 # the embeddings for the words in our dataset, fuzzy match the ones
@@ -86,3 +88,6 @@ cat data/raw/msd_beatunes_map.cls | awk -F  '\t' '{ print $1 "\t" $2}' > data/cl
 ./process/transform/join data/transform/mxm_embeddings.feather \
     data/transform/track_metadata.feather \
     data/transform/embeddings.feather
+
+
+# TODO: compute json data for interactive component
