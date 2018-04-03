@@ -18,6 +18,8 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('path_to_metadata', type=str,
                         help='Path to SQLite database')
+    parser.add_argument('path_to_genre', type=str,
+                        help='Path to genres file')
     parser.add_argument('path_to_mxm_data', type=str,
                         help='Path to musixmatch dataset')
     parser.add_argument('path_to_output', type=str,
@@ -27,6 +29,7 @@ def main():
     path_to_metadata = args.path_to_metadata
     path_to_mxm_data = args.path_to_mxm_data
     path_to_output = args.path_to_output
+    path_to_genre = args.path_to_genre
 
     logger.info('Loading data...')
 
@@ -44,6 +47,11 @@ def main():
 
     logger.info('Subsetting songs to match the musixmatch dataset...')
     df = mxm_tracks.merge(songs, how='left', on='track_id')
+
+    # add genre
+    genre = pd.read_csv(path_to_genre, sep='\t', comment='#',
+                        names=['track_id', 'genre'])
+    df = df.merge(genre, how='left', on='track_id')
 
     nas = df.apply(lambda c: np.sum(c.isna()), axis=0) / df.shape[0] * 100
     logger.info('NA stats: {}'.format(nas))

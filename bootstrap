@@ -32,10 +32,14 @@ mkdir data/transform
     data/transform/mxm_dataset_50_normalized.feather \
     --max_words 100 --normalize
 
-# export track metadata - Are we using this?
-# add infered genre 
+# parse genre file
+cat data/raw/msd_beatunes_map.cls | awk -F  '\t' '{ print $1 "\t" $2}' > data/clean/genre.tsv
+
+# export track metadata
 ./process/clean/export_track_metadata \
     data/raw/AdditionalFiles/track_metadata.db \
+    data/clean/genre.tsv \
+    data/raw/msd_beatunes_map.cls \
     data/transform/mxm_dataset_50_normalized.feather \
     data/transform/track_metadata.feather
 
