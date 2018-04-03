@@ -35,10 +35,11 @@ def main():
     mxm = pd.read_feather(path_to_data)
     metadata = pd.read_feather(path_to_metadata)
 
-    metadata.rename(columns={c: '_'+c for c in metadata.columns
+    metadata.rename(columns={c: c+'_' for c in metadata.columns
                              if c != 'track_id'}, inplace=True)
 
     df = metadata.merge(mxm, how='right', on='track_id')
+    df.rename(columns={'track_id': 'track_id_'}, inplace=True)
 
     logger.info('Saving file in {}'.format(args.path_to_output))
     df.to_feather(args.path_to_output)

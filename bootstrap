@@ -24,6 +24,11 @@ mkdir data/transform
 ./process/transform/bag_of_words data/clean/mxm_dataset.json \
     data/transform/mxm_dataset.feather
 
+# top 100 words, topwords removed, not normalized
+./process/transform/bag_of_words data/clean/mxm_dataset.json \
+    data/transform/mxm_dataset_100.feather \
+    --max_words 100
+
 # top 100 words, topwords removed and normalized (counts converted to
 # proportions)
 # this dataset is used for parts of the analysis that required computing
@@ -65,6 +70,12 @@ cat data/raw/msd_beatunes_map.cls | awk -F  '\t' '{ print $1 "\t" $2}' > data/cl
 ./process/transform/join data/transform/mxm_dataset.feather \
     data/transform/track_metadata.feather \
     data/transform/bag_of_words.feather
+
+
+# top 100 bag of words (stopwords removed) + metadata
+./process/transform/join data/transform/mxm_dataset_100.feather \
+    data/transform/track_metadata.feather \
+    data/transform/bag_of_words_top_100.feather
 
 # top 100 bag of words (normalized and stopwords removed) + metadata
 ./process/transform/join data/transform/mxm_dataset_100_normalized.feather \
