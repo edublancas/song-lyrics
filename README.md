@@ -63,3 +63,5 @@ GLOVE gives some problems when trying to download it using `wget`, it's better t
 ```shell
 ./bootstrap
 ```
+
+This will generate the files that we will be working with:

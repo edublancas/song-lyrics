@@ -19,17 +19,17 @@ mkdir data/transform
 
 # Generate bag of words representation
 
-# all words (~5000), stopwords removed (~10GB file)
+# all words (~5000), stopwords removed (~2.3GB file)
 # this file is used for exploring the distribution of the dataset
 ./process/transform/bag_of_words data/clean/mxm_dataset.json \
     data/transform/mxm_dataset.feather
 
-# top 100 words, topwords removed andnormalized (counts converted to
+# top 100 words, topwords removed and normalized (counts converted to
 # proportions)
 # this dataset is used for parts of the analysis that required computing
 # distance measures between pairs
 ./process/transform/bag_of_words data/clean/mxm_dataset.json \
-    data/transform/mxm_dataset_50_normalized.feather \
+    data/transform/mxm_dataset_100_normalized.feather \
     --max_words 100 --normalize
 
 # parse genre file
@@ -39,11 +39,10 @@ cat data/raw/msd_beatunes_map.cls | awk -F  '\t' '{ print $1 "\t" $2}' > data/cl
 ./process/clean/export_track_metadata \
     data/raw/AdditionalFiles/track_metadata.db \
     data/clean/genre.tsv \
-    data/raw/msd_beatunes_map.cls \
-    data/transform/mxm_dataset_50_normalized.feather \
+    data/transform/mxm_dataset_100_normalized.feather \
     data/transform/track_metadata.feather
 
-# TODO: impute langauge and sentiment
+# TODO: impute language and sentiment
 
 # entity resolution for embeddings: take the glove dataset and get only
 # the embeddings for the words in our dataset, fuzzy match the ones
@@ -55,9 +54,24 @@ cat data/raw/msd_beatunes_map.cls | awk -F  '\t' '{ print $1 "\t" $2}' > data/cl
 # sum of the count/proportion * embedding vectors for every word, run --help
 # for more info
 ./process/transform/word_embeddings \
-    data/transform/mxm_dataset_50_normalized.feather \
+    data/transform/mxm_dataset_100_normalized.feather \
     data/clean/embeddings_subset.json \
-    data/transform/mxm_embeddings_50_normalized.feather
+    data/transform/mxm_embeddings_100_normalized.feather
 
 
-# join all datasets to create a final one
+# join all datasets to create the ones that we will use
+
+# bag of words with all the vocabulary (stopwords removed) + metadata
+./process/transform/join data/transform/mxm_dataset.feather \
+    data/transform/track_metadata.feather \
+    data/transform/bag_of_words.feather
+
+# top 100 bag of words (normalized and stopwords removed) + metadata
+./process/transform/join mxm_dataset_100_normalized.feather \
+    data/transform/track_metadata.feather \
+    data/transform/embeddings.feather
+
+# word embeddings + metadata
+./process/transform/join mxm_embeddings_100_normalized.feather \
+    data/transform/track_metadata.feather \
+    data/transform/embeddings.feather
