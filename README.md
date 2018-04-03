@@ -78,16 +78,17 @@ mkdir data/clean
 # convert json data to bag of words representation
 mkdir data/transform
 
-# all 5000 words (~10GB file)
+# all words (~10GB file) (stopwords removed by default)
 ./process/transform/bag_of_words data/clean/mxm_dataset.json \
     data/transform/mxm_dataset.feather
 
-# top 1000  words but normalized (counts converted to proportions)
+# top 1000 words but normalized (counts converted to proportions)
+# (stopwords removed by default)
 ./process/transform/bag_of_words data/clean/mxm_dataset.json \
     data/transform/mxm_dataset_100_normalized.feather \
     --max_words 1000 --normalize
 
-# just top 50
+# just top 50 (stopwords removed by default)
 ./process/transform/bag_of_words data/clean/mxm_dataset.json \
     --max_words 50 data/transform/mxm_dataset_50.feather
 
