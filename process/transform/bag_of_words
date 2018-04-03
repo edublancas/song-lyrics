@@ -46,7 +46,7 @@ def main():
 
     words, track_ids, bows = load_json_data(path_to_data)
 
-    if not keep_stopwords:
+    if not args.keep_stopwords:
         stop = stopwords.words('english')
         keys_to_remove = [str(idx) for idx, word in enumerate(words) if word
                           in stop]
