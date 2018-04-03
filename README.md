@@ -82,22 +82,21 @@ mkdir data/transform
 ./process/transform/bag_of_words data/clean/mxm_dataset.json \
     data/transform/mxm_dataset.feather
 
-# top 1000 words but normalized (counts converted to proportions)
-# (stopwords removed by default)
-./process/transform/bag_of_words data/clean/mxm_dataset.json \
-    data/transform/mxm_dataset_100_normalized.feather \
-    --max_words 1000 --normalize
-
 # just top 50 (stopwords removed by default)
 ./process/transform/bag_of_words data/clean/mxm_dataset.json \
     --max_words 50 data/transform/mxm_dataset_50.feather
+
+# top 50 words but normalized (counts converted to proportions)
+# (stopwords removed by default)
+./process/transform/bag_of_words data/clean/mxm_dataset.json \
+    data/transform/mxm_dataset_50_normalized.feather \
+    --max_words 50 --normalize
 
 # export track metadata - Are we using this?
 ./process/clean/export_track_metadata data/raw/AdditionalFiles/track_metadata.db data/transform/mxm_dataset_50.feather data/transform/track_metadata.feather
 
 # export artist terms (genre) - probably remove, use infered genre instead
 ./process/clean/export_terms data/raw/AdditionalFiles/artist_term.db data/transform/track_metadata.feather data/transform/track_terms.feather
-
 
 # At this point you should have a lot of .feather files in data/transform/
 # let's start exploring those with ggplot2. put your findings in the
@@ -112,10 +111,12 @@ mkdir data/transform
     data/raw/glove.6B/glove.6B.50d.txt data/clean/embeddings_subset.json
 
 # use word embeddings to represent songs, each song is represented as the
-# sum of the count * embedding vectors for every word, run --help
+# sum of the count/proportion * embedding vectors for every word, run --help
 # for more info
-./process/transform/word_embeddings data/clean/embeddings_subset.json \
-    data/transform/mxm_embeddings.feather
+./process/transform/word_embeddings \
+    data/transform/mxm_dataset_50_normalized.feather \
+    data/clean/embeddings_subset.json \
+    data/transform/mxm_embeddings_50_normalized.feather
 
 
 # join all datasets to create a final one

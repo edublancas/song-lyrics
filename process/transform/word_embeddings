@@ -11,6 +11,7 @@ from pathlib import Path
 import argparse
 import logging
 import logging.config
+import pandas as pd
 
 from song_lyrics.parse import load_json_data, json_glove
 from song_lyrics.transform import bows2embeddings
@@ -21,6 +22,11 @@ def main():
     # use docstring at the top as description for the script
     parser = argparse.ArgumentParser(description=__doc__)
 
+    parser.add_argument('path_to_data', type=str,
+                        help='Path to file with bag of words to use as input, '
+                             'must be a feather file where every row is a '
+                             'song, one column is track_id and the rest are '
+                             'words')
     parser.add_argument('path_to_glove', type=str,
                         help='Path to the GLOVE json data')
     parser.add_argument('path_to_output', type=str,
@@ -52,8 +58,12 @@ def main():
     logger.info('Loaded {:,} embeddings...'.format(len(glove)))
 
     # load musixmatch data
-    path_to_data = 'data/clean/mxm_dataset.json'
-    words, track_ids, bows = load_json_data(path_to_data)
+    mxm = pd.read_feather(args.path_to_data)
+
+    track_ids = mxm.track_id.tolist()
+    mxm.drop(columns=['track_id'], inplace=True)
+    words = list(mxm)
+    bows = [row.to_dict() for idx, row in mxm.iterrows()]
 
     # convert bag of words to dense representation using embeddings
     df = bows2embeddings(bows, words, track_ids, glove,
