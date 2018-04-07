@@ -54,16 +54,26 @@ words in total, we can limit the output to the top k words, normalize the
 counts (convert them to proportions) and remove stopwords. We used these
 options to generate several datasets for the analysis.
 
+### Language detection
+
+During the first iterations of the project we noticed that it is important
+to know the language of the song. For example, when analyzing which artists
+are far from each other in term of the words they use, we were just seeing
+difference in language. For that reason we decided to detect the language
+so we could use it for our analysis.
+
+We do this using the [langdetect](https://github.com/Mimino666/langdetect) library (this is done in the `./language_detection`) script. This script
+generates a `language.feather` file that maps songs with their language.
+
 ### Extracting track metadata
 
 There there are some other datasets that contain track metadata. It is
 important to mention that the Musixmatch dataset (the one with the lyrics data) is a subset of the [Million Song Dataset](https://labrosa.ee.columbia.edu/millionsong/) so we took the track IDs for such subset and only exported the metadata for those tracks.
 
 The datasets that contain the track metadata are `track_metadata.db`
-(included in the original raw data) and `msd_beatunes_map.cls` (we got that
-data from [here](http://www.tagtraum.com/)). The track metadata file is
-generated using the `./export_track_metadata` script and it contains the
-following columns (NAs information included):
+(included in the original raw data),  `msd_beatunes_map.cls` (we got that
+data from [here](http://www.tagtraum.com/)) and `language.feather`. The
+track metadata file is generated using the `./export_track_metadata` script and it contains the following columns (NAs information included):
 
 * track_id - Unique identifier for the songs
 * title - track title
@@ -80,6 +90,7 @@ following columns (NAs information included):
 * latitude - Artist latitude (58.29% NAS)
 * longitude - Artist longitude (58.29% NAS)
 * location_string - Location string such as "New York" (58.29% NAS)
+* language - Song language
 
 ### Generating clean datasets
 
