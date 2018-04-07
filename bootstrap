@@ -46,6 +46,7 @@ cat data/raw/msd_beatunes_map.cls | awk -F  '\t' '{ print $1 "\t" $2}' > data/cl
 ./process/clean/export_track_metadata \
     data/raw/AdditionalFiles/track_metadata.db \
     data/clean/genre.tsv \
+    data/raw/AdditionalFiles/artist_location.txt \
     data/transform/mxm_dataset_1000_normalized.feather \
     data/transform/track_metadata.feather
 

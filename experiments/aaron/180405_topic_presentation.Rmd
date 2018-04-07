@@ -1,0 +1,91 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+setwd("../../data/transform/")
+library(feather)
+
+topic_artist <- read_feather('../../data/transform/artist_topic_weights.feather')
+topic_year   <- read_feather('../../data/clean/year_topic_weights.feather')
+```
+
+
+
+When there are less songs/year, the topics are less consistant.
+```{r}
+library(tidyverse)
+df_parallel_coord <- data.frame(t(topic_year))[1:3,]
+colnames(df_parallel_coord) <- topic_year$year
+df_parallel_coord$topic<-rownames(df_parallel_coord)
+
+GGally::ggparcoord(df_parallel_coord, scale='globalminmax', columns = 1:87, groupColumn='topic')+ theme(text = element_text(size=5),axis.text.x = element_text(angle=90, hjust=1))
+```
+
+Considering years once there are more songs reeased, there are no clear trends.
+```{r}
+df_parallel_coord <- data.frame(t(topic_year))[1:3,]
+colnames(df_parallel_coord) <- topic_year$year
+df_parallel_coord$topic<-rownames(df_parallel_coord)
+
+GGally::ggparcoord(df_parallel_coord, scale='globalminmax', columns = 57:87, groupColumn='topic')+ theme(text = element_text(size=15),axis.text.x = element_text(angle=90, hjust=1))
+```
+
+* Results show where a lot of music is made (usa, uk)
+* Results show that relgion  defines an artist far more than death, or love - more artists have a religion score over 80 than any other topic
+* Results dont indicate a particular region which has more of one genre
+
+
+Clearly most music in the dataset is made in the United States and in Europe.
+```{r}
+topic_loc_tidy <- gather(topic_artist, 'topic', 'weight', c(3,6,7))
+topic_loc_tidy$topic <- as.factor(topic_loc_tidy$topic)
+
+ggplot(topic_loc_tidy) +
+  borders("world", colour="gray50", fill="gray90") +
+  geom_point(aes(x=longitude, y=latitude) , color = 'red', size=0.1, alpha=.25)+
+  ggtitle('Topics by Location')
+
+```
+
+Most "topic-heavy" artists: their average song has a score in the topic over 0.9
+```{r}
+
+data_to_plot <- select(topic_loc_tidy, longitude, latitude, topic, weight) %>% filter(weight>0.75)
+ggplot(data_to_plot) +
+  borders("usa", colour="gray50", fill="gray90") +
+  geom_point(aes(x=longitude, y=latitude, color=topic, shape=topic) , size=2, alpha=.75)+
+  xlim(-125, -65)+
+  ylim(25,50)+
+  ggtitle('Topics in USA')
+```
+
+"topic heavy" plot in Europe 
+```{r}
+ggplot(data_to_plot) +
+  borders("world", colour="gray50", fill="gray90") +
+  geom_point(aes(x=longitude, y=latitude, color=topic) , size=2, alpha=.3)+
+  xlim(-25, 50)+
+  ylim(25,75)+
+  ggtitle('Europe')
+```
+  
+"topic heavy" plot in UK 
+```{r}
+ggplot(data_to_plot) +
+  borders("world", colour="gray50", fill="gray90") +
+  geom_point(aes(x=longitude, y=latitude, color=topic) , size=2, alpha=.75)+
+  xlim(-12.5, 5)+
+  ylim(48,60)+
+  ggtitle('United Kingdom')
+```
+
+similar numbers of each topic - thats not visible because many of them are the same artists, and the blue dot ends up on top of the same artis
+```{r}
+data_to_plot <- select(topic_loc_tidy, longitude, latitude, topic, weight) %>% filter(weight>0.90)
+ggplot(data_to_plot, aes(topic))+geom_bar()
+```
+
+
+
