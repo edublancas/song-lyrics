@@ -63,7 +63,7 @@ The datasets that contain the track metadata are `track_metadata.db`
 (included in the original raw data) and `msd_beatunes_map.cls` (we got that
 data from [here](http://www.tagtraum.com/)). The track metadata file is
 generated using the `./export_track_metadata` script and it contains the
-following columns:
+following columns (NAs information included):
 
 * track_id - Unique identifier for the songs
 * title - track title
@@ -75,10 +75,11 @@ following columns:
 * duration - Track duration (seconds)
 * Artist familiarity - Undocumented
 * Artist hottnesss - Undocumented
-* year - Track release year (26.27% NAs)
-* latitude - Artist latitude
-* longitude - Artist longitude
-* location_string - Location string (such as "New York")
+* release_year - Track release year (26.27% NAs)
+* genre - Artist genre (17.37% NAs)
+* latitude - Artist latitude (58.29% NAS)
+* longitude - Artist longitude (58.29% NAS)
+* location_string - Location string such as "New York" (58.29% NAS)
 
 ### Generating clean datasets
 
