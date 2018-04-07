@@ -17,8 +17,9 @@ source('experiments/eduardo/util.R')
 ```{r}
 # load data
 df <- read_feather('data/transform/bag_of_words_top_1000.feather')
+df <- read_feather('data/transform/embeddings.feather')
 
-# columns corresponding to the words
+# get columns corresponding to the metadata words
 columns <- colnames(df)
 columns_metadata <- columns[endsWith(columns, '_')]
 columns_lyrics <- columns[!endsWith(columns, '_')]
@@ -111,7 +112,7 @@ rownames(by_year) <- by_year$release_year_
 
 distances <- as.matrix(dist(by_year, diag=TRUE, upper=TRUE))
 distances <- melt(as.matrix(distances), varnames = c("row", "col"))
-# distances <- distances[distances$row > distances$col,]
+distances <- distances[distances$row > distances$col,]
 ```
 
 ```{r}
