@@ -26,6 +26,16 @@ columns_lyrics <- columns[!endsWith(columns, '_')]
 ```
 
 ```{r}
+tuples <- unique(df[, c('artist_id_', 'artist_name_')])
+
+
+sort(table(tuples$artist_id_), decreasing=TRUE)[1:3]
+
+filter(df, artist_id_ == 'ARGJ1ZL1187FB3FC38')[, c('artist_id_', 'artist_name_')]
+
+length(unique(df$artist_id_))
+length(unique(df$artist_name_))
+
 # artists tagged as
 artist_ids <- terms[terms$mbtag == 'disco', ]$artist_id
 
