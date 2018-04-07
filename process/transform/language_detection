@@ -41,7 +41,10 @@ def main():
 
         if len(words_with_counts):
             sentence = reduce(lambda x, y: x+' '+y, words_with_counts)
-            return detect(sentence)
+            try:
+                return detect(sentence)
+            except Exception:
+                return np.nan
         else:
             return np.nan
 
