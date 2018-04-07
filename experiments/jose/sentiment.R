@@ -27,6 +27,7 @@ difference[difference$unsteammedWord=="'em",3]<-'them'
 difference[difference$unsteammedWord=="'til",3]<-'until'
 difference[difference$unsteammedWord=="'bout",3]<-'about'
 difference[difference$unsteammedWord=="'fore",3]<-'before'
+
 unsteammedWords[unsteammedWords$id %in% difference$id,3]<-difference[,3]
 names(musicXmatch)[2:5001]<-unsteammedWords$unsteammedWord
 
@@ -56,16 +57,31 @@ songsData <- songsData[,c(1:6,5007,7:5006)]
 
 write_feather(songsData,'experiments/jose/songsData.feather')
 
-songsDataEng <- songsData %>% filter(language=='en')
+repeatedWords<-c('them','until','about','nothing','something','darling','waiting','morning','searching','before','spinning','cause')
+for(w in repeatedWords){
+  if(w=='them'){
+    index<-grep(w,names(songsData))[1:2]
+  }
+  else{
+    index<-grep(w,names(songsData)) 
+  }
+  songsData[index[1]]<-apply(songsData[,index],1,sum)
+  songsData[index[-1]]<-NULL
+  print(index)
+}
+
+names(songsData)[grep('cause',names(songsData))]<-'because'
+
+songsData %>% select(1:7) %>% summarise_all(function(x){sum(is.na(x) | str_trim(x)=='')/nrow(millionSongs)}) %>% tidyr::gather(key = Variable,value=Missing) %>%
+  ggplot(aes(reorder(Variable,-Missing),Missing)) + geom_col(fill='lightblue',colour='black') + geom_text(aes(label=paste0(round(Missing*100,1),'%')),vjust=-.2) + scale_y_continuous(labels = percent) +
+  labs(x='Variables',y='Missing Values')
+
+songsDataEng <- songsData %>% filter(inputedLanguage=='en')
 
 wordCount <- songsDataEng %>% select(-c(1:7)) %>% summarise_all(sum)
   
 songsDataEng <- songsDataEng %>% select(-which(wordCount==0)+7)
 
-
-songsDataEng %>% select(1:6) %>% summarise_all(function(x){sum(is.na(x) | str_trim(x)=='')/nrow(millionSongs)}) %>% tidyr::gather(key = Variable,value=Missing) %>%
-  ggplot(aes(reorder(Variable,-Missing),Missing)) + geom_col(fill='lightblue',colour='black') + geom_text(aes(label=paste0(round(Missing*100,1),'%')),vjust=-.2) + scale_y_continuous(labels = percent) +
-  labs(x='Variables',y='Missing Values')
 
 songsDataEng %>% select(-c(1:7)) %>% summarise_all(sum) %>% tidyr::gather(key=words,value=freq) %>%
   with(wordcloud::wordcloud(words,freq,max.words = 300))
