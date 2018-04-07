@@ -75,7 +75,7 @@ following columns:
 * duration - Track duration (seconds)
 * Artist familiarity - Undocumented
 * Artist hottnesss - Undocumented
-* year - Track release year
+* year - Track release year (26.27% NAs)
 * latitude - Artist latitude
 * longitude - Artist longitude
 * location_string - Location string (such as "New York")
