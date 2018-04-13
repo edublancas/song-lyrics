@@ -1,0 +1,78 @@
+#!/usr/bin/env python
+"""
+Fix artist name and ID
+"""
+import argparse
+import logging
+import pandas as pd
+
+
+def main():
+    logger = logging.getLogger(__name__)
+    logging.basicConfig(level=logging.INFO)
+
+    # use docstring at the top as description for the script
+    parser = argparse.ArgumentParser(description=__doc__)
+
+    parser.add_argument('path_to_data', type=str,
+                        help='Path to track metadata feather file')
+    parser.add_argument('path_to_output', type=str,
+                        help='Path to output file')
+
+    args = parser.parse_args()
+    path_to_data = args.path_to_data
+    path_to_output = args.path_to_output
+
+    logger.info('Loading data...')
+    df = pd.read_feather(path_to_data)
+
+    # fix artist_name: for the artist_id, we have more than one artits_name
+    # in some cases, fix it by grouping by artist_id and replacing with the
+    # most popular name
+
+    def fix_artist_name(df):
+        names = df.artist_name.value_counts()
+        most_common_name = names.index[0]
+        return most_common_name
+
+    fixed_name = df.groupby('artist_id').apply(fix_artist_name)
+    fixed_name = pd.DataFrame(fixed_name).reset_index()
+    fixed_name.columns = ['artist_id', 'artist_name']
+
+    # example: this ID matches several names
+    # some_id = 'ARGJ1ZL1187FB3FC38'
+    # df[df.artist_id == some_id].artist_name.unique()
+    # fixed_name[fixed_name.artist_id == some_id].artist_name.unique()
+
+    # fix artist_id: in some cases, we have more than one ID for the fixed
+    # name, fix it byt grouping by artist_name and replacing with the first
+    # artist_id
+    # fixed_name[fixed_name.artist_name == 'Frank Sinatra']
+
+    def fix_artist_id(df):
+        return df.artist_id.iloc[0]
+
+    fixed_id = fixed_name.groupby('artist_name').apply(fix_artist_id)
+    fixed_id = pd.DataFrame(fixed_id).reset_index()
+    fixed_id.columns = ['artist_name', 'artist_id_fixed']
+    # fixed_id[fixed_id.artist_name == 'Frank Sinatra']
+
+    # dataframe with fixed id and name
+    fixed = fixed_name.merge(fixed_id, how='left', on='artist_name')
+
+    fixed_metadata = (df.drop(columns='artist_name')
+                        .merge(fixed, how='left', on='artist_id'))
+    fixed_metadata.drop(columns='artist_id', inplace=True)
+    fixed_metadata.rename(columns=dict(artist_id_fixed='artist_id'),
+                          inplace=True)
+
+    logger.info('%i unique artist ids, %i unique artist names',
+                len(fixed_metadata.artist_name.unique()),
+                len(fixed_metadata.artist_id.unique()))
+
+    logger.info('Saving file in {}'.format(path_to_output))
+    fixed_metadata.to_feather(path_to_output)
+
+
+if __name__ == "__main__":
+    main()
