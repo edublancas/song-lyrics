@@ -39,6 +39,12 @@ mkdir data/transform
     data/transform/mxm_dataset_1000_normalized.feather \
     --max_words 1000 --normalize
 
+
+# detect language - takes a while
+./process/transform/language_detection \
+    data/transform/mxm_dataset_1000.feather \
+    data/transform/language.feather
+
 # parse genre file
 cat data/raw/msd_beatunes_map.cls | awk -F  '\t' '{ print $1 "\t" $2}' > data/clean/genre.tsv
 
