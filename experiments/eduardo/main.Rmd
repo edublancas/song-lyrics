@@ -18,6 +18,7 @@ source('experiments/eduardo/util.R')
 # load data
 df <- read_feather('data/transform/bag_of_words_top_1000.feather')
 df <- read_feather('data/transform/embeddings.feather')
+word_distance <- embeddings_distances('data/clean/embeddings_subset.json')
 
 # get columns corresponding to the metadata words
 columns <- colnames(df)
@@ -87,73 +88,55 @@ selected <- c('Oasis', 'The Verve', 'Maroon 5', 'Sum 41')
 filter(test, artist_name %in% selected)
 ```
 
-# Analyzing topics
-
-Generating topics:
+# Comparing songs form the same artist
 
 ```{r}
-distances <- embeddings_distances('data/clean/embeddings_subset.json')
-
-topic <- closest_k(distances, 'sun')
-topic
-
-df_topic <- load_topic(topic, df, metadata_cols)
-df_topic <- df_topic[order(-df_topic$sun_topic),]
+oasis <- df %>% filter(artist_name_ == 'Oasis') %>% sample_n(30)
+oasis <- oasis[c('title_', columns_lyrics)]
+plot_matrix(oasis)
 ```
 
 ```{r}
-head(df_topic)
-
-head(filter(df_topic, artist_name == 'Maroon 5'))
+deep purple <- df %>% filter(artist_name_ == 'Deep Purple') %>% sample_n(30)
+deep purple <- deep purple[c('title_', columns_lyrics)]
+plot_matrix(deep purple)
 ```
-
 
 # Finding similar years
 
+
 ```{r}
-mean_words <- function(df, cols){
-    data.frame(t(colMeans(df[, cols])))
-}
-
-by_year <- df %>% group_by(release_year_) %>% do(mean_words(., columns_lyrics))
-by_year <- data.frame(by_year)
-by_year <- by_year[!is.na(by_year$release_year_), ]
-rownames(by_year) <- by_year$release_year_
-
-distances <- as.matrix(dist(by_year, diag=TRUE, upper=TRUE))
-distances <- melt(as.matrix(distances), varnames = c("row", "col"))
-distances <- distances[distances$row > distances$col,]
+by_year_en <- df %>% filter(language_ == 'en') %>% group_by(release_year_)
+                %>% do(mean_words(., columns_lyrics))
+plot_matrix(by_year_en)
 ```
 
 ```{r}
-ggplot(distances, aes(x=row, y=col)) + 
-    geom_tile(aes(fill=value), color="white") + 
-    coord_fixed()
+by_year_es <- df %>% filter(language_ == 'es') %>% group_by(release_year_)
+                %>% do(mean_words(., columns_lyrics))
+plot_matrix(by_year_es)
 ```
+
 
 ## Finding similar artists
 
 ```{r}
-# subset artists - using genre is an easy way to group artists
+reggaeton <- df %>% filter(genre_ == 'Reggaeton')
+
+by_artist <- reggaeton %>% group_by(artist_name_) %>%
+                do(mean_words(., columns_lyrics))
+
+plot_matrix(by_artist)
+```
+
+```{r}
 sub <- df %>% filter(genre_ == 'Rock') %>% sample_n(50)
-sub$artist_name_
-```
 
-```{r}
+unique(sub$artist_name_)
+
 by_artist <- sub %>% group_by(artist_name_) %>% do(mean_words(., columns_lyrics))
-by_artist <- data.frame(by_artist)
-by_artist <- by_artist[!is.na(by_artist$artist_name_), ]
-rownames(by_artist) <- by_artist$artist_name_
 
-distances <- as.matrix(dist(by_artist, diag=TRUE, upper=TRUE))
-distances <- melt(as.matrix(distances), varnames = c("row", "col"))
-```
-
-```{r}
-ggplot(distances, aes(x=row, y=col)) + 
-    geom_tile(aes(fill=value), color="white") + 
-    coord_fixed() +
-    theme(axis.text.x = element_text(angle = 90, hjust = 1))
+plot_matrix(by_artist)
 ```
 
 ## Finding similar genres

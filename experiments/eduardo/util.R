@@ -1,5 +1,11 @@
 library(rjson)
 
+# take the mean of some columns
+mean_words <- function(df, cols){
+    data.frame(t(colMeans(df[, cols])))
+}
+
+
 # generate a matrix plot
 plot_matrix <- function(data, grouping_column=1){
     data <- data.frame(data)
