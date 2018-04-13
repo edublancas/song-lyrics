@@ -1,24 +1,15 @@
+#!/usr/bin/env python
 """
 Generate data for interactive component
 """
-from random import sample
+import json
+import argparse
+import logging
 from scipy.spatial.distance import pdist, squareform
 import pandas as pd
 
-# load bag of words and embeddings
-bow = pd.read_feather('data/transform/bag_of_words_top_1000.feather')
-embeddings = pd.read_feather('data/transform/embeddings.feather')
 
-selected = sample(list(bow.artist_name_), 1000)
-bow = bow[bow.artist_name_.isin(selected)]
-
-# columns corresponding to metadata, word counts and embeddings dimensions
-metadata = [col for col in bow.columns if col.endswith('_')]
-words = [col for col in bow.columns if not col.endswith('_')]
-dims = [col for col in embeddings.columns if col.startswith('D')]
-
-
-def sum_words(df):
+def sum_words(df, words):
     """Sum word columns in a DataFrame
     """
     sums = df[words].sum(axis=0)
@@ -58,7 +49,7 @@ def group_info(artist_name, mappings, new_keys):
     return d
 
 
-def artist_distance(embeddings):
+def artist_distance(embeddings, dims):
     """
     Given an embeddings, return a DataFrame with the distances between
     artists
@@ -77,40 +68,86 @@ def most_similar_artists(artist_name, distance_matrix, k=10):
     return list(distance_matrix[artist_name].sort_values()[1:k+1].index)
 
 
-# get list of unique artists
-artists = bow.artist_name_.unique()
+def main():
+    logger = logging.getLogger(__name__)
+    logging.basicConfig(level=logging.INFO)
 
-# top 5 songs for each artist
-top_5 = (bow.groupby('artist_name_')
-         .apply(sum_words)
-         .apply(top_k_words, axis=1)
-         .to_dict())
+    # use docstring at the top as description for the script
+    parser = argparse.ArgumentParser(description=__doc__)
 
-# number of songs per artist
-n_songs = (bow.groupby('artist_name_')
-           .apply(lambda df: df.shape[0])
-           .to_dict())
+    parser.add_argument('path_to_bag_of_words', type=str,
+                        help='Path to bag of words data')
+    parser.add_argument('path_to_embeddings', type=str,
+                        help='Path to bag of words data')
+    parser.add_argument('path_to_profiles', type=str,
+                        help='Path to output JSON file with artists profiles')
+    parser.add_argument('path_to_artists', type=str,
+                        help='Path to output JSON file with artist names')
 
-# top 3 genres
-genres = (bow.groupby('artist_name_')
-          .apply(top_genres)
-          .to_dict())
+    args = parser.parse_args()
+    path_to_bag_of_words = args.path_to_bag_of_words
+    path_to_embeddings = args.path_to_embeddings
+    path_to_profiles = args.path_to_profiles
+    path_to_artists = args.path_to_artists
 
-# songs per year
-years = (bow.groupby('artist_name_')
-         .apply(songs_per_year)
-         .to_dict())
+    # load bag of words and embeddings
+    logger.info('Loading data...')
+    bow = pd.read_feather(path_to_bag_of_words)
+    embeddings = pd.read_feather(path_to_embeddings)
 
+    # columns corresponding to metadata, word counts and embeddings dimensions
+    words = [col for col in bow.columns if not col.endswith('_')]
+    dims = [col for col in embeddings.columns if col.startswith('D')]
 
-# find most similar artists
-distances = artist_distance(embeddings)
-similar = {artist: most_similar_artists(artist, distances)
-           for artist in artists}
+    # get list of unique artists
+    artists = list(bow.artist_name_.unique())
 
-# build dataset
-data = {}
+    # top 5 songs for each artist
+    logger.info('Finding top 5 songs...')
+    top_5 = (bow.groupby('artist_name_')
+             .apply(sum_words, words=words)
+             .apply(top_k_words, axis=1)
+             .to_dict())
 
-for artist in artists:
-    data[artist] = group_info(artist, [top_5, n_songs, genres, years, similar],
-                              ['top_words', 'n_songs', 'top_genres',
-                               'years', 'similar_artists'])
+    # number of songs per artist
+    logger.info('Counting number of songs...')
+    n_songs = (bow.groupby('artist_name_')
+               .apply(lambda df: df.shape[0])
+               .to_dict())
+
+    # top 3 genres
+    logger.info('Finding top 3 genres...')
+    genres = (bow.groupby('artist_name_')
+              .apply(top_genres)
+              .to_dict())
+
+    # songs per year
+    logger.info('Counting songs per year...')
+    years = (bow.groupby('artist_name_')
+             .apply(songs_per_year)
+             .to_dict())
+
+    # find most similar artists
+    logger.info('Finding similar artists...')
+    distances = artist_distance(embeddings, dims=dims)
+    similar = {artist: most_similar_artists(artist, distances)
+               for artist in artists}
+
+    # build dataset
+    mappings = [top_5, n_songs, genres, years, similar]
+    keys = ['top_words', 'n_songs', 'top_genres', 'years', 'similar_artists']
+    data = {}
+
+    logger.info('Generating output file...')
+
+    for artist in artists:
+        data[artist] = group_info(artist, mappings, keys)
+
+    with open(path_to_profiles, 'w') as f:
+        json.dump(data, f)
+
+    with open(path_to_artists, 'w') as f:
+        json.dump(artists, f)
+
+    logger.info('Saved profiles in %s', path_to_profiles)
+    logger.info('Saved artists list in %s', path_to_artists)

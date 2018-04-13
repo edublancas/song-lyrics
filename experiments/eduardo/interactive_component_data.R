@@ -20,7 +20,7 @@ by_artist <- df %>% group_by(artist_name_)
 sums <- by_artist %>% do(sum_words(., columns_lyrics))
 
 get_top_words <- function(df, k=20){
-    counts <- as.numeric(w[, 2:nrow(df)])
+    counts <- as.numeric(w[, 2:length(df)])
     indexes <- order(counts, decreasing=TRUE)[1:k]
 
     words <-colnames(w)[indexes]
@@ -29,8 +29,8 @@ get_top_words <- function(df, k=20){
     return(top)
 }
 
+apply(sums, 1, get_top_words, k=5)
 
-names(top) <- words
 
 # number of songs
 n_songs <- by_artist %>% summarize(n = n()) %>%
