@@ -98,3 +98,12 @@ cat data/raw/msd_beatunes_map.cls | awk -F  '\t' '{ print $1 "\t" $2}' > data/cl
 ./process/transform/join data/transform/mxm_embeddings.feather \
     data/transform/track_metadata.feather \
     data/transform/embeddings.feather
+
+
+# generate data for web app
+mkdir data/webapp
+
+./process/transform/make_webapp_data data/transform/bag_of_words.feather \
+    data/transform/embeddings.feather \
+    data/webapp/profiles.json \
+    data/webapp/artists.json
