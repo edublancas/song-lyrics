@@ -44,8 +44,9 @@ plot_matrix(deep purple)
 
 
 ```{r}
-by_year_en <- df %>% filter(language_ == 'en') %>% group_by(release_year_)
-                %>% do(mean_words(., columns_lyrics))
+by_year_en <- df %>% filter(language_ == 'en') %>%
+                 group_by(release_year_) %>%
+                 do(mean_words(., columns_lyrics))
 plot_matrix(by_year_en)
 ```
 
