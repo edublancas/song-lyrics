@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-Fix artist name
+Fix artist name and ID
 """
 import argparse
 import logging

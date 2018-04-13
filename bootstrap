@@ -57,7 +57,7 @@ cat data/raw/msd_beatunes_map.cls | awk -F  '\t' '{ print $1 "\t" $2}' > data/cl
     data/transform/track_metadata_tmp.feather
 
 # fix artist id and name
-./process/clean/fix_artist_name data/transform/track_metadata_tmp.feather \
+./process/clean/fix_artist data/transform/track_metadata_tmp.feather \
     data/transform/track_metadata.feather
 
 # TODO: impute language
