@@ -23,6 +23,8 @@ def main():
                         help='Path to location file')
     parser.add_argument('path_to_mxm_data', type=str,
                         help='Path to musixmatch dataset')
+    parser.add_argument('path_to_language_data', type=str,
+                        help='Path to langauge data')
     parser.add_argument('path_to_output', type=str,
                         help='Output path for the feather file')
 
@@ -31,6 +33,7 @@ def main():
     path_to_genre = args.path_to_genre
     path_to_location = args.path_to_location
     path_to_mxm_data = args.path_to_mxm_data
+    path_to_language_data = args.path_to_language_data
     path_to_output = args.path_to_output
 
     logger.info('Loading data...')
@@ -64,6 +67,10 @@ def main():
                            engine='python')
     location.drop('artist_name', axis=1, inplace=True)
     df = df.merge(location, how='left', on='artist_id')
+
+    # merge language
+    language = pd.read_feather(path_to_language_data)
+    df = df.merge(language, how='left', on='track_id')
 
     nas = df.apply(lambda c: np.sum(c.isna()), axis=0) / df.shape[0] * 100
     logger.info('NA stats: {}'.format(nas))
