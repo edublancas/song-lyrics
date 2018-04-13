@@ -54,9 +54,13 @@ cat data/raw/msd_beatunes_map.cls | awk -F  '\t' '{ print $1 "\t" $2}' > data/cl
     data/clean/genre.tsv \
     data/raw/AdditionalFiles/artist_location.txt \
     data/transform/mxm_dataset_1000_normalized.feather \
+    data/transform/track_metadata_tmp.feather
+
+# fix artist id and name
+./process/clean/fix_artist_name data/transform/track_metadata_tmp.feather \
     data/transform/track_metadata.feather
 
-# TODO: impute language, sentiment
+# TODO: impute language
 
 # entity resolution for embeddings: take the glove dataset and get only
 # the embeddings for the words in our dataset, fuzzy match the ones
