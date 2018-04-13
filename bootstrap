@@ -98,6 +98,3 @@ cat data/raw/msd_beatunes_map.cls | awk -F  '\t' '{ print $1 "\t" $2}' > data/cl
 ./process/transform/join data/transform/mxm_embeddings.feather \
     data/transform/track_metadata.feather \
     data/transform/embeddings.feather
-
-
-# TODO: compute json data for interactive component

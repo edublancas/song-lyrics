@@ -160,32 +160,37 @@ ggplot(distances, aes(x=row, y=col)) +
 
 
 ```{r}
-genre <- table(df$genre_)
+genre_ <- table(df$genre_)
 top_genres <- names(genre_[genre_ > 80])
 
-hist(table(df$genre_))
-```
-
-```{r}
-by_genre <- df %>%filter(genre_ %in% top_genres) %>%
-                group_by(genre_) %>%
+by_genre <- df %>% filter(genre_ %in% top_genres) %>% group_by(genre_) %>%
                 do(mean_words(., columns_lyrics))
 
-by_genre <- data.frame(by_genre)
-by_genre <- by_genre[!is.na(by_genre$genre_), ]
-rownames(by_genre) <- by_genre$genre_
-
-distances <- as.matrix(dist(by_genre))
-distances <- melt(as.matrix(distances), varnames = c("row", "col"))
+plot_matrix(by_genre)
 ```
 
 ```{r}
-ggplot(distances, aes(x=row, y=col)) + 
-    geom_tile(aes(fill=value), color="white") + 
-    coord_fixed() +
-    theme(axis.text.x = element_text(angle=45, hjust=1))
+by_genre_es <- df %>% filter(genre_ %in% top_genres, language_ == 'es') %>%
+                    group_by(genre_) %>% do(mean_words(., columns_lyrics))
+
+plot_matrix(by_genre_es)
 ```
 
+```{r}
+by_genre_en <- df %>% filter(genre_ %in% top_genres, language_ == 'en') %>%
+                    group_by(genre_) %>% do(mean_words(., columns_lyrics))
+
+plot_matrix(by_genre_en)
+```
+
+```{r}
+reggaeton <- df %>% filter(genre_ == 'Reggaeton')
+table(reggaeton$language_)
+
+reggaeton_en <- df %>% filter(genre_ == 'Reggaeton', language_ == 'en')
+
+reggaeton_en[c('title_', 'artist_name_')]
+```
 
 ## Find similar songs (bag of words and embeddings)
 

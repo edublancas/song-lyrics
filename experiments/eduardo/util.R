@@ -1,5 +1,22 @@
 library(rjson)
 
+# generate a matrix plot
+plot_matrix <- function(data, grouping_column=1){
+    data <- data.frame(data)
+    data <- data[!is.na(data[[grouping_column]]), ]
+    rownames(data) <- data[[grouping_column]]
+
+    distances <- as.matrix(dist(data))
+    distances <- melt(as.matrix(distances), varnames = c("row", "col"))
+
+    ggplot(distances, aes(x=row, y=col)) +
+        geom_tile(aes(fill=value), color="white") + 
+        coord_fixed() +
+        theme(axis.text.x = element_text(angle=45, hjust=1))
+}
+
+
+
 # compute distances matrix from the embeddings json file
 embeddings_distances <- function(path_to_embeddings){
     # load data
