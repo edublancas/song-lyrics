@@ -1,13 +1,17 @@
 from random import sample
+from scipy.spatial.distance import pdist, squareform
 import pandas as pd
 
 df = pd.read_feather('data/transform/bag_of_words_top_1000.feather')
+embeddings = pd.read_feather('data/transform/embeddings.feather')
 
 selected = sample(list(df.artist_name_), 1000)
 df = df[df.artist_name_.isin(selected)]
 
 metadata = [col for col in df.columns if col.endswith('_')]
 words = [col for col in df.columns if not col.endswith('_')]
+
+dims = [col for col in embeddings.columns if col.startswith('D')]
 
 
 def sum_words(df):
@@ -59,10 +63,20 @@ genres = (df.groupby('artist_name_')
             .apply(top_genres)
             .to_dict())
 
+# songs per year
 years = (df.groupby('artist_name_')
            .apply(songs_per_year)
            .to_dict())
 
+
+embeddings_only = embeddings.loc[:, ['artist_name_'] + dims]
+artist_vectors = embeddings_only.groupby('artist_name_').mean()
+
+dist = squareform(pdist(artist_vectors.values))
+distances = pd.DataFrame(dist, index=artist_vectors.index,
+                         columns=artist_vectors.index)
+
+distances['Oasis'].sort_values()
 
 data = {}
 
