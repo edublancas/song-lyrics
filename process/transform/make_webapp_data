@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 """
-Generate data for interactive component
+Generate data for interactive component, by default it only outputs
+artists with at least 10 songs
 """
 import json
 import argparse
@@ -83,17 +84,33 @@ def main():
                         help='Path to output JSON file with artists profiles')
     parser.add_argument('path_to_artists', type=str,
                         help='Path to output JSON file with artist names')
+    parser.add_argument('--min_songs', default=10, type=int,
+                        help='Only output artists with this minimum number '
+                             'of songs, defaults to three')
 
     args = parser.parse_args()
     path_to_bag_of_words = args.path_to_bag_of_words
     path_to_embeddings = args.path_to_embeddings
     path_to_profiles = args.path_to_profiles
     path_to_artists = args.path_to_artists
+    min_songs = args.min_songs
 
     # load bag of words and embeddings
     logger.info('Loading data...')
     bow = pd.read_feather(path_to_bag_of_words)
     embeddings = pd.read_feather(path_to_embeddings)
+
+    # filter artists: only keep the ones with >= min_songs songs
+    n_songs_series = bow.groupby('artist_name_').apply(lambda df: df.shape[0])
+    artists_to_keep = n_songs_series[n_songs_series > min_songs].index
+
+    logger.info('Keeping only artists with at least %d songs: %d out of %d '
+                '(%.2f %%)',
+                min_songs, len(artists_to_keep), len(n_songs_series),
+                100*len(artists_to_keep)/len(n_songs_series))
+
+    bow = bow[bow.artist_name_.isin(artists_to_keep)]
+    embeddings = embeddings[embeddings.artist_name_.isin(artists_to_keep)]
 
     # columns corresponding to metadata, word counts and embeddings dimensions
     words = [col for col in bow.columns if not col.endswith('_')]
@@ -111,9 +128,7 @@ def main():
 
     # number of songs per artist
     logger.info('Counting number of songs...')
-    n_songs = (bow.groupby('artist_name_')
-               .apply(lambda df: df.shape[0])
-               .to_dict())
+    n_songs = n_songs_series.to_dict()
 
     # top 3 genres
     logger.info('Finding top 3 genres...')
