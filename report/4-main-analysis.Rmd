@@ -105,8 +105,40 @@ track metadata file is generated using the `./export_track_metadata` script and 
 * location - Location string such as "New York" (58.29% NAs)
 * language - Song language (0.04% NAs)
 
+### Word embeddings
+
+Apart from using the bag of words representation, we generated a dense vector representation for each song using [word embeddings](https://en.wikipedia.org/wiki/Word_embedding), especifically, the 50 dimensional vectors in [GloVe](https://nlp.stanford.edu/projects/glove/). The process is as follows:
+
+Every song is represented as a vector $C \in \mathbb{R}^{|W|}$, where $W$ are the words in our dataset. Every element $c_{word}$ in $C$ has a word associated with it and it represents the number of times that word is mentioned in the song. To convert this to a dense vector, we first normalized it:
+
+$$C_{normalized} = \frac{C}{\sum_{i=1}^{i=w}{C_i}}$$
+
+
+Then, using the $w \in \mathbb{R}^{50}$ dense vectors in GloVe, we computed a single vector for every song as follows:
+
+
+First, initialize a zero vector $V \in \mathbb{R}^{50}$
+
+For every non-zero value $c_{normalized, word}$ in $c_{normalized}$:
+    1. Lookup the corresponding embedding $w_{word}$
+    2. Compute $c_{normalized, word} \times w_{word}$
+    3. Add  $c_{normalized, word} \times w_{word}$ to $V$
+
+$V$ is the dense vector representation for the song.
+
 ### Generating clean datasets
 
+Once we cleaned the data we generated 5 final datasets:
+
+1. `bag_of_words.feather` - Contains all the metadata and the counts for all the words (stopwords removed)
+2. `bag_of_words.feather` - Contains the counts top 1,000 words with the stopwords removed
+3. `embeddings.feather` - Contains the metadata and the word embeddings representation (50 dimensions)
+4. `profiles.json` - Summary for artists with at least 10 songs, this is the dataset used in the interactive component
+5. `artists.json` - List of artists with at least 10 songs, this is also used in the interactive component
+
+Datasets 2 and 3 are used when computing distance-based metrics to speedup computations, we assume that most of the interesting information is included in the top words. The word embeddings representation was also included since
+we found it has better results for some comparisons, especifically, to compare
+similarity between artists.
 
 ## Word distribution
 
