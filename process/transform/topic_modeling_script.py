@@ -114,7 +114,7 @@ topics_per_year = pd.DataFrame(weights_yearly_clean).sort_values(by='year').rese
 
 
 #artist weights
-print('Identify topic weights for each artist ()')
+print('Identify topic weights for each artist (~21k iterations)')
 weights_artist_clean = {}
 weights_artist_clean['love'] = [0] * len(bag_of_words_top_1000_topics.artist_id_.unique())
 weights_artist_clean['death'] = [0] * len(bag_of_words_top_1000_topics.artist_id_.unique())
@@ -123,6 +123,8 @@ weights_artist_clean['artist_id'] = [0] * len(bag_of_words_top_1000_topics.artis
 weights_artist_clean['artist_name'] = [0] * len(bag_of_words_top_1000_topics.artist_id_.unique())
 weights_artist_clean['longitude'] = [0] * len(bag_of_words_top_1000_topics.artist_id_.unique())
 weights_artist_clean['latitude'] = [0] * len(bag_of_words_top_1000_topics.artist_id_.unique())
+weights_artist_clean['song_count'] = [0] * len(bag_of_words_top_1000_topics.artist_id_.unique())
+
 
 for i, val in tqdm(enumerate(bag_of_words_top_1000_topics.artist_id_.unique())):
     temp = bag_of_words_top_1000_topics[bag_of_words_top_1000_topics.artist_id_==val]
@@ -133,6 +135,8 @@ for i, val in tqdm(enumerate(bag_of_words_top_1000_topics.artist_id_.unique())):
     weights_artist_clean['love'][i] = temp.love.mean()
     weights_artist_clean['death'][i] = temp.death.mean()
     weights_artist_clean['religion'][i] = temp.religion.mean()
+    weights_artist_clean['song_count'][i] = len(temp)
+
 
 topics_per_artist = pd.DataFrame(weights_artist_clean).sort_values(by='artist_name').reset_index(drop=True)
 
