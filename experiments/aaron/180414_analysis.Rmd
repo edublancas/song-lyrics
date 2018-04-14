@@ -1,0 +1,69 @@
+---
+title: "180237_analysis"
+output: html_notebook
+---
+
+```{r}
+library(feather)
+library(tidyverse)
+
+#read feather files
+setwd("../../data/transform")
+df_mxm_dataset <- read_feather("mxm_dataset.feather")
+df_top_1000_dataset <- read_feather("bag_of_words_top_1000.feather")
+df_artist_topic <- read_feather("artist_topic_weights.feather")
+df_year_topic <- read_feather("year_topic_weights.feather")
+```
+
+```{r}
+#song word count
+mxm_dup <- df_mxm_dataset
+mxm_dup$track_id <-NULL
+mxm_dup <- transform(mxm_dup, sum=rowSums(mxm_dup))
+word_count <- data.frame(df_mxm_dataset$track_id, mxm_dup$sum) 
+```
+
+Per song counts must be carefully considered, because they only count words which are in the most common 5000 words. Nevertheless, we can see that the mode is around 75 words, and there is a wide range of word counts.
+
+```{r}
+ggplot(word_count, aes(mxm_dup.sum)) +
+  geom_histogram(binwidth=25)+
+  scale_x_continuous(limits = c(0,1250))+
+  ggtitle('Song Word Counts')+
+  xlab('Word Count')+
+  ylab('Song Count')
+```
+
+```{r}
+ggplot(word_count, aes(mxm_dup.sum)) +
+  geom_histogram(binwidth=1)+
+  scale_x_continuous(limits = c(0,100))+
+  ggtitle('Song Word Counts (low word count)')+
+  xlab('Word Count')+
+  ylab('Song Count')
+```
+
+The dataset grows exponentially in size until ~2005, before it slows in growth rate and declines.
+
+Note: we need a good explanation of how our data was collected.
+```{r}
+# songs/year distrubution
+ggplot(df_year_topic,aes(x=year, y=song_count))+
+  geom_point()+
+  geom_line()+
+  xlab('Year')+
+  ylab('Song Count')+
+  ggtitle('Song Count/Year')
+```
+
+The dataset is skewed towrds having few songs for each artist.
+```{r}
+#songs/artist distribution
+ggplot(df_artist_topic,aes(song_count))+
+  geom_histogram(binwidth=1)+
+  xlab('Song Count')+
+  ylab('Number of Artists')+
+  ggtitle('Song Count/Artist')
+
+
+```
