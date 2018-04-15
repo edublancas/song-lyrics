@@ -84,6 +84,8 @@ def main():
                         help='Path to bag of words data')
     parser.add_argument('path_to_embeddings', type=str,
                         help='Path to embeddings data')
+    parser.add_argument('path_to_artist_topics', type=str,
+                        help='Path to artist topics file')
     parser.add_argument('path_to_profiles', type=str,
                         help='Path to output CSV file with artists profiles')
     parser.add_argument('--min_songs', default=10, type=int,
@@ -93,6 +95,7 @@ def main():
     args = parser.parse_args()
     path_to_bag_of_words = args.path_to_bag_of_words
     path_to_embeddings = args.path_to_embeddings
+    path_to_artist_topics = args.path_to_artist_topics
     path_to_profiles = args.path_to_profiles
     min_songs = args.min_songs
 
@@ -171,6 +174,16 @@ def main():
         data.append(group_info(artist, mappings, keys))
 
     df = pd.DataFrame(data)
+
+    # add topic
+    topics = pd.read_feather(path_to_artist_topics)
+    topics = topics[['artist_name', 'love', 'death', 'religion']]
+
+    df = df.merge(topics, left_on='artist', right_on='artist_name')
+
+    nas = df.apply(lambda c: np.sum(c.isna()), axis=0) / df.shape[0] * 100
+    logger.info('NA stats: {}'.format(nas))
+
     df.to_csv(path_to_profiles, index=False)
 
     logger.info('Saved profiles in %s', path_to_profiles)
