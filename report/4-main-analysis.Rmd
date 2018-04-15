@@ -65,6 +65,19 @@ so we could use it for our analysis.
 We do this using the [langdetect](https://github.com/Mimino666/langdetect) library (this is done in the `./language_detection`) script. This script
 generates a `language.feather` file that maps songs with their language.
 
+### Fixing artist name and ID
+
+We performed some cleaning in the artist name and ID. We found that for
+the same artist ID, some songs had more than one artist name, this happened
+when some artist had collaborations. For example, an artist with ID `A1` may
+have artist names `Noel Gallagher`, `Noel Gallagher; Richard Ashcroft`, `Noel Gallagher; Richard Ashcroft; Ian Brown`. We grouped the songs by artist ID
+and assigned the most common artist name to all the songs.
+
+After cleaning the name we notice another problem: some artist names had
+more than one artist ID, this happened in a small number of cases but we cleaned the data as well. We grouped the songs by artist name and assigned
+the first artist ID in the group. This problem may be due to artists changing
+record labels, hence, not being recognized as the same artist by the Musixmatch portal.
+
 ### Extracting track metadata
 
 There there are some other datasets that contain track metadata. It is
@@ -83,16 +96,43 @@ track metadata file is generated using the `./export_track_metadata` script and 
 * artist_mid - Musixmatch artist unique ID
 * artist_name - Artist name
 * duration - Track duration (seconds)
-* Artist familiarity - Undocumented
-* Artist hottnesss - Undocumented
+* artist_familiarity - Undocumented
+* artist_hottnesss - Undocumented
 * release_year - Track release year (26.27% NAs)
 * genre - Artist genre (17.37% NAs)
-* latitude - Artist latitude (58.29% NAS)
-* longitude - Artist longitude (58.29% NAS)
-* location_string - Location string such as "New York" (58.29% NAS)
-* language - Song language
+* latitude - Artist latitude (58.29% NAs)
+* longitude - Artist longitude (58.29% NAs)
+* location - Location string such as "New York" (58.29% NAs)
+* language - Song language (0.04% NAs)
+
+### Word embeddings
+
+Apart from using the bag of words representation, we generated a dense vector representation for each song using [word embeddings](https://en.wikipedia.org/wiki/Word_embedding), especifically, the 50 dimensional vectors in [GloVe](https://nlp.stanford.edu/projects/glove/). The process is as follows:
+
+Every song is represented as a vector $\mathbf{c} \in \mathbb{R}^{|W|}$, where $W$ is the set of words in our dataset. Every element $\mathbf{c}_{i}$ in $\mathbf{c}$ has a word associated with it and it represents the number of times that word is mentioned in the song. To convert this to a dense vector, we first normalized it:
+
+$$\mathbf{c}_{normalized} = \frac{\mathbf{c}}{\sum_{i=1}^{i=w}{\mathbf{c}_i}}$$
+
+
+Then, using the $w \in \mathbb{R}^{50}$ dense vectors in GloVe, we built a matrix where the ith row corresponds to the embedding for the ith word in $|W|$, then we compute the dense vector for every song as follows:
+
+$$\mathbf{v}_{song} = \mathbf{c}_{normalized} \times M$$
+
+Which give us a 50 dimensional vector for every row.
 
 ### Generating clean datasets
+
+Once we cleaned the data we generated 5 final datasets:
+
+1. `bag_of_words.feather` - Contains all the metadata and the counts for all the words (stopwords removed)
+2. `bag_of_words.feather` - Contains the counts top 1,000 words with the stopwords removed
+3. `embeddings.feather` - Contains the metadata and the word embeddings representation (50 dimensions)
+4. `profiles.json` - Summary for artists with at least 10 songs, this is the dataset used in the interactive component
+5. `artists.json` - List of artists with at least 10 songs, this is also used in the interactive component
+
+Datasets 2 and 3 are used when computing distance-based metrics to speedup computations, we assume that most of the interesting information is included in the top words. The word embeddings representation was also included since
+we found it has better results for some comparisons, especifically, to compare
+similarity between artists.
 
 ## Word distribution
 
