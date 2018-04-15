@@ -10,6 +10,8 @@ our data, we computed pairwise euclidean distance between observations at differ
 
 Since we have more than 200,000 songs it is hard to visualize them all at once, so we need to group them in some way. For this part we decided to group based on the following columns: year, genre and artist name. When grouping songs, we took the mean of the group to represent it.
 
+We make use of the `plot_matrix()` function which can be found in the `util.R` file. The function just computes the distance between pairs and plots them, there is also a `sort` parameter that clusters the observations and them orders them depending on the cluster they got assigned to, this helps to visualize better.
+
 ```{r}
 library(feather)
 library(dplyr)
@@ -42,7 +44,8 @@ We first take a look at the distance between years:
 ```{r}
 by_year_en <- df %>% group_by(release_year_) %>%
                  do(mean_words(., columns_lyrics))
-plot_matrix(by_year_en)
+
+plot_matrix(by_year_en, sort=FALSE, only_lower_half=TRUE)
 ```
 
 We see that for any given year, the more we move (either to following or previous years) the distance increases. We can see that the greatest distance is between the latest data (2000s) and the earliest data (1920s).
@@ -63,7 +66,7 @@ top_genres
 by_genre <- df %>% filter(genre_ %in% top_genres) %>% group_by(genre_) %>%
                 do(mean_words(., columns_lyrics))
 
-plot_matrix(by_genre, sort=TRUE)
+plot_matrix(by_genre)
 ```
 
 We see that some rows are very different to the rest: Samba, Reggaeton, MPB ([Música popular brasileira](https://en.wikipedia.org/wiki/M%C3%BAsica_popular_brasileira)), Latin, Flamenco and Bachata. Most songs from these songs are in either Spanish or Portuguese, so it makes sense that they make use of different words.
@@ -74,10 +77,10 @@ We not filter by songs only in Spanish.
 by_genre_es <- df %>% filter(genre_ %in% top_genres, language_ == 'es') %>%
                     group_by(genre_) %>% do(mean_words(., columns_lyrics))
 
-plot_matrix(by_genre_es)
+plot_matrix(by_genre_es, groups=2)
 ```
 
-This plot is more informative, we see that Trance and House songs in Spanish are the genres that are most different to the rest.
+This plot is more informative, we see that Trance, House, Drum & Bass, Children's Music and World songs in Spanish are the genres that are most different to the rest.
 
 We now take a look at music in English.
 
@@ -85,7 +88,7 @@ We now take a look at music in English.
 by_genre_en <- df %>% filter(genre_ %in% top_genres, language_ == 'en') %>%
                     group_by(genre_) %>% do(mean_words(., columns_lyrics))
 
-plot_matrix(by_genre_en)
+plot_matrix(by_genre_en, groups=2)
 ```
 
 Here we see that Samba, Reggaeton and Bachata are the genres that are different, songs from those three genres are usually not in English, which
@@ -134,36 +137,66 @@ by_artist <- rock_en %>% filter(artist_name_ %in% rock_en_top) %>%
                 group_by(artist_name_) %>%
                 do(mean_words(., columns_lyrics))
 
-plot_matrix(by_artist)
+plot_matrix(by_artist, groups=2)
 ```
 
 ```{r}
-hh <- df %>% filter(genre_ == 'Hip-Hop', language_ == 'en')
+hh <- df %>% filter(genre_ == 'Pop', language_ == 'en')
 hh_top <- names(sort(table(hh$artist_name_), decreasing=TRUE)[1:30])
 
 by_artist <- hh %>% filter(artist_name_ %in% hh_top) %>%
                 group_by(artist_name_) %>%
                 do(mean_words(., columns_lyrics))
 
-plot_matrix(by_artist)
+plot_matrix(by_artist, groups=2)
 ```
 
 # Comparing songs form the same artist
 
-Finally, we compare songs from the some (highly recommended) artists:
+Finally, we compare songs from the some (highly recommended) artists. First we take a look at 30 songs from the band Foo Fighters.
 
 ```{r}
-set.seed(4)
-oasis <- df %>% filter(artist_name_ == 'Oasis') %>% sample_n(30)
-oasis <- oasis[c('title_', columns_lyrics)]
-oasis$title_
+set.seed(10)
 
-plot_matrix(oasis)
+ff <- df %>% filter(artist_name_ == 'Foo Fighters') %>% sample_n(30)
+ff <- ff[c('title_', columns_lyrics)]
+
+plot_matrix(ff, groups=2)
 ```
 
+We see a clear outlier here, the song ["Skin And Bones"](https://genius.com/Foo-fighters-skin-and-bones-lyrics), the chorus looks like this:
+
+
+    Skin and bones
+    Skin and bones
+    Skin and bones, don't you know?
+    Skin and bones
+    Skin and bones
+    Skin and bones, don't you know?
+
+Looks like the heavy use of "skin" and "bones" is making that specific song be very different from the rest.
+
+Now we take a look at 30 songs from The Kooks:
 
 ```{r}
-artist <- df %>% filter(artist_name_ == 'The Kooks') %>% sample_n(30)
-artist <- artist[c('title_', columns_lyrics)]
-plot_matrix(artist)
+set.seed(10)
+
+kooks <- df %>% filter(artist_name_ == 'The Kooks') %>% sample_n(30)
+kooks <- kooks[c('title_', columns_lyrics)]
+
+plot_matrix(kooks, groups=2, only_lower_half=TRUE)
+```
+
+We see some black squares outside the diagonal of the matrix. those correspond to the following pairs:
+
+```{r}
+distances <- pairwise_distances(kooks, groups=2, only_lower_half=TRUE)
+pairs <- distances %>% filter(row != col, value == 0)
+kable(pairs)
+```
+
+We see that rows 1, 3 and 4 correspond to the same song but a different version so it makes sense that they have the same lyrics. The second row does not match and the songs are actually different, the counts are as follows:
+
+```{r}
+top_k_words()
 ```

@@ -1,19 +1,28 @@
 library(rjson)
 
+
+top_k_words <- function(df, cols, row=1, k=10){
+    # given a bow data frame, return the top word for some song
+    counts <- as.numeric(songs[row, cols])
+    names(counts) <- cols
+    return(sort(counts, decreasing=TRUE)[1:k])
+}
+
 # take the mean of some columns
 mean_words <- function(df, cols){
     data.frame(t(colMeans(df[, cols])))
 }
 
 
-# generate a matrix plot
-plot_matrix <- function(data, grouping_column=1, only_lower_half=FALSE,
-                        sort=FALSE, groups=3){
+# compute pairwise distances
+pairwise_distances <- function(data, grouping_column=1, only_lower_half=FALSE,
+                               sort=TRUE, groups=3){
     data <- data.frame(data)
     data <- data[!is.na(data[[grouping_column]]), ]
     rownames(data) <- data[[grouping_column]]
 
     if(sort){
+        set.seed(0)
         cols <- 1:ncol(data)
         cols <- cols[cols != grouping_column]
 
@@ -24,11 +33,24 @@ plot_matrix <- function(data, grouping_column=1, only_lower_half=FALSE,
     }
 
     distances <- as.matrix(dist(data))
-    distances <- melt(as.matrix(distances), varnames = c("row", "col"))
 
     if(only_lower_half){
-        distances <- distances[distances$row > distances$col, ]
+        distances[upper.tri(distances, diag=FALSE)] <- NA
     }
+
+    distances <- melt(as.matrix(distances), varnames = c("row", "col"))
+    distances <- distances[!is.na(distances$value), ]
+    
+    return(distances)
+}
+
+
+# generate a matrix plot
+plot_matrix <- function(data, grouping_column=1, only_lower_half=FALSE,
+                        sort=TRUE, groups=3){
+
+    distances <- pairwise_distances(data, grouping_column, only_lower_half,
+                                    sort, groups)
 
     ggplot(distances, aes(x=row, y=col)) +
         geom_tile(aes(fill=value), color="white") + 

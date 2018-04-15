@@ -44,6 +44,7 @@ Install R requirements:
     * feather
     * reshape2
     * wordcloud
+    * knitr
 
 ## 1. Get raw data
 
