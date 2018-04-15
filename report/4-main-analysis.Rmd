@@ -109,22 +109,16 @@ track metadata file is generated using the `./export_track_metadata` script and 
 
 Apart from using the bag of words representation, we generated a dense vector representation for each song using [word embeddings](https://en.wikipedia.org/wiki/Word_embedding), especifically, the 50 dimensional vectors in [GloVe](https://nlp.stanford.edu/projects/glove/). The process is as follows:
 
-Every song is represented as a vector $C \in \mathbb{R}^{|W|}$, where $W$ are the words in our dataset. Every element $c_{word}$ in $C$ has a word associated with it and it represents the number of times that word is mentioned in the song. To convert this to a dense vector, we first normalized it:
+Every song is represented as a vector $\mathbf{c} \in \mathbb{R}^{|W|}$, where $W$ is the set of words in our dataset. Every element $\mathbf{c}_{i}$ in $\mathbf{c}$ has a word associated with it and it represents the number of times that word is mentioned in the song. To convert this to a dense vector, we first normalized it:
 
-$$C_{normalized} = \frac{C}{\sum_{i=1}^{i=w}{C_i}}$$
-
-
-Then, using the $w \in \mathbb{R}^{50}$ dense vectors in GloVe, we computed a single vector for every song as follows:
+$$\mathbf{c}_{normalized} = \frac{\mathbf{c}}{\sum_{i=1}^{i=w}{\mathbf{c}_i}}$$
 
 
-First, initialize a zero vector $V \in \mathbb{R}^{50}$
+Then, using the $w \in \mathbb{R}^{50}$ dense vectors in GloVe, we built a matrix where the ith row corresponds to the embedding for the ith word in $|W|$, then we compute the dense vector for every song as follows:
 
-For every non-zero value $c_{normalized, word}$ in $c_{normalized}$:
-    1. Lookup the corresponding embedding $w_{word}$
-    2. Compute $c_{normalized, word} \times w_{word}$
-    3. Add  $c_{normalized, word} \times w_{word}$ to $V$
+$$\mathbf{v}_{song} = \mathbf{c}_{normalized} \times M$$
 
-$V$ is the dense vector representation for the song.
+Which give us a 50 dimensional vector for every row.
 
 ### Generating clean datasets
 
