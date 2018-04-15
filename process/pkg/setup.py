@@ -18,7 +18,7 @@ LONG_DESCRIPTION = ''
 
 REQUIRED = ['fuzzywuzzy', 'python-Levenshtein', 'pyyaml', 'nltk',
             'numpy', 'pandas', 'feather-format', 'langdetect',
-            'tqdm']
+            'tqdm', 'scikit-learn']
 
 here = os.path.abspath(os.path.dirname(__file__))
 
