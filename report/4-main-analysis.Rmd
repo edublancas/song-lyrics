@@ -65,6 +65,8 @@ so we could use it for our analysis.
 We do this using the [langdetect](https://github.com/Mimino666/langdetect) library (this is done in the `./language_detection`) script. This script
 generates a `language.feather` file that maps songs with their language.
 
+To detect the language we take every word with non-zero count, generate a "sentence" by joining all words in a string, separating them by one space and pass the string to the  `detect()` in the `langdetect` library.
+
 ### Fixing artist name and ID
 
 We performed some cleaning in the artist name and ID. We found that for

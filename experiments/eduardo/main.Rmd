@@ -16,6 +16,7 @@ library(dplyr)
 library(tidyr)
 library(reshape2)
 library(ggplot2)
+library(knitr)
 source('experiments/eduardo/util.R')
 ```
 
@@ -91,27 +92,34 @@ Here we see that Samba, Reggaeton and Bachata are the genres that are different,
 suggests that our language imputation algorithm is having trouble labeling
 those songs.
 
+We took a look at Reggaeton music to find out more about this problem:
+
 ```{r}
 reggaeton <- df %>% filter(genre_ == 'Reggaeton')
-table(reggaeton$language_)
-
-
-x <- bow %>% filter(genre_ == 'Reggaeton', language_ == 'en')
-
-data.frame(x)
-
-x$title_
-x$artist_name_
-
-bow_columns_lyrics[x[1, bow_columns_lyrics] > 0]
+ggplot(reggaeton, aes(language_)) + geom_bar()
 ```
+
+Most of the songs are labeled as Spanish but a couple of them in English and even one in Italian.
+
+
+These are the Reggaeton songs in English:
 
 ```{r}
-reggaeton_en <- df %>% filter(genre_ == 'Reggaeton', language_ == 'en')
-
-reggaeton_en[c('title_', 'artist_name_')]
+reggaeton_en <- bow %>% filter(genre_ == 'Reggaeton', language_ == 'en')
+kable(reggaeton_en[, c('title_', 'artist_name_')])
 ```
 
+If we take a look at the lyrics of any of them, we will see that they mix
+a lot of English ann Spanish words, see for example, this verse from "Impacto" by Daddy Yankee:
+
+    ¡Hey!
+    Demuestra lo que hay, mama (¡hey!)
+    No pierdas el enfoque y...
+    ¡Sube! (hit me!)
+    ¡Sube! (hit me!)
+    ¡Sube! (hit me!, let's go!)
+
+Since the dataset only includes the top 5,000 words accross all songs, many Spanish word will not appear in the dataset but the English words will probably do. This will affect the language imputation for these songs since the non-zero counts will mostly be songs in English.
 
 ## Finding similar artists
 
