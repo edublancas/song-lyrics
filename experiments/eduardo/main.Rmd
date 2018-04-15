@@ -3,7 +3,10 @@ title: "R Notebook"
 output: html_notebook
 ---
 
-# Analyzing word correlation
+# Distance-based comparisons
+
+One of the things we are interested on is to find which observations are more similar/different to each other. Using the word embeddings representation of
+our data, we computed pairwise euclidean distance between observations at different levels to find similar elements.
 
 ```{r}
 library(feather)
@@ -15,29 +18,13 @@ source('experiments/eduardo/util.R')
 ```
 
 ```{r}
-# load data
-df <- read_feather('data/transform/bag_of_words_top_1000.feather')
+# load embeddings data data and
 df <- read_feather('data/transform/embeddings.feather')
-word_distance <- embeddings_distances('data/clean/embeddings_subset.json')
 
 # get columns corresponding to the metadata words
 columns <- colnames(df)
 columns_metadata <- columns[endsWith(columns, '_')]
 columns_lyrics <- columns[!endsWith(columns, '_')]
-```
-
-# Comparing songs form the same artist
-
-```{r}
-oasis <- df %>% filter(artist_name_ == 'Oasis') %>% sample_n(30)
-oasis <- oasis[c('title_', columns_lyrics)]
-plot_matrix(oasis)
-```
-
-```{r}
-deep purple <- df %>% filter(artist_name_ == 'Deep Purple') %>% sample_n(30)
-deep purple <- deep purple[c('title_', columns_lyrics)]
-plot_matrix(deep purple)
 ```
 
 # Finding similar years
@@ -56,27 +43,6 @@ by_year_es <- df %>% filter(language_ == 'es') %>% group_by(release_year_)
 plot_matrix(by_year_es)
 ```
 
-
-## Finding similar artists
-
-```{r}
-reggaeton <- df %>% filter(genre_ == 'Reggaeton')
-
-by_artist <- reggaeton %>% group_by(artist_name_) %>%
-                do(mean_words(., columns_lyrics))
-
-plot_matrix(by_artist)
-```
-
-```{r}
-sub <- df %>% filter(genre_ == 'Rock') %>% sample_n(50)
-
-unique(sub$artist_name_)
-
-by_artist <- sub %>% group_by(artist_name_) %>% do(mean_words(., columns_lyrics))
-
-plot_matrix(by_artist)
-```
 
 ## Finding similar genres
 
@@ -113,6 +79,44 @@ reggaeton_en <- df %>% filter(genre_ == 'Reggaeton', language_ == 'en')
 
 reggaeton_en[c('title_', 'artist_name_')]
 ```
+
+
+## Finding similar artists
+
+```{r}
+reggaeton <- df %>% filter(genre_ == 'Reggaeton')
+
+by_artist <- reggaeton %>% group_by(artist_name_) %>%
+                do(mean_words(., columns_lyrics))
+
+plot_matrix(by_artist)
+```
+
+```{r}
+sub <- df %>% filter(genre_ == 'Rock') %>% sample_n(50)
+
+unique(sub$artist_name_)
+
+by_artist <- sub %>% group_by(artist_name_) %>% do(mean_words(., columns_lyrics))
+
+plot_matrix(by_artist)
+```
+
+
+# Comparing songs form the same artist
+
+```{r}
+oasis <- df %>% filter(artist_name_ == 'Oasis') %>% sample_n(30)
+oasis <- oasis[c('title_', columns_lyrics)]
+plot_matrix(oasis)
+```
+
+```{r}
+deep purple <- df %>% filter(artist_name_ == 'Deep Purple') %>% sample_n(30)
+deep purple <- deep purple[c('title_', columns_lyrics)]
+plot_matrix(deep purple)
+```
+
 
 ## Find similar songs (bag of words and embeddings)
 
