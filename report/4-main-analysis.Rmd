@@ -127,8 +127,7 @@ Once we cleaned the data we generated 5 final datasets:
 1. `bag_of_words.feather` - Contains all the metadata and the counts for all the words (stopwords removed)
 2. `bag_of_words.feather` - Contains the counts top 1,000 words with the stopwords removed
 3. `embeddings.feather` - Contains the metadata and the word embeddings representation (50 dimensions)
-4. `profiles.json` - Summary for artists with at least 10 songs, this is the dataset used in the interactive component
-5. `artists.json` - List of artists with at least 10 songs, this is also used in the interactive component
+4. `profiles.csv` - Summary for artists with at least 10 songs, this is the dataset used in the interactive component
 
 Datasets 2 and 3 are used when computing distance-based metrics to speedup computations, we assume that most of the interesting information is included in the top words. The word embeddings representation was also included since
 we found it has better results for some comparisons, especifically, to compare
