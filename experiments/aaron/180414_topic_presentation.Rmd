@@ -15,7 +15,7 @@ topic_year   <- read_feather('../../data/transform/year_topic_weights.feather')
 
 # Topics in Song Lyrics
 
-One fundemental way to compare music over the past century and across the world is to look to the content of the music. Topic modeling is a powerful technique which allows for extracting the most common topics from a set of text documents (in this case song lyrics). It relys on an unstructured algorithm called Latent Dirochlet Allocation (LDA)  which find groups of words which tend to appear in the same song. Each word is asigned a weight according to its relation to each topic. It is up to human discression to name the group of words.
+One fundemental way to compare music over the past century and across the world is to look to the content of the music. Topic modeling is a powerful technique which allows for extracting the most common topics from a set of text documents (in this case song lyrics). It relys on an unstructured algorithm called Latent Dirochlet Allocation (LDA)  which find groups of words which tend to appear in the same song. Each word is asigned a weight according to its relation to each topic. It is up to human discression to name the groups of words.
 
 This was used to identify topics within our data. After finding 25 topics, by considering the most heaviliy weighted words, 3 topics with semantic meaning were identified: Love, Religion, and Death.
 
@@ -34,7 +34,7 @@ Now we can begin to answer some questions with the topic data.
 
 Here, the songs scores in each year were averaged. As we have seen previously, the number of songs each year in the dataset has generally grown over time. Thus it makes sense that we see a lot of noise in earlier years. Once sufficient data is available (around 1955), we can start to make observations.
 * Love Songs have become less popular since the 1950's
-* Songs above religion and death have become more popular since the 1950's
+* Songs about religion and death have become more popular since the 1950's
 * In general, topics have become more consistant each year.
 
 ```{r}
@@ -68,16 +68,12 @@ GGally::ggparcoord(df_parallel_coord,
   ggtitle('Topics Over Time')
 ```
 
-* Results show where a lot of music is made (usa, uk)
-* Results show that relgion  defines an artist far more than death, or love - more artists have a religion score over 80 than any other topic
-* Results dont indicate a particular region which has more of one genre
 
 
 ## Topics Over Geography:
 
-To consider topics across geography, first explore the location of artists in the dataset: Artists are scattered around the globe, with major "hubs" being the USA and Europe (particularly the UK).
+To consider topics across geography, we first explore the location of artists in the dataset: Artists are scattered around the globe, with major "hubs" being the USA and Europe (particularly the UK).
 
-Clearly most music in the dataset is made in the United States and in Europe.
 ```{r}
 topic_loc_tidy <- gather(topic_artist, 'topic', 'weight', c(3,6,7))
 topic_loc_tidy$topic <- as.factor(topic_loc_tidy$topic)
@@ -88,14 +84,12 @@ ggplot(topic_loc_tidy) +
   ggtitle('Artist Location')
 ```
 
-In order to investigate topics around the world, each artist's topic scores are averaged. Only artists maintaining an average score of over 0.75 for a particular topic are considered to consistantly discuss that tiouc. By using this cuttoff, have defined we define ~8% of artists to speak heavily about death, ~17% of artists to conss speak heavily about love, and ~9% of artists to speak heavily about religion. 
+In order to investigate topics around the world, each artist's topic scores are averaged. Only artists maintaining an average score of over 0.75 for a particular topic are considered to consistantly discuss that topic By using this cuttoff, have we define ~8% of artists to speak heavily about death, ~17% of artists to conss speak heavily about love, and ~9% of artists to speak heavily about religion. 
 
 Primary observations:
-* Thus, we can already learned that love is the most common topic to define an artist's content.
+* Love is the most common topic to define an artist's content.
 * Europe sees far more artists discussing death, particularly Germany
-* The United States is dominated by artists discussing love, with few discussing death. 
-
-
+* The United States is dominated by artists discussing love and religion, with few discussing death. 
 
 ```{r}
 data_to_plot <- select(topic_loc_tidy, longitude, latitude, topic, weight) %>%
@@ -125,4 +119,9 @@ ggplot(data_to_plot) +
   ggtitle('"Topic Heavy" Arists in Europe')
 
 ```
+
+## Hypothoses and Next Steps
+* We hypothosize that love songs have become relatively less popular over the past decades because more topics are now desirable to the audience to be discussed in music.
+* Topic modeling in individual years (or decades). Considering music from over the course of almost a century only allows for easily identifying topics which have always been discussed. By modeling topics from specific timeframes, we may be able to understand which unique topics only existed during specific points in history.
+* The data suggests that the are a lot of artists discussing death in Europe and particuarly Germany. We could perform into topic modeling on other documents coming from these countries (like books perhaps) to see if this trend is limited to music, or the country's entire culture.
 
