@@ -166,7 +166,7 @@ by_artist <- pop %>% filter(artist_name_ %in% pop_top) %>%
 plot_matrix(by_artist, 'Top 30 Pop artists (English)', groups=2)
 ```
 
-Here we see two interesting things: Céline Dion looks brigther, meaning that her lyrics are different from the rest of the artists. If we look at the upper corner, we see a group of artists with low distances: Will Young (England), Wet Wet Wet (Scotland) and Westlife (Ireland).
+Here we see that Céline Dion looks brigther, meaning that her lyrics are different from the rest of the artists.
 
 # Comparing songs form the same artist
 
@@ -201,8 +201,7 @@ set.seed(10)
 kooks <- df %>% filter(artist_name_ == 'The Kooks') %>% sample_n(30)
 kooks <- kooks[c('title_', columns_lyrics)]
 
-plot_matrix(kooks, 'The Kooks (30 sample songs)',
-            groups=2, only_lower_half=TRUE)
+plot_matrix(kooks, 'The Kooks (30 sample songs)', groups=2)
 ```
 
 We see some black squares outside the diagonal of the matrix. those correspond to the following pairs:
