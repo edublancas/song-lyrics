@@ -7,10 +7,21 @@ mean_words <- function(df, cols){
 
 
 # generate a matrix plot
-plot_matrix <- function(data, grouping_column=1, only_lower_half=FALSE){
+plot_matrix <- function(data, grouping_column=1, only_lower_half=FALSE,
+                        sort=FALSE, groups=3){
     data <- data.frame(data)
     data <- data[!is.na(data[[grouping_column]]), ]
     rownames(data) <- data[[grouping_column]]
+
+    if(sort){
+        cols <- 1:ncol(data)
+        cols <- cols[cols != grouping_column]
+
+        group <- kmeans(data[, cols], centers=groups, nstart=5)$cluster
+        group_sorted <- names(sort(group))
+
+        data <- data[group_sorted, ]
+    }
 
     distances <- as.matrix(dist(data))
     distances <- melt(as.matrix(distances), varnames = c("row", "col"))

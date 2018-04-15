@@ -63,7 +63,7 @@ top_genres
 by_genre <- df %>% filter(genre_ %in% top_genres) %>% group_by(genre_) %>%
                 do(mean_words(., columns_lyrics))
 
-plot_matrix(by_genre)
+plot_matrix(by_genre, sort=TRUE)
 ```
 
 We see that some rows are very different to the rest: Samba, Reggaeton, MPB ([Música popular brasileira](https://en.wikipedia.org/wiki/M%C3%BAsica_popular_brasileira)), Latin, Flamenco and Bachata. Most songs from these songs are in either Spanish or Portuguese, so it makes sense that they make use of different words.
