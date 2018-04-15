@@ -38,6 +38,7 @@ pip install -r requirements.txt
 
 Install R requirements:
 
+    * tidyverse
     * rjson
     * dplyr
     * ggplot2
