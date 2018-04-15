@@ -19,13 +19,13 @@ library(tidyr)
 library(reshape2)
 library(ggplot2)
 library(knitr)
-source('util.R')
+source('../lib/eduardo_util.R')
 ```
 
 ```{r}
 # load embeddings data data and
-df <- read_feather('data/transform/embeddings.feather')
-bow <- read_feather('data/transform/bag_of_words.feather')
+df <- read_feather('../data/transform/embeddings.feather')
+bow <- read_feather('../data/transform/bag_of_words.feather')
 
 # get columns corresponding to the metadata words
 columns <- colnames(df)
