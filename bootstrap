@@ -100,6 +100,9 @@ cat data/raw/msd_beatunes_map.cls | awk -F  '\t' '{ print $1 "\t" $2}' > data/cl
     data/transform/embeddings.feather
 
 
+# assign topics to artists
+./topic_modeling
+
 # generate data for web app
 mkdir data/webapp
 
