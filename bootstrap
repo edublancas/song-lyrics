@@ -105,5 +105,4 @@ mkdir data/webapp
 
 ./process/transform/make_webapp_data data/transform/bag_of_words.feather \
     data/transform/embeddings.feather \
-    data/webapp/profiles.json \
-    data/webapp/artists.json
+    data/webapp/profiles.csv \

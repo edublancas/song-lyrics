@@ -3,11 +3,11 @@
 Generate data for interactive component, by default it only outputs
 artists with at least 10 songs
 """
-import json
 import argparse
 import logging
 from scipy.spatial.distance import pdist, squareform
 import pandas as pd
+import numpy as np
 
 
 def sum_words(df, words):
@@ -20,7 +20,9 @@ def sum_words(df, words):
 def top_k_words(artist, k=10):
     """Get top k words for an artist as {word: count} mapping
     """
-    return artist.sort_values(ascending=False)[:k].to_dict()
+    top_k = artist.sort_values(ascending=False)[:k].to_dict()
+
+    return [{'word': word, 'count': count} for word, count in top_k.items()]
 
 
 def top_genres(artist, k=3):
@@ -46,6 +48,8 @@ def group_info(artist_name, mappings, new_keys):
 
     for mapping, key in zip(mappings, new_keys):
         d[key] = mapping[artist_name]
+
+    d['artist'] = artist_name
 
     return d
 
@@ -81,9 +85,7 @@ def main():
     parser.add_argument('path_to_embeddings', type=str,
                         help='Path to embeddings data')
     parser.add_argument('path_to_profiles', type=str,
-                        help='Path to output JSON file with artists profiles')
-    parser.add_argument('path_to_artists', type=str,
-                        help='Path to output JSON file with artist names')
+                        help='Path to output CSV file with artists profiles')
     parser.add_argument('--min_songs', default=10, type=int,
                         help='Only output artists with this minimum number '
                              'of songs, defaults to three')
@@ -92,7 +94,6 @@ def main():
     path_to_bag_of_words = args.path_to_bag_of_words
     path_to_embeddings = args.path_to_embeddings
     path_to_profiles = args.path_to_profiles
-    path_to_artists = args.path_to_artists
     min_songs = args.min_songs
 
     # load bag of words and embeddings
@@ -142,6 +143,15 @@ def main():
              .apply(songs_per_year)
              .to_dict())
 
+    def _safe(fn, l):
+        return np.nan if not l else fn(l)
+
+    years_start = {artist: _safe(min, years.keys()) for artist, years
+                   in years.items()}
+
+    years_end = {artist: _safe(max, years.keys()) for artist, years
+                 in years.items()}
+
     # find most similar artists
     logger.info('Finding similar artists...')
     distances = artist_distance(embeddings, dims=dims)
@@ -149,23 +159,21 @@ def main():
                for artist in artists}
 
     # build dataset
-    mappings = [top_5, n_songs, genres, years, similar]
-    keys = ['top_words', 'n_songs', 'top_genres', 'years', 'similar_artists']
-    data = {}
+    mappings = [top_5, n_songs, genres, years, similar, years_start, years_end]
+    keys = ['words', 'songs', 'genres', 'years', 'similar', 'year_st',
+            'year_end']
+
+    data = []
 
     logger.info('Generating output file...')
 
     for artist in artists:
-        data[artist] = group_info(artist, mappings, keys)
+        data.append(group_info(artist, mappings, keys))
 
-    with open(path_to_profiles, 'w') as f:
-        json.dump(data, f)
-
-    with open(path_to_artists, 'w') as f:
-        json.dump(artists, f)
+    df = pd.DataFrame(data)
+    df.to_csv(path_to_profiles, index=False)
 
     logger.info('Saved profiles in %s', path_to_profiles)
-    logger.info('Saved artists list in %s', path_to_artists)
 
 
 if __name__ == "__main__":
