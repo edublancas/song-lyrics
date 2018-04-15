@@ -22,15 +22,21 @@ source('experiments/eduardo/util.R')
 ```{r}
 # load embeddings data data and
 df <- read_feather('data/transform/embeddings.feather')
+bow <- read_feather('data/transform/bag_of_words.feather')
 
 # get columns corresponding to the metadata words
 columns <- colnames(df)
 columns_metadata <- columns[endsWith(columns, '_')]
 columns_lyrics <- columns[!endsWith(columns, '_')]
+
+bow_columns <- colnames(bow)
+bow_columns_metadata <- bow_columns[endsWith(columns, '_')]
+bow_columns_lyrics <- bow_columns[!endsWith(columns, '_')]
 ```
 
-# Finding similar years
+# Comparing years
 
+We first take a look at the distance between years:
 
 ```{r}
 by_year_en <- df %>% group_by(release_year_) %>%
@@ -38,19 +44,30 @@ by_year_en <- df %>% group_by(release_year_) %>%
 plot_matrix(by_year_en)
 ```
 
-## Finding similar genres
+We see that for any given year, the more we move (either to following or previous years) the distance increases. We can see that the greatest distance is between the latest data (2000s) and the earliest data (1920s).
 
+## Comparing genres
+
+We have `r length(unique(df$genre_))` different genres in the data, so in order to visualize better we filtered by the most popular genres defined as the ones with more than 80 songs.
 
 ```{r}
 # get only genres that have more than 80 songs
 genre_ <- table(df$genre_)
 top_genres <- names(genre_[genre_ > 80])
 
+top_genres
+```
+
+```{r}
 by_genre <- df %>% filter(genre_ %in% top_genres) %>% group_by(genre_) %>%
                 do(mean_words(., columns_lyrics))
 
 plot_matrix(by_genre)
 ```
+
+We see that some rows are very different to the rest: Samba, Reggaeton, MPB ([Música popular brasileira](https://en.wikipedia.org/wiki/M%C3%BAsica_popular_brasileira)), Latin, Flamenco and Bachata. Most songs from these songs are in either Spanish or Portuguese, so it makes sense that they make use of different words.
+
+We not filter by songs only in Spanish.
 
 ```{r}
 by_genre_es <- df %>% filter(genre_ %in% top_genres, language_ == 'es') %>%
@@ -59,6 +76,10 @@ by_genre_es <- df %>% filter(genre_ %in% top_genres, language_ == 'es') %>%
 plot_matrix(by_genre_es)
 ```
 
+This plot is more informative, we see that Trance and House songs in Spanish are the genres that are most different to the rest.
+
+We now take a look at music in English.
+
 ```{r}
 by_genre_en <- df %>% filter(genre_ %in% top_genres, language_ == 'en') %>%
                     group_by(genre_) %>% do(mean_words(., columns_lyrics))
@@ -66,10 +87,26 @@ by_genre_en <- df %>% filter(genre_ %in% top_genres, language_ == 'en') %>%
 plot_matrix(by_genre_en)
 ```
 
+Here we see that Samba, Reggaeton and Bachata are the genres that are different, songs from those three genres are usually not in English, which
+suggests that our language imputation algorithm is having trouble labeling
+those songs.
+
 ```{r}
 reggaeton <- df %>% filter(genre_ == 'Reggaeton')
 table(reggaeton$language_)
 
+
+x <- bow %>% filter(genre_ == 'Reggaeton', language_ == 'en')
+
+data.frame(x)
+
+x$title_
+x$artist_name_
+
+bow_columns_lyrics[x[1, bow_columns_lyrics] > 0]
+```
+
+```{r}
 reggaeton_en <- df %>% filter(genre_ == 'Reggaeton', language_ == 'en')
 
 reggaeton_en[c('title_', 'artist_name_')]

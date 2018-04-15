@@ -7,13 +7,17 @@ mean_words <- function(df, cols){
 
 
 # generate a matrix plot
-plot_matrix <- function(data, grouping_column=1){
+plot_matrix <- function(data, grouping_column=1, only_lower_half=FALSE){
     data <- data.frame(data)
     data <- data[!is.na(data[[grouping_column]]), ]
     rownames(data) <- data[[grouping_column]]
 
     distances <- as.matrix(dist(data))
     distances <- melt(as.matrix(distances), varnames = c("row", "col"))
+
+    if(only_lower_half){
+        distances <- distances[distances$row > distances$col, ]
+    }
 
     ggplot(distances, aes(x=row, y=col)) +
         geom_tile(aes(fill=value), color="white") + 
