@@ -43,9 +43,8 @@ ggplot(word_count, aes(mxm_dup.sum)) +
   ylab('Song Count')
 ```
 
-The dataset grows exponentially in size until ~2005, before it slows in growth rate and declines.
+The number of songs/year grows exponentially in size until ~2005, before it slows in growth rate and then declines.
 
-Note: we need a good explanation of how our data was collected.
 ```{r}
 # songs/year distrubution
 ggplot(df_year_topic,aes(x=year, y=song_count))+
