@@ -198,5 +198,20 @@ kable(pairs)
 We see that rows 1, 3 and 4 correspond to the same song but a different version so it makes sense that they have the same lyrics. The second row does not match and the songs are actually different, the counts are as follows:
 
 ```{r}
-top_k_words()
+titles <- c('Always Free',
+            'Always Where I Need To Be (NRK P3 Acoustic Session)')
+songs <- bow %>% filter(artist_name_ == 'The Kooks', title_ %in% titles)
+
+song_1 <- top_k_words(songs, bow_columns_lyrics, row=1, k=10)
+song_2 <- top_k_words(songs, bow_columns_lyrics, row=2, k=10)
+
+df <- t(data.frame(song_1, song_2))
+rownames(df) <- titles
+df <- melt(df)
+colnames(df) <- c('Title', 'Word', 'Count')
+
+ggplot(df, aes(x=Word, y=Count, fill=Title)) +
+    geom_bar(stat="identity", position=position_dodge())
 ```
+
+We see that both songs have the exact same counts for the top 10 words (they have actually the same counts for all words). This suggests that some of the counts may be wrong. When this dataset was created, the authors performed entity resolution between the 1 million song dataset and the Musixmatch dataset so it may be the case that some matches are wrong. Since for this particular case the artist is the same and the title is similar, they mismatched the lyrics.
