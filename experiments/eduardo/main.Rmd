@@ -8,6 +8,8 @@ output: html_notebook
 One of the things we are interested on is to find which observations are more similar/different to each other. Using the word embeddings representation of
 our data, we computed pairwise euclidean distance between observations at different levels to find similar elements.
 
+Since we have more than 200,000 songs it is hard to visualize them all at once, so we need to group them in some way. For this part we decided to group based on the following columns: year, genre and artist name. When grouping songs, we took the mean of the group to represent it.
+
 ```{r}
 library(feather)
 library(dplyr)
@@ -29,6 +31,12 @@ columns_lyrics <- columns[!endsWith(columns, '_')]
 
 # Finding similar years
 
+
+```{r}
+by_year_en <- df %>% group_by(release_year_) %>%
+                 do(mean_words(., columns_lyrics))
+plot_matrix(by_year_en)
+```
 
 ```{r}
 by_year_en <- df %>% filter(language_ == 'en') %>%
