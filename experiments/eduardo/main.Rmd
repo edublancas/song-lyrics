@@ -123,37 +123,47 @@ Since the dataset only includes the top 5,000 words accross all songs, many Span
 
 ## Finding similar artists
 
-```{r}
-reggaeton <- df %>% filter(genre_ == 'Reggaeton')
+We noe turn our attention to finding similar artists, to subset the number of
+comparisons, we first filter by genre, language (English) and then we take the top 30 artists (the ones with the most songs)
 
-by_artist <- reggaeton %>% group_by(artist_name_) %>%
+```{r}
+rock_en <- df %>% filter(genre_ == 'Rock', language_ == 'en')
+rock_en_top <- names(sort(table(rock_en$artist_name_), decreasing=TRUE)[1:30])
+
+by_artist <- rock_en %>% filter(artist_name_ %in% rock_en_top) %>%
+                group_by(artist_name_) %>%
                 do(mean_words(., columns_lyrics))
 
 plot_matrix(by_artist)
 ```
 
 ```{r}
-sub <- df %>% filter(genre_ == 'Rock') %>% sample_n(50)
+hh <- df %>% filter(genre_ == 'Hip-Hop', language_ == 'en')
+hh_top <- names(sort(table(hh$artist_name_), decreasing=TRUE)[1:30])
 
-unique(sub$artist_name_)
-
-by_artist <- sub %>% group_by(artist_name_) %>% do(mean_words(., columns_lyrics))
+by_artist <- hh %>% filter(artist_name_ %in% hh_top) %>%
+                group_by(artist_name_) %>%
+                do(mean_words(., columns_lyrics))
 
 plot_matrix(by_artist)
 ```
 
-
 # Comparing songs form the same artist
 
+Finally, we compare songs from the some (highly recommended) artists:
+
 ```{r}
+set.seed(4)
 oasis <- df %>% filter(artist_name_ == 'Oasis') %>% sample_n(30)
 oasis <- oasis[c('title_', columns_lyrics)]
+oasis$title_
+
 plot_matrix(oasis)
 ```
 
 
 ```{r}
-deep purple <- df %>% filter(artist_name_ == 'Deep Purple') %>% sample_n(30)
-deep purple <- deep purple[c('title_', columns_lyrics)]
-plot_matrix(deep purple)
+artist <- df %>% filter(artist_name_ == 'The Kooks') %>% sample_n(30)
+artist <- artist[c('title_', columns_lyrics)]
+plot_matrix(artist)
 ```
