@@ -1,12 +1,12 @@
-# Main Analysis
+# 4. Main Analysis
 
-## Data cleaning
+## 4.1. Data cleaning
 
 On this section, we explain the process to go from the raw data to the clean
 datasets we used for the analysis. All this process can be performed using the
 `./bootstrap` script.
 
-### Converting the data to a tabular format
+### 4.1.1. Converting the data to a tabular format
 
 The first step to work with the datasets was to put them in a better format
 for cleaning.
@@ -54,7 +54,7 @@ words in total, we can limit the output to the top k words, normalize the
 counts (convert them to proportions) and remove stopwords. We used these
 options to generate several datasets for the analysis.
 
-### Language detection
+### 4.1.2. Language detection
 
 During the first iterations of the project we noticed that it is important
 to know the language of the song. For example, when analyzing which artists
@@ -67,7 +67,7 @@ generates a `language.feather` file that maps songs with their language.
 
 To detect the language we take every word with non-zero count, generate a "sentence" by joining all words in a string, separating them by one space and pass the string to the  `detect()` in the `langdetect` library.
 
-### Fixing artist name and ID
+### 4.1.3. Fixing artist name and ID
 
 We performed some cleaning in the artist name and ID. We found that for
 the same artist ID, some songs had more than one artist name, this happened
@@ -80,7 +80,7 @@ more than one artist ID, this happened in a small number of cases but we cleaned
 the first artist ID in the group. This problem may be due to artists changing
 record labels, hence, not being recognized as the same artist by the Musixmatch portal.
 
-### Extracting track metadata
+### 4.1.4. Extracting track metadata
 
 There there are some other datasets that contain track metadata. It is
 important to mention that the Musixmatch dataset (the one with the lyrics data) is a subset of the [Million Song Dataset](https://labrosa.ee.columbia.edu/millionsong/) so we took the track IDs for such subset and only exported the metadata for those tracks.
@@ -107,7 +107,7 @@ track metadata file is generated using the `./export_track_metadata` script and 
 * location - Location string such as "New York" (58.29% NAs)
 * language - Song language (0.04% NAs)
 
-### Word embeddings
+### 4.1.5. Word embeddings
 
 Apart from using the bag of words representation, we generated a dense vector representation for each song using [word embeddings](https://en.wikipedia.org/wiki/Word_embedding), especifically, the 50 dimensional vectors in [GloVe](https://nlp.stanford.edu/projects/glove/). The process is as follows:
 
@@ -122,7 +122,7 @@ $$\mathbf{v}_{song} = \mathbf{c}_{normalized} \times M$$
 
 Which give us a 50 dimensional vector for every row.
 
-### Generating clean datasets
+### 4.1.6. Generating clean datasets
 
 Once we cleaned the data we generated 5 final datasets:
 
@@ -135,14 +135,11 @@ Datasets 2 and 3 are used when computing distance-based metrics to speedup compu
 we found it has better results for some comparisons, especifically, to compare
 similarity between artists.
 
-## Word distribution
+## 4.2. Word distribution
 
-## What is the sentiment of the songs?
+## 4.3. Sentiment analysis
 
-## Which are the topics? How do they change?
-
-<<<<<<< HEAD
-## Distance-based comparisons
+## 4.4. Distance-based comparisons
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo=TRUE,
@@ -185,7 +182,7 @@ bow_columns_metadata <- bow_columns[endsWith(columns, '_')]
 bow_columns_lyrics <- bow_columns[!endsWith(columns, '_')]
 ```
 
-### Comparing years
+### 4.4.1. Comparing years
 
 We first take a look at the distance between years:
 
@@ -198,7 +195,7 @@ plot_matrix(by_year, "Release year", sort=FALSE)
 
 We see that for any given year, the more we move (either to following or previous years) the distance increases. We can see that the greatest distance is between the latest data (2000s) and the earliest data (1920s).
 
-### Comparing genres
+### 4.4.2. Comparing genres
 
 We have `r length(unique(df$genre_))` different genres in the data, so in order to visualize better we filtered by the most popular genres defined as the ones with more than 80 songs.
 
@@ -276,7 +273,7 @@ a lot of English ann Spanish words, see for example, this verse from "Impacto" b
 
 Since the dataset only includes the top 5,000 words accross all songs, many Spanish word will not appear in the dataset but the English words will probably do. This will affect the language imputation for these songs since the non-zero counts will mostly be songs in English.
 
-### Finding similar artists
+### 4.4.3. Finding similar artists
 
 We now turn our attention to finding similar artists, to subset the number of
 comparisons, we first filter by genre, language (English) and then we take the top 30 artists (the ones with the most songs)
@@ -307,7 +304,7 @@ plot_matrix(by_artist, 'Top 30 Pop artists (English)', groups=2)
 
 Here we see that Céline Dion looks brigther, meaning that her lyrics are different from the rest of the artists.
 
-### Comparing songs form the same artist
+### 4.4.4. Comparing songs form the same artist
 
 Finally, we compare songs from the two artists. First we take a look at 30 songs from the band Foo Fighters.
 
@@ -373,7 +370,9 @@ ggplot(df, aes(x=Word, y=Count, fill=Title)) +
 ```
 
 We see that both songs have the exact same counts for the top 10 words (they have actually the same counts for all words). This suggests that some of the counts may be wrong. When this dataset was created, the authors performed entity resolution between the 1 million song dataset and the Musixmatch dataset so it may be the case that some matches are wrong. Since for this particular case the artist is the same and the title is similar, they mismatched the lyrics.
-=======
+
+## 4.5. Topic modeling
+
 ```{r}
 library(feather)
 library(tidyverse)
@@ -399,7 +398,7 @@ Now we can begin to answer some fundemental questions with the topic data:
 * Do topics change around the world?
 * Have topics changed over time?
 
-### How have topics changed over time?
+### 4.5.1. How have topics changed over time?
 
 Here each year's songs topic weights were averaged. As we have seen previously, the number of songs each year in the dataset has generally grown over time. Thus it makes sense that we see a lot of noise in earlier years. Once sufficient data is available (around 1955), we can start to make observations.
 
@@ -437,9 +436,7 @@ GGally::ggparcoord(df_parallel_coord,
   ggtitle('Topics Over Time (when sufficient data available)')
 ```
 
-
-
-### How do topics differ across the world?
+### 4.5.2 How do topics differ across the world?
 
 To consider topics across geography, we first explore the location of artists in the dataset: Artists are scattered around the globe, with major "hubs" being the USA and Europe (particularly the UK).
 
@@ -495,11 +492,8 @@ ggplot(data_to_plot) +
 
 ```
 
-### Topic Related Hypothoses and Next Steps
+### 4.5.3 Topic Related Hypotheses and Next Steps
 
 * We hypothosize that love songs have become relatively less popular over the past decades because more topics are now desirable to the audience to be discussed in music.
 * Topic modeling in individual years (or decades). Considering music from over the course of almost a century only allows for easily identifying topics which have always been discussed. By modeling topics from specific timeframes, we may be able to understand which unique topics only existed during specific points in history. Similarly, topic modeling could be performed in specific locations. Maybe there are region specific topics which were not weighted heavily enough to be identified when considering data from around the world.
 * The data suggests that the are a lot of artists discussing death in Europe and particuarly Germany. We could perform  topic modeling on other documents coming from these countries (like books perhaps) to see if this trend is limited to music, or the country's entire culture.
-
-## Which bands are similar to each other?
->>>>>>> aaron-report-edit
