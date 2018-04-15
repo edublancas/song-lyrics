@@ -1,4 +1,4 @@
-# Distance-based comparisons
+## Distance-based comparisons
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo=TRUE,
@@ -41,7 +41,7 @@ bow_columns_metadata <- bow_columns[endsWith(columns, '_')]
 bow_columns_lyrics <- bow_columns[!endsWith(columns, '_')]
 ```
 
-# Comparing years
+### Comparing years
 
 We first take a look at the distance between years:
 
@@ -54,7 +54,7 @@ plot_matrix(by_year, "Release year", sort=FALSE)
 
 We see that for any given year, the more we move (either to following or previous years) the distance increases. We can see that the greatest distance is between the latest data (2000s) and the earliest data (1920s).
 
-## Comparing genres
+### Comparing genres
 
 We have `r length(unique(df$genre_))` different genres in the data, so in order to visualize better we filtered by the most popular genres defined as the ones with more than 80 songs.
 
@@ -132,7 +132,7 @@ a lot of English ann Spanish words, see for example, this verse from "Impacto" b
 
 Since the dataset only includes the top 5,000 words accross all songs, many Spanish word will not appear in the dataset but the English words will probably do. This will affect the language imputation for these songs since the non-zero counts will mostly be songs in English.
 
-## Finding similar artists
+### Finding similar artists
 
 We now turn our attention to finding similar artists, to subset the number of
 comparisons, we first filter by genre, language (English) and then we take the top 30 artists (the ones with the most songs)
@@ -163,7 +163,7 @@ plot_matrix(by_artist, 'Top 30 Pop artists (English)', groups=2)
 
 Here we see that Céline Dion looks brigther, meaning that her lyrics are different from the rest of the artists.
 
-# Comparing songs form the same artist
+### Comparing songs form the same artist
 
 Finally, we compare songs from the two artists. First we take a look at 30 songs from the band Foo Fighters.
 
