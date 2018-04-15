@@ -141,4 +141,234 @@ similarity between artists.
 
 ## Which are the topics? How do they change?
 
-## Which bands are similar to each other?
+## Distance-based comparisons
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo=TRUE,
+                      warning=FALSE,
+                      message=FALSE,
+                      fig.width=9,
+                      fig.height=9)
+```
+
+
+One of the things we are interested on is to find which observations are more similar/different to each other. Using the word embeddings representation of
+our data, we computed pairwise euclidean distance between observations at different levels to find similar elements.
+
+Since we have more than 200,000 songs it is hard to visualize them all at once, so we need to group them in some way. For this part we decided to group based on the following columns: year, genre and artist name. When grouping songs, we took the mean of the group to represent it.
+
+We make use of the `plot_matrix()` function which can be found in the `util.R` file. The function just computes the distance between pairs and plots them, there is also a `sort` parameter that clusters the observations and them orders them depending on the cluster they got assigned to, this helps to visualize better.
+
+```{r}
+library(feather)
+library(dplyr)
+library(tidyr)
+library(reshape2)
+library(ggplot2)
+library(knitr)
+source('../lib/eduardo_util.R')
+```
+
+```{r}
+# load embeddings data data and
+df <- read_feather('../data/transform/embeddings.feather')
+bow <- read_feather('../data/transform/bag_of_words.feather')
+
+# get columns corresponding to the metadata words
+columns <- colnames(df)
+columns_metadata <- columns[endsWith(columns, '_')]
+columns_lyrics <- columns[!endsWith(columns, '_')]
+
+bow_columns <- colnames(bow)
+bow_columns_metadata <- bow_columns[endsWith(columns, '_')]
+bow_columns_lyrics <- bow_columns[!endsWith(columns, '_')]
+```
+
+### Comparing years
+
+We first take a look at the distance between years:
+
+```{r}
+by_year <- df %>% group_by(release_year_) %>%
+                do(mean_words(., columns_lyrics))
+
+plot_matrix(by_year, "Release year", sort=FALSE)
+```
+
+We see that for any given year, the more we move (either to following or previous years) the distance increases. We can see that the greatest distance is between the latest data (2000s) and the earliest data (1920s).
+
+### Comparing genres
+
+We have `r length(unique(df$genre_))` different genres in the data, so in order to visualize better we filtered by the most popular genres defined as the ones with more than 80 songs.
+
+```{r}
+# get only genres that have more than 80 songs
+genre_ <- table(df$genre_)
+top_genres <- names(genre_[genre_ > 80])
+
+top_genres
+```
+
+```{r}
+by_genre <- df %>% filter(genre_ %in% top_genres) %>% group_by(genre_) %>%
+                do(mean_words(., columns_lyrics))
+
+plot_matrix(by_genre, 'Song genre')
+```
+
+We see that some rows are very different to the rest: Samba, Reggaeton, MPB ([Música popular brasileira](https://en.wikipedia.org/wiki/M%C3%BAsica_popular_brasileira)), Latin, Flamenco and Bachata. Most songs from these songs are in either Spanish or Portuguese, so it makes sense that they make use of different words.
+
+We not filter by songs only in Spanish.
+
+```{r}
+by_genre_es <- df %>% filter(genre_ %in% top_genres, language_ == 'es') %>%
+                    group_by(genre_) %>% do(mean_words(., columns_lyrics))
+
+plot_matrix(by_genre_es, 'Song genre (only songs in Spanish)', groups=2)
+```
+
+This plot is more informative, we see that Trance, House, Drum & Bass, Children's Music and World songs in Spanish are the genres that are most different to the rest.
+
+We now take a look at music in English.
+
+```{r}
+by_genre_en <- df %>% filter(genre_ %in% top_genres, language_ == 'en') %>%
+                    group_by(genre_) %>% do(mean_words(., columns_lyrics))
+
+plot_matrix(by_genre_en, 'Song genre (only songs in English)', groups=2)
+```
+
+Here we see that Samba, Reggaeton and Bachata are the genres that are different, songs from those three genres are usually not in English, which
+suggests that our language imputation algorithm is having trouble labeling
+those songs.
+
+We took a look at Reggaeton music to find out more about this problem:
+
+```{r, fig.width=8, fig.height=6}
+reggaeton <- df %>% filter(genre_ == 'Reggaeton')
+
+ggplot(reggaeton, aes(language_)) +
+    geom_bar() +
+    xlab("Language") +
+    ylab("Count") +
+    ggtitle("Reggaeton songs by language")
+```
+
+Most of the songs are labeled as Spanish but a couple of them in English and even one in Italian.
+
+These are the Reggaeton songs in English:
+
+```{r}
+reggaeton_en <- bow %>% filter(genre_ == 'Reggaeton', language_ == 'en')
+kable(reggaeton_en[, c('title_', 'artist_name_')])
+```
+
+If we take a look at the lyrics of any of them, we will see that they mix
+a lot of English ann Spanish words, see for example, this verse from "Impacto" by Daddy Yankee:
+
+    ¡Hey!
+    Demuestra lo que hay, mama (¡hey!)
+    No pierdas el enfoque y...
+    ¡Sube! (hit me!)
+    ¡Sube! (hit me!)
+    ¡Sube! (hit me!, let's go!)
+
+Since the dataset only includes the top 5,000 words accross all songs, many Spanish word will not appear in the dataset but the English words will probably do. This will affect the language imputation for these songs since the non-zero counts will mostly be songs in English.
+
+### Finding similar artists
+
+We now turn our attention to finding similar artists, to subset the number of
+comparisons, we first filter by genre, language (English) and then we take the top 30 artists (the ones with the most songs)
+
+```{r}
+rock_en <- df %>% filter(genre_ == 'Rock', language_ == 'en')
+rock_en_top <- names(sort(table(rock_en$artist_name_), decreasing=TRUE)[1:30])
+
+by_artist <- rock_en %>% filter(artist_name_ %in% rock_en_top) %>%
+                group_by(artist_name_) %>%
+                do(mean_words(., columns_lyrics))
+
+plot_matrix(by_artist, 'Top 30 Rock artists (English)', groups=2)
+```
+
+There are three bands that differ from the rest" Amorphis, Cannibal Corpse, and Napalm Death. Those three band are actually Metal bands, not Rock bands. Metal lyrics usually focus on [dark topics](https://en.wikipedia.org/wiki/Heavy_metal_lyrics), so it makes sense that those bands are different to the other bands but similar to each other.
+
+```{r}
+pop <- df %>% filter(genre_ == 'Pop', language_ == 'en')
+pop_top <- names(sort(table(pop$artist_name_), decreasing=TRUE)[1:30])
+
+by_artist <- pop %>% filter(artist_name_ %in% pop_top) %>%
+                group_by(artist_name_) %>%
+                do(mean_words(., columns_lyrics))
+
+plot_matrix(by_artist, 'Top 30 Pop artists (English)', groups=2)
+```
+
+Here we see that Céline Dion looks brigther, meaning that her lyrics are different from the rest of the artists.
+
+### Comparing songs form the same artist
+
+Finally, we compare songs from the two artists. First we take a look at 30 songs from the band Foo Fighters.
+
+```{r}
+set.seed(10)
+
+ff <- df %>% filter(artist_name_ == 'Foo Fighters') %>% sample_n(30)
+ff <- ff[c('title_', columns_lyrics)]
+
+plot_matrix(ff, 'Foo Fighters (30 sample songs)', groups=2)
+```
+
+We see a clear outlier here, the song ["Skin And Bones"](https://genius.com/Foo-fighters-skin-and-bones-lyrics), the chorus looks like this:
+
+
+    Skin and bones
+    Skin and bones
+    Skin and bones, don't you know?
+    Skin and bones
+    Skin and bones
+    Skin and bones, don't you know?
+
+Looks like the heavy use of "skin" and "bones" is making that specific song be very different from the rest.
+
+Now we take a look at 30 songs from The Kooks:
+
+```{r}
+set.seed(10)
+
+kooks <- df %>% filter(artist_name_ == 'The Kooks') %>% sample_n(30)
+kooks <- kooks[c('title_', columns_lyrics)]
+
+plot_matrix(kooks, 'The Kooks (30 sample songs)', groups=2)
+```
+
+We see some black squares outside the diagonal of the matrix. those correspond to the following pairs:
+
+```{r}
+distances <- pairwise_distances(kooks, groups=2)
+pairs <- distances %>% filter(row != col, Distance == 0)
+kable(pairs)
+```
+
+We see that rows 1, 3 and 4 correspond to the same song but a different version so it makes sense that they have the same lyrics. The second row does not match and the songs are actually different, the counts are as follows:
+
+```{r, fig.width=8, fig.height=6}
+titles <- c('Always Free',
+            'Always Where I Need To Be (NRK P3 Acoustic Session)')
+songs <- bow %>% filter(artist_name_ == 'The Kooks', title_ %in% titles)
+
+song_1 <- top_k_words(songs, bow_columns_lyrics, row=1, k=10)
+song_2 <- top_k_words(songs, bow_columns_lyrics, row=2, k=10)
+
+df <- t(data.frame(song_1, song_2))
+rownames(df) <- titles
+df <- melt(df)
+colnames(df) <- c('Title', 'Word', 'Count')
+
+ggplot(df, aes(x=Word, y=Count, fill=Title)) +
+    geom_bar(stat="identity", position=position_dodge()) +
+    ggtitle("Two songs from The Kooks") +
+    theme(axis.text.x = element_text(angle=45, hjust=1))
+```
+
+We see that both songs have the exact same counts for the top 10 words (they have actually the same counts for all words). This suggests that some of the counts may be wrong. When this dataset was created, the authors performed entity resolution between the 1 million song dataset and the Musixmatch dataset so it may be the case that some matches are wrong. Since for this particular case the artist is the same and the title is similar, they mismatched the lyrics.
