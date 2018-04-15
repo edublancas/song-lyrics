@@ -38,24 +38,11 @@ by_year_en <- df %>% group_by(release_year_) %>%
 plot_matrix(by_year_en)
 ```
 
-```{r}
-by_year_en <- df %>% filter(language_ == 'en') %>%
-                 group_by(release_year_) %>%
-                 do(mean_words(., columns_lyrics))
-plot_matrix(by_year_en)
-```
-
-```{r}
-by_year_es <- df %>% filter(language_ == 'es') %>% group_by(release_year_)
-                %>% do(mean_words(., columns_lyrics))
-plot_matrix(by_year_es)
-```
-
-
 ## Finding similar genres
 
 
 ```{r}
+# get only genres that have more than 80 songs
 genre_ <- table(df$genre_)
 top_genres <- names(genre_[genre_ > 80])
 
@@ -119,15 +106,9 @@ oasis <- oasis[c('title_', columns_lyrics)]
 plot_matrix(oasis)
 ```
 
+
 ```{r}
 deep purple <- df %>% filter(artist_name_ == 'Deep Purple') %>% sample_n(30)
 deep purple <- deep purple[c('title_', columns_lyrics)]
 plot_matrix(deep purple)
 ```
-
-
-## Find similar songs (bag of words and embeddings)
-
-TODO: visualize artists in two dimensions using PCA
-
-## Songs that talk about the same topic
