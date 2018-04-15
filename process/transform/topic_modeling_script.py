@@ -1,11 +1,11 @@
 #!/usr/bin/env python
-
 import pandas as pd
 import numpy as np
-import matplotlib.pyplot as plt
 from tqdm import tqdm
+from sklearn.decomposition import LatentDirichletAllocation
 
 print('Load bag_of_words_top_1000.feather')
+
 bag_of_words_top_1000 = pd.read_feather(
     '../../data/transform/bag_of_words_top_1000.feather')
 
@@ -14,7 +14,8 @@ def corpus_topics_top_words(model, features, no_top_words):
     topic_dict = {}
     for topic_idx, topic in enumerate(model.components_):
         topic_dict[topic_idx] = [features[i]
-                                 for i in topic.argsort()[:-no_top_words - 1:-1]]
+                                 for i
+                                 in topic.argsort()[:-no_top_words - 1:-1]]
     return topic_dict
 
 
@@ -26,7 +27,6 @@ def song_topics(model, song):
 
 
 print('Identify topics within model')
-from sklearn.decomposition import LatentDirichletAllocation
 
 mxm_25_top1000 = LatentDirichletAllocation(n_topics=25, random_state=0)
 mxm_25_top1000.fit(bag_of_words_top_1000.iloc[:, 16:])
@@ -39,6 +39,7 @@ top_per_topic_words = corpus_topics_top_words(
 # save per/song topic results to df
 song_topic_weights = np.zeros([len(bag_of_words_top_1000.iloc[:, 16:]), 25])
 temp = bag_of_words_top_1000.iloc[:, 16:]
+
 for i in tqdm(range(len(bag_of_words_top_1000))):
     song_weights = pd.Series(song_topics(mxm_25_top1000, temp.iloc[i]))
     song_topic_weights[i] = song_weights
