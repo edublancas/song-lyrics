@@ -19,7 +19,7 @@ library(tidyr)
 library(reshape2)
 library(ggplot2)
 library(knitr)
-source('experiments/eduardo/util.R')
+source('util.R')
 ```
 
 ```{r}
