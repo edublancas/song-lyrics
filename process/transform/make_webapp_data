@@ -14,15 +14,18 @@ def sum_words(df, words):
     """Sum word columns in a DataFrame
     """
     sums = df[words].sum(axis=0)
+
     return sums
 
 
 def top_k_words(artist, k=10):
     """Get top k words for an artist as {word: count} mapping
     """
+    total = artist.sum()
     top_k = artist.sort_values(ascending=False)[:k].to_dict()
 
-    return [{'word': word, 'count': count} for word, count in top_k.items()]
+    return [{'word': word, 'count': count, 'proportion': count / total}
+            for word, count in top_k.items()]
 
 
 def top_genres(artist, k=3):
