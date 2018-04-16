@@ -110,4 +110,4 @@ mkdir data/webapp
     data/transform/embeddings.feather \
     data/transform/artist_topic_weights.feather \
     data/transform/artist_sentiment_mean_score.feather \
-    data/webapp/profiles.csv \
+    data/webapp/profiles.csv

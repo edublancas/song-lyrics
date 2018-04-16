@@ -190,7 +190,16 @@ def main():
     # add sentiment
     logger.info('Adding sentiment...')
     sentiment = pd.read_feather(path_to_sentiment)
-    df = df.merge(sentiment, on='artist_id')
+    ids = bow[['artist_name_', 'artist_id_']].drop_duplicates()
+
+    sentiment = sentiment.merge(ids, on='artist_id_')[['artist_name_',
+                                                       'meanScore']]
+    df = df.merge(sentiment, left_on='artist', right_on='artist_name_')
+
+    # final processing
+    df.drop(columns=['artist_name', 'artist_name_'], inplace=True)
+    df.rename(columns={'meanScore': 'mean_sentiment'}, inplace=True)
+    df = df.round({'love': 2, 'death': 2, 'religion': 2, 'mean_sentiment': 2})
 
     nas = df.apply(lambda c: np.sum(c.isna()), axis=0) / df.shape[0] * 100
     logger.info('NA stats: {}'.format(nas))
