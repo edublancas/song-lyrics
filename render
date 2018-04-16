@@ -1,0 +1,12 @@
+#!/usr/bin/env Rscript
+
+library(rmarkdown)
+args<-commandArgs(TRUE)
+
+if(length(args)==1){
+    format <- 'html_document'
+}else{
+    format <- paste(args[2], 'document', sep='_')
+}
+
+render(args[1], output_format=format)

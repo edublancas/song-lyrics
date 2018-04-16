@@ -46,6 +46,7 @@ Install R requirements:
     * reshape2
     * wordcloud
     * knitr
+    * maps
 
 ## 1. Get raw data
 
