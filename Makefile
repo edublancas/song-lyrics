@@ -1,5 +1,9 @@
 requirements:
+	echo 'Installing R packages...'
 	./install_r_requirements
+
+	echo 'Installing Python packages...'
+	pip install -e process/pkg
 
 
 get_data:

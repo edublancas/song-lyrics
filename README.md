@@ -24,33 +24,28 @@ We are using the [Million Song Dataset](https://labrosa.ee.columbia.edu/millions
 
 ## Quickstart
 
+```shell
+git clone https://github.com/edublancas/song-lyrics
+cd song-lyrics
+```
+
 ## 0. Software requirements
 
 * Install [miniconda](https://github.com/edublancas/commons/blob/master/repos/conda.md)
 * Install [R](https://www.r-project.org/)
 
-Create conda environment and requirements for the project:
+Install Python and R required packages:
 
 ```shell
-conda create --name=song-lyrics python=3
-pip install -r requirements.txt
-```
-
-Install R requirements:
-
-```
-make install_r_requirements
+make requirements
 ```
 
 ## 1. Get raw data
 
 ```shell
-git clone https://github.com/edublancas/song-lyrics
-cd song-lyrics
-
 # this will create a new data/ folder in the current
 # working directory raw data will be stored in data/raw
-./process/download/get_data
+make get_data
 ```
 
 GLOVE gives some problems when trying to download it using `wget`, it's better to download it manually, put data un `data/raw`: https://nlp.stanford.edu/projects/glove/
@@ -58,7 +53,13 @@ GLOVE gives some problems when trying to download it using `wget`, it's better t
 ## 2. Process data
 
 ```shell
-./bootstrap
+make bootstrap
 ```
 
 This will generate the files that we will be working with:
+
+## 3. Build report
+
+```shell
+make report
+```
