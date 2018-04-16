@@ -38,15 +38,9 @@ pip install -r requirements.txt
 
 Install R requirements:
 
-    * tidyverse
-    * rjson
-    * dplyr
-    * ggplot2
-    * feather
-    * reshape2
-    * wordcloud
-    * knitr
-    * maps
+```
+make install_r_requirements
+```
 
 ## 1. Get raw data
 
