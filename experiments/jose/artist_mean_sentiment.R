@@ -5,7 +5,7 @@ source('experiments/jose/functions.R')
 setwd('./')
 
 # Required packages
-packages<-c('feather','tidyverse','data.table','tidytext')
+packages<-c('feather','tidyverse','data.table','tidytext', 'stringr')
 
 # Load required pakages (install and load if packages is not currently installed)
 print('Loading required packages')
