@@ -30,6 +30,14 @@ git clone https://github.com/edublancas/song-lyrics
 cd song-lyrics
 ```
 
+```shell
+# start VM
+vagrant up
+
+# ssh into the VM
+vagrant ssh
+```
+
 ## 0. Software requirements
 
 * [Python 3](https://www.python.org/downloads/)
