@@ -130,7 +130,7 @@ def main():
     artists = list(bow.artist_name_.unique())
 
     # top 5 songs for each artist
-    logger.info('Finding top 5 songs...')
+    logger.info('Finding top 5 words...')
     top_5 = (bow.groupby('artist_name_')
              .apply(sum_words, words=words)
              .apply(top_k_words, axis=1)
