@@ -1,4 +1,4 @@
-# Data Quality
+# 3. Data Quality
 
 ```{r}
 library(feather)
@@ -10,9 +10,9 @@ df_artist_topic <-     read_feather("../data/transform/artist_topic_weights.feat
 df_year_topic <-       read_feather("../data/transform/year_topic_weights.feather")
 ```
 
-## Missing Data
+## 3.1. Missing Data
 
-## Song Word Count
+## 3.2. Song Word Count
 
 Per song counts must be carefully considered, because they only count words which are in the most common 5000 words. Nevertheless, we can see that the mode is around 75 words, and there is a wide range of word counts.
 
@@ -38,7 +38,7 @@ ggplot(word_count, aes(mxm_dup.sum)) +
 ```
 
 
-## Song Count Over Time
+## 3.3. Song Count Over Time
 
 The number of songs/year grows exponentially in size until ~2005, before it slows in growth rate and then declines.
 
@@ -52,7 +52,7 @@ ggplot(df_year_topic,aes(x=year, y=song_count))+
   ggtitle('Song Count/Year')
 ```
 
-## Song Count per Artist
+## 3.4. Song Count per Artist
 
 The dataset is skewed towards including few songs for each artist
 
