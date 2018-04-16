@@ -25,14 +25,15 @@ We are using the [Million Song Dataset](https://labrosa.ee.columbia.edu/millions
 ## Quickstart
 
 ```shell
+# clone the repo
 git clone https://github.com/edublancas/song-lyrics
 cd song-lyrics
 ```
 
 ## 0. Software requirements
 
-* Install [miniconda](https://github.com/edublancas/commons/blob/master/repos/conda.md)
-* Install [R](https://www.r-project.org/)
+* [Python 3](https://www.python.org/downloads/)
+* [R](https://www.r-project.org/)
 
 Install Python and R required packages:
 
@@ -63,3 +64,5 @@ This will generate the files that we will be working with:
 ```shell
 make report
 ```
+
+## 4. Interactive component
