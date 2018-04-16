@@ -17,10 +17,10 @@ songsDataClean<-read_feather('data/transform/bag_of_words.feather')
 
 # Wrangle the songDataClean to get the words for each artist and convert to data.table
 print('Getting words per artist')
-artist_words<-songsDataClean %>% select(5,17:ncol(songsDataClean)) %>% 
-  filter(!is.na(artist_mbid_) & str_trim(artist_mbid_)!='') %>%
-  group_by(artist_mbid_) %>% 
-  summarise_all(sum) %>% ungroup() %>% gather(word,freq,-artist_mbid_) %>% 
+artist_words<-songsDataClean %>% select(16:ncol(songsDataClean)) %>% 
+  filter(!is.na(artist_id_) & str_trim(artist_id_)!='') %>%
+  group_by(artist_id_) %>% 
+  summarise_all(sum) %>% ungroup() %>% gather(word,freq,-artist_id_) %>% 
   data.table(key='freq') %>% filter(freq>0) %>% data.table(key='word')
 
 # Get the afinn lexicon sentiments and convert them to a data.table
@@ -33,8 +33,8 @@ artist_word_sentiment <- artist_words[sentiments,nomatch=0]
 
 # Get the average sentiment per artist and write it to file
 print('Calculating mean sentiment score per artist')
-setkey(artist_word_sentiment,artist_mbid_)
-artist_sentiment<-artist_word_sentiment[,list(meanScore=sum(score*freq)/sum(freq)),by=list(artist_mbid_)]
+setkey(artist_word_sentiment,artist_id_)
+artist_sentiment<-artist_word_sentiment[,list(meanScore=sum(score*freq)/sum(freq)),by=list(artist_id_)]
 
 # Write result to disk
 print('Writing result to data/transform/artist_mean_sentiment.feather')
