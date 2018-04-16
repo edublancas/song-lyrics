@@ -31,7 +31,7 @@ cd song-lyrics
 ```
 
 ```shell
-# start VM
+# start VM (comes with R and Python installed)
 vagrant up
 
 # ssh into the VM
