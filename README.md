@@ -16,7 +16,7 @@ TODO: add executive summary here
     - `process/clean/` - Cleaning the raw data
     - `process/transform/` - Code for generating various song vector representations
     - `process/cluster/` - Clustering songs
-* `viz/` - Visualizations (R)
+* `report/` - Report files
 
 ## Data
 
