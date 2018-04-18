@@ -4,7 +4,7 @@ Exploratory Data Analysis and Visualization, Columbia University, Spring 2018.
 
 ## Project overview
 
-WIP
+TODO: add executive summary here
 
 ## Folder structure
 
@@ -65,3 +65,8 @@ Build the final report.
 ```shell
 make report
 ```
+
+
+## 4. Interactive component
+
+TODO: add instructions
