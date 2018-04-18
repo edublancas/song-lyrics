@@ -11,4 +11,6 @@ output: html_document
 ## 1.1 Team members
 
 * Eduardo Blancas Reyes
-    - 
+    - Coded Python cleaning/processing scripts used in `boostrap` (except for topic modeling and sentiment analysis)
+    - Wrote report section 4.1 Data cleaning
+    - Wrote report section 4.4. Distance-based comparisons
