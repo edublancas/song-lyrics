@@ -6,3 +6,9 @@ output: html_document
 ---
 
 # 1. Introduction
+
+
+## 1.1 Team members
+
+* Eduardo Blancas Reyes
+    - 
