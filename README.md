@@ -9,13 +9,13 @@ WIP
 ## Folder structure
 
 * `data/` - Data is dumped here, not included in the repository
+* `experiments/` - Notebooks/scripts that we used to explore the data
+* `lib/` - R utility functions used in the project
 * `process/` - Scripts for downloading and processing the data (Python 3)
-    - `process/pkg/` - Small Python package with utility functions
-    - `process/download/` - Getting the raw data
+    - `process/pkg/` - Python package with utility functions
     - `process/clean/` - Cleaning the raw data
     - `process/transform/` - Code for generating various song vector representations
     - `process/cluster/` - Clustering songs
-* `experiments/` - Notebooks/scripts that we used to explore the data
 * `viz/` - Visualizations (R)
 
 ## Data
@@ -31,10 +31,9 @@ cd song-lyrics
 
 ## 0. Software requirements
 
-* Install [miniconda](https://github.com/edublancas/commons/blob/master/repos/conda.md)
-* Install [R](https://www.r-project.org/)
+This project requires Python 3 and R.
 
-Install Python and R required packages:
+To install Python and R required packages:
 
 ```shell
 make requirements
@@ -42,23 +41,26 @@ make requirements
 
 ## 1. Get raw data
 
+The following command fetches all the datasets we used, it will create a new data/ folder in the current working directory raw data will be stored in data/raw.
+
+
 ```shell
-# this will create a new data/ folder in the current
-# working directory raw data will be stored in data/raw
 make get_data
 ```
 
-GLOVE gives some problems when trying to download it using `wget`, it's better to download it manually, put data un `data/raw`: https://nlp.stanford.edu/projects/glove/
+Note: [GLoVe](https://nlp.stanford.edu/projects/glove/) gives some problems when trying to download it using `wget`, it's better to download it manually, put the uncompressed data in  `data/raw`.
 
 ## 2. Process data
+
+This script runs all the cleaning, processing we did on the data and it outputs the final datasets we used in the report and the interactive component.
 
 ```shell
 make bootstrap
 ```
 
-This will generate the files that we will be working with:
-
 ## 3. Build report
+
+Build the final report.
 
 ```shell
 make report
