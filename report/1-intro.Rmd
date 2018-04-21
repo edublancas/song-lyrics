@@ -14,12 +14,16 @@ We explored and tried to answer different questions in the project. Primarily, w
 
 ## 1.1 Team members
 
-* Aaron Sandholzli
+* Aaron Sadholz (as5401)
+    - Coded python topic modeling scrips
+    - Wrote report section 4.5. Topic Modeling.
+    - Wrote report scection 6. Conclusion
     
-* Eduardo Blancas Reyes
+* Eduardo Blancas Reyes (eb3079)
     - Coded Python cleaning/processing scripts used in `boostrap` (except for topic modeling and sentiment analysis)
     - Wrote report section 4.1 Data cleaning
     - Wrote report section 4.4. Distance-based comparisons
+
 * Jose
 
 * Valmik Patel (UNI: vp2382)
