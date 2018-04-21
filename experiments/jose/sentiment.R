@@ -2,7 +2,6 @@ require(feather)
 require(scales)
 require(stringr)
 require(tidyverse)
-require(ggplot2)
 require(tidytext)
 require(data.table)
 require(reshape2)
@@ -28,7 +27,7 @@ songsDataClean %>% select(-c(1:16)) %>% summarise_all(sum) %>%
   wordcloud::comparison.cloud(colors = c("#F8766D", "#00BFC4"),max.words = 100,random.order = F)
 
 # Sentiment per year
-songsDataClean %>% select(9,17:ncol(songsDataClean)) %>% filter(!is.na(release_year_)) %>% 
+songsDataClean %>% select(9,17:ncol(songsDataEng)) %>% filter(!is.na(release_year_)) %>% 
   group_by(release_year_) %>% summarise_all(sum) %>% ungroup() %>%
   tidyr::gather(key=word,value=freq,-release_year_) %>% filter(freq>0) %>%
   inner_join(get_sentiments('nrc')) %>%
@@ -38,7 +37,7 @@ songsDataClean %>% select(9,17:ncol(songsDataClean)) %>% filter(!is.na(release_y
     labs(colour='Sentiment',y='Frequency (Thousands)',x='Song Release Year')
 
 # Sentiment per year faceted by 15 most frequent genres in dataset
-songsDataClean %>% select(9,10,17:ncol(songsDataClean)) %>% 
+songsDataClean %>% select(9,10,17:ncol(songsDataEng)) %>% 
   filter(!is.na(release_year_) & genre_ %in% names(sort(table(songsDataClean$genre_),decreasing = TRUE)[1:15])) %>% 
   group_by(genre_,release_year_) %>% summarise_all(sum) %>% ungroup() %>%
   tidyr::gather(key=word,value=freq,-genre_,-release_year_) %>% filter(freq>0) %>%
@@ -50,7 +49,7 @@ songsDataClean %>% select(9,10,17:ncol(songsDataClean)) %>%
     facet_wrap(~genre_,scales = 'free_y',ncol = 3)
 
 genrePopularArtist<-songsDataEng %>% filter(genre_ %in% names(sort(table(songsDataClean$genre_),decreasing = TRUE)[1:15])) %>%
-  select(7,10,15:ncol(songsDataClean)) %>%
+  select(7,10,15:ncol(songsDataEng)) %>%
   plyr::ddply(.variables='genre_',
                .fun=function(x)
                 {
@@ -61,9 +60,10 @@ genrePopularArtist<-songsDataEng %>% filter(genre_ %in% names(sort(table(songsDa
                 }
               ) %>% tidyr::gather(key=word,value=freq,-c(1:4)) %>% filter(freq>0) %>%
   inner_join(get_sentiments('afinn')) %>% group_by(genre_,artist_id_,artist_name_) %>%
-  summarise(meanSentiment=sum(freq*score)/sum(freq)) %>% 
-  #mutate(sentiment=ifelse(meanSentiment<0,'Negative','Positive'))
-  ggplot(genrePopularArtist,aes(y=meanSentiment,x=artist_name_)) + geom_point() + 
-    coord_flip() + facet_wrap(~genre_,scales = 'free_y',ncol = 2)
+  summarise(meanSentiment=sum(freq*score)/sum(freq))
+
+ggplot(genrePopularArtist,aes(y=meanSentiment,x=artist_name_)) + geom_point(size=2) + 
+    coord_flip() + facet_wrap(~genre_,scales = 'free_y',ncol = 2) + theme_bw() + 
+    theme(panel.grid.major.y=element_blank()) + geom_segment(aes(xend=artist_name_),yend=-4)
   
 
