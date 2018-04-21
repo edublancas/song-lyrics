@@ -15,7 +15,7 @@ df_year_topic <-       read_feather("../data/transform/year_topic_weights.feathe
 
 ## 3.2. Song Word Count
 
-Per song counts must be carefully considered, because they only count words which are in the most common 5000 words. Nevertheless, we can see that the mode is around 75 words, and there is a wide range of word counts.
+Per song counts must be carefully considered, because they only count words which are in the most common 5000 words. Nevertheless, we can see that the mode is around 75 words, and there is a wide range of word counts. When considering songs in this project, it is important to note that songs with different word counts will behave differently.
 
 ```{r}
 mxm_dup <- df_mxm_dataset
@@ -41,7 +41,7 @@ ggplot(word_count, aes(mxm_dup.sum)) +
 
 ## 3.3. Song Count Over Time
 
-The number of songs/year grows exponentially in size until ~2005, before it slows in growth rate and then declines.
+The number of songs/year grows exponentially in size until ~2005, before it slows in growth rate and then declines. This is important to note as the data is clearly biased to more recent music. Thus, it is not representitive of music from all points in history - the results from more recent year's analysis will most likely be more reliable.
 
 ```{r}
 # songs/year distrubution
@@ -55,7 +55,7 @@ ggplot(df_year_topic,aes(x=year, y=song_count))+
 
 ## 3.4. Song Count per Artist
 
-The dataset is skewed towards including few songs for each artist
+The dataset is skewed towards including few songs for each artist. When considering artists in this project, it should be noted that not all artists carry equally reliable information, as many artists are only represented by a single/few songs.
 
 ```{r}
 #songs/artist distribution
