@@ -94,7 +94,7 @@ track metadata file is generated using the `./export_track_metadata` script and 
 * track_id - Unique identifier for the songs
 * title - track title
 * song_id - Another ID (undocumented)
-* release – Album name
+* release ??? Album name
 * artist_id - Artist unique ID
 * artist_mid - Musixmatch artist unique ID
 * artist_name - Artist name
@@ -215,7 +215,7 @@ by_genre <- df %>% filter(genre_ %in% top_genres) %>% group_by(genre_) %>%
 plot_matrix(by_genre, 'Song genre')
 ```
 
-We see that some rows are very different to the rest: Samba, Reggaeton, MPB ([Música popular brasileira](https://en.wikipedia.org/wiki/M%C3%BAsica_popular_brasileira)), Latin, Flamenco and Bachata. Most songs from these songs are in either Spanish or Portuguese, so it makes sense that they make use of different words.
+We see that some rows are very different to the rest: Samba, Reggaeton, MPB ([M??sica popular brasileira](https://en.wikipedia.org/wiki/M%C3%BAsica_popular_brasileira)), Latin, Flamenco and Bachata. Most songs from these songs are in either Spanish or Portuguese, so it makes sense that they make use of different words.
 
 We not filter by songs only in Spanish.
 
@@ -265,12 +265,12 @@ kable(reggaeton_en[, c('title_', 'artist_name_')])
 If we take a look at the lyrics of any of them, we will see that they mix
 a lot of English ann Spanish words, see for example, this verse from "Impacto" by Daddy Yankee:
 
-    ¡Hey!
-    Demuestra lo que hay, mama (¡hey!)
+    ??Hey!
+    Demuestra lo que hay, mama (??hey!)
     No pierdas el enfoque y...
-    ¡Sube! (hit me!)
-    ¡Sube! (hit me!)
-    ¡Sube! (hit me!, let's go!)
+    ??Sube! (hit me!)
+    ??Sube! (hit me!)
+    ??Sube! (hit me!, let's go!)
 
 Since the dataset only includes the top 5,000 words accross all songs, many Spanish word will not appear in the dataset but the English words will probably do. This will affect the language imputation for these songs since the non-zero counts will mostly be songs in English.
 
@@ -303,7 +303,7 @@ by_artist <- pop %>% filter(artist_name_ %in% pop_top) %>%
 plot_matrix(by_artist, 'Top 30 Pop artists (English)', groups=2)
 ```
 
-Here we see that Céline Dion looks brigther, meaning that her lyrics are different from the rest of the artists.
+Here we see that C??line Dion looks brigther, meaning that her lyrics are different from the rest of the artists.
 
 ### 4.4.4. Comparing songs form the same artist
 

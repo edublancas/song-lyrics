@@ -7,10 +7,20 @@ output: html_document
 
 # 1. Introduction
 
+Music has evolved immensely throughout the years. This is evident in no place more than it is in song lyrics. Lyrics have evolved over time across genres and geographies reflecting the current affairs of that time and the evolution of culture. We wanted to explore these relationships between lyrics, time, geography, and genre. Thus we decided to have song lyrics exploration as the topic for our project.
+
+
+We explored and tried to answer different questions in the project. Primarily, we looked at how lyrics varied across time, band and geography. We looked at the sentiment scores and their variation across these factors. In addition, we explored the topics covered by the songs as well by using topic modeling on the song lyrics. The similarity of bands was also determined based on their choice of lyrics.
 
 ## 1.1 Team members
 
+* Aaron Sandholzli
+    
 * Eduardo Blancas Reyes
     - Coded Python cleaning/processing scripts used in `boostrap` (except for topic modeling and sentiment analysis)
     - Wrote report section 4.1 Data cleaning
     - Wrote report section 4.4. Distance-based comparisons
+* Jose
+
+* Valmik Patel (UNI: vp2382)
+    
