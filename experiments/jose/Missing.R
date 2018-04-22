@@ -4,6 +4,7 @@ require(stringr)
 require(tidyverse)
 require(ggplot2)
 require(tidytext)
+require(XML)
 
 setwd('~/Documents/DataScience/Classes/Visualization/song-lyrics/')
 

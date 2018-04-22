@@ -1,9 +1,18 @@
 
 # 3. Data Quality
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo=TRUE,
+                      warning=FALSE,
+                      message=FALSE,
+                      fig.width=9,
+                      fig.height=9
+                      )
+```
 
-```{r}
+```{r loadDatasets}
 library(feather)
 library(tidyverse)
+library(scales)
 
 df_mxm_dataset <-      read_feather("../data/transform/mxm_dataset.feather")
 df_top_1000_dataset <- read_feather("../data/transform/bag_of_words_top_1000.feather")
@@ -12,6 +21,37 @@ df_year_topic <-       read_feather("../data/transform/year_topic_weights.feathe
 ```
 
 ## 3.1. Missing Data
+
+Besides the top 5,000 must frequent words in the lyrics of the Million Songs dataset, our dataset also include an additional 16 variables describing the songs and artists. These variables are used in this section to explore missing values among them.  The folliwng barchart present the missing vales rate per variable. We can see that 10 of this 16 variables are missing value free and more than half of the songs on our dataset have missing artist location information (location, latitude and longitude). Is also important to mentioned that a little over one quarter of the song in our dataset have missing genre.  
+
+```{r loadDataSets}
+songsData <- read_feather('../data/transform/bag_of_words_clean.feather')
+metadata<-select(songsData,1:16)
+names(metadata)<-gsub('_$','',names(metadata))
+metadata %>% summarise_all(function(x){sum(is.na(x) | str_trim(x)=='')/length(x)}) %>% 
+  gather(key = Variable,value=Missing) %>%
+  ggplot(aes(reorder(Variable,-Missing),Missing)) + geom_col(fill='lightblue',colour='black') + scale_y_continuous(labels = percent) +
+  labs(x='Variables',y='Missing Values') + coord_flip() + 
+  geom_text(aes(label=paste0(round(Missing*100,1),'%')),hjust=-.1,size=3)
+```
+
+The following plot shows that the prevalent missing pattern corresponds to the cobination of variables location, latitude and longitud. This pattern is followed by the cobination of the same variables with release year and then by the release year variable by itself.
+
+```{r missingPattern}
+extracat::visna(metadata,sort = 'b')
+```
+
+The following Heapmap show the distribution of missing values by language. 
+
+```{r missingByLanguage}
+metadata %>% select(language,artist_mbid,location,release_year,genre) %>% filter(!is.na(language)) %>% 
+  group_by(language) %>% summarise_all(function(x){sum(is.na(x))/length(x)}) %>% ungroup() %>% 
+  gather(variable,missing_rate,-language) %>% 
+  ggplot(aes(y=language,x=variable,fill=missing_rate)) + geom_tile(colour='white') + 
+  theme_bw() + scale_fill_gradientn(name="Missing Rate",labels=percent,
+                                    colours = c('lightyellow','yellow','orange','darkred')) +
+  labs(x='Variables',y='Language ISO 639-1 Code')
+```
 
 ## 3.2. Song Word Count
 
