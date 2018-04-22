@@ -143,8 +143,6 @@ similarity between artists.
 
 ## 4.2. Word distribution
 
-## 4.3. Sentiment analysis
-
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo=TRUE,
                       warning=FALSE,
@@ -163,6 +161,20 @@ require(tidytext)
 require(reshape2)
 ```
 
+```{r loadDataset}
+
+songsDataClean <- read_feather('../data/transform/bag_of_words_clean.feather')
+```
+
+The following wordcloud is made out of the top 200 most frequent words in our dataset. We can see that the most frequent used word in this dataset are love, followed by words like time, feel, baby, yeah, heart, etc.
+
+```{r wordCloud}
+songsDataEng %>% select(-c(1:16)) %>% summarise_all(sum) %>% tidyr::gather(key=words,value=freq) %>%
+  with(wordcloud::wordcloud(words,freq,max.words = 200))
+```
+
+## 4.3. Sentiment analysis
+
 The sentiment dataset from the TidyText package was used to obtain the sentiment for the words in our final data set. This dataset contains the following three general-purpose lexicons:
 
 1. AFINN from Finn [Årup Nielsen](http://www2.imm.dtu.dk/pubdb/views/publication_details.php?id=6010)
@@ -179,8 +191,6 @@ To perform this analysis the following data wrangling steps where conducted:
 
 ```{r sentiment_transformData}
 
-songsDataClean <- read_feather('../data/transform/bag_of_words_clean.feather')
-
 songsDataEng <- songsDataClean %>% filter(language_=='en')
 
 wordCount <- songsDataEng %>% select(-c(1:16)) %>% summarise_all(sum)
@@ -192,15 +202,7 @@ Once the data was wrangled we apply a series of data transformation to get the d
 
 ![](figures/sentiment_transform.png){width=450px}
 
-
-Lets start our analysis by looking at the top 200 most frequent words in our dataset using a word cloud.
-
-```{r wordCloud}
-songsDataEng %>% select(-c(1:16)) %>% summarise_all(sum) %>% tidyr::gather(key=words,value=freq) %>%
-  with(wordcloud::wordcloud(words,freq,max.words = 200))
-```
-
-We can see from the previous visualization that the most used word in this dataset is the word love, followed by words like time, feel, baby, yeah, heart, etc. By adding the bing sentiment lexicon to the previous word cloud, we can see the most frequent positive and negative words. Love is the most frequent positive word used as expected, follow by words like heaven, promise, beautiful, free, smile, sweet, ext. On the negative side we can see words like die, fall, pain, wrong, hard, cry, lies, etc.
+By adding the bing sentiment lexicon to the previous word cloud, we can see the most frequent positive and negative words. Love is the most frequent positive word used as expected, follow by words like heaven, promise, beautiful, free, smile, sweet, ext. On the negative side we can see words like die, fall, pain, wrong, hard, cry, lies, etc.
 
 ```{r sentimentWordCloud}
 songsDataClean %>% select(-c(1:16)) %>% summarise_all(sum) %>% 
