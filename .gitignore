@@ -74,6 +74,7 @@ target/
 #####=== R ===#####
 
 # History files
+.RData
 .Rhistory
 .Rapp.history
 
