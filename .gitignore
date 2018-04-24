@@ -1,7 +1,6 @@
-*.vagrant/
 data/**
 *.png
-.vagrant/
+report/all.Rmd
 
 *.txt
 *.zip

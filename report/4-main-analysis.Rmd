@@ -143,16 +143,8 @@ similarity between artists.
 
 ## 4.2. Word distribution
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo=TRUE,
-                      warning=FALSE,
-                      message=FALSE,
-                      fig.width=9,
-                      fig.height=9
-                      )
-```
-
 The require R packages for this analysis are the following:
+
 ```{r sentiment_loadPackages}
 require(feather)
 require(stringr)
@@ -263,15 +255,6 @@ songsDataEng %>% filter(genre_ %in% names(sort(table(songsDataClean$genre_),decr
 ```
 
 ## 4.4. Distance-based comparisons
-
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo=TRUE,
-                      warning=FALSE,
-                      message=FALSE,
-                      fig.width=9,
-                      fig.height=9)
-```
-
 
 One of the things we are interested on is to find which observations are more similar/different to each other. Using the word embeddings representation of
 our data, we computed pairwise euclidean distance between observations at different levels to find similar elements.
