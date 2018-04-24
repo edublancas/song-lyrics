@@ -1,3 +1,4 @@
+*.vagrant/
 data/**
 *.png
 .vagrant/
@@ -31,7 +32,7 @@ develop-eggs/
 dist/
 downloads/
 eggs/
-lib/
+# lib/
 lib64/
 parts/
 sdist/
@@ -74,6 +75,7 @@ target/
 #####=== R ===#####
 
 # History files
+.RData
 .Rhistory
 .Rapp.history
 

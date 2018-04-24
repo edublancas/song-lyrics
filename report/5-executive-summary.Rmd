@@ -1,0 +1,78 @@
+# 5. Executive Summary
+
+We explored song lyrics data from the Musixmatch + Million Songs dataset to derive conclusions about trends in song lyrics and music across time and geography. We asked questions to explore different facets of the dataset and identified some interesting trends. In this section, we will give a short summary of our findings and look at compelling trends in sentiment score, topics, and similar artists.
+
+## From distance-based comparisons
+
+Analizing similarity at different levels gave us interesting information about the data. Since our dataset contains data from many languages (mostly English and Spanish) we saw that when comparing genres, some of them were much closer to each other since they share the language (some songs in certain music genres are mostly in Spanish).
+
+When filtering only by songs that our algorithm labeled as English, we still notice groups of songs that are very different to the rest, when inspecting these songs we realized that most of them are Reggaeton music, a genre that originated in Puerto Rico. The lyrics of Reggaeton usually mix English and Spanish, so our algorithm had difficulties labeling these songs.
+
+Furthermore, when comparing artists, we found that lyrics in Metal music are different from the rest of the popular genres. This makes sense since Metal lyrics usually speak about [dark subjects such as Hell, injustice, mayhem, carnage and death](https://en.wikipedia.org/wiki/Heavy_metal_lyrics).
+
+## Topic Analysis
+
+The topics love, death, and religion have always existed in song lyrics, however their relevence has changed over time. To understand this, we model the occurance of words which relate to each topic:
+
+* The topic love comes from the words: love, heart, sweet, etc.
+* The topic death comes from the words: death, die, scream, etc.
+* The topic religion comes from the words: god, heaven, angel, etc.
+
+Interestingly, love songs have become less common since the the 1950's. In the vizualization below, the average topic score is 0, and a positive or negative score indicates if each year has had above or below the average amount of that topic (the score can range from -1 to 1). Clearly the popularity of love songs have decreased significantly from 1955 to 1980, since then stabilizing at the average.
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+library(feather)
+library(tidyverse)
+topic_year   <- read_feather('../data/transform/year_topic_weights.feather')
+
+df_parallel_coord <- data.frame(t(topic_year))[1:3,]
+colnames(df_parallel_coord) <- topic_year$year
+df_parallel_coord$topic<-rownames(df_parallel_coord)
+
+# scaled for most intuitive understanding for non technical audience mean is 0, max is +1, min is -1
+for (i in colnames(df_parallel_coord)){
+  col<-toString(i)
+  if (col != 'topic'){
+      df_parallel_coord[col] <- 2*df_parallel_coord[col]-1
+  }
+}
+
+GGally::ggparcoord(df_parallel_coord,
+                   scale='globalminmax',
+                   columns = 32:87,
+                   groupColumn='topic')+
+  theme(text = element_text(size=13),axis.text.x = element_text(angle=0, hjust=0.5))+
+  xlab('Year') +
+  ylab('Topic Score')+
+  ggtitle('Topic Relevance: 1955-2010')+
+  scale_x_discrete(breaks=seq(1955, 2010, 5))+
+  geom_hline(yintercept = 0)
+
+```
+
+## Sentiment Analysis
+
+The sentiment dataset from the TidyText package was used to obtain the sentiment for the words in our final data set. By using the AFFIN, bing and nrc lexicons we explored the following topics:
+
+* Most frequent positive and negative words. 
+* How different sentiments categories (joy, trust, sadness, anger, etc) changes according to the songs release year and genre.
+* Mean sentiment score distribution for the top 10 most popular artists by genre.
+
+The must important observations of this analysis are the following:
+
+* Words with positive sentiments are more frequents across all years, however the gap between positive and negative sentiments seems to decrease with time.
+* When the sentiment trend over time is stratified by genre we observed that negative sentiment not only get closer to positives sentiments but in actually surpasses it for some genres like Electronic, Electronic/Dance, Rock and Latin. We also observed that negative sentiment seems to be more predominant in almost all years for genres like hardcore and hip-hop.
+
+The visualization below shows some of these observations:
+```{r nrcGenreYear,fig.height=12,fig.width=12}
+songsDataClean %>% select(9,10,17:ncol(songsDataEng)) %>% 
+  filter(!is.na(release_year_) & genre_ %in% names(sort(table(songsDataClean$genre_),decreasing = TRUE)[1:15])) %>% 
+  group_by(genre_,release_year_) %>% summarise_all(sum) %>% ungroup() %>%
+  tidyr::gather(key=word,value=freq,-genre_,-release_year_) %>% filter(freq>0) %>%
+  inner_join(get_sentiments('nrc')) %>%
+  group_by(genre_,release_year_,sentiment) %>% summarise(freq=sum(freq)) %>%
+  ggplot(aes(x=release_year_,y=freq,group=sentiment,colour=fct_reorder(sentiment,freq,.desc = TRUE))) + 
+    xlim(1960,2010) + geom_line() + theme_bw() +
+    labs(colour='Sentiment',y='Frequency',x='Song Release Year') +
+    facet_wrap(~genre_,scales = 'free_y',ncol = 3)
+```

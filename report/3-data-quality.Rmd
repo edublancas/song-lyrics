@@ -1,8 +1,18 @@
-# 3. Data Quality
 
-```{r}
+# 3. Data Quality
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo=TRUE,
+                      warning=FALSE,
+                      message=FALSE,
+                      fig.width=9,
+                      fig.height=9
+                      )
+```
+
+```{r loadDatasets}
 library(feather)
 library(tidyverse)
+library(scales)
 
 df_mxm_dataset <-      read_feather("../data/transform/mxm_dataset.feather")
 df_top_1000_dataset <- read_feather("../data/transform/bag_of_words_top_1000.feather")
@@ -12,9 +22,40 @@ df_year_topic <-       read_feather("../data/transform/year_topic_weights.feathe
 
 ## 3.1. Missing Data
 
+Besides the top 5,000 must frequent words in the lyrics of the Million Songs dataset, our dataset also include an additional 16 variables describing the songs and artists. These variables are used in this section to explore missing values among them.  The folliwng barchart present the missing vales rate per variable. We can see that 10 of this 16 variables are missing value free and more than half of the songs on our dataset have missing artist location information (location, latitude and longitude). Is also important to mentioned that a little over one quarter of the song in our dataset have missing genre.  
+
+```{r loadDataSets}
+songsData <- read_feather('../data/transform/bag_of_words_clean.feather')
+metadata<-select(songsData,1:16)
+names(metadata)<-gsub('_$','',names(metadata))
+metadata %>% summarise_all(function(x){sum(is.na(x) | str_trim(x)=='')/length(x)}) %>% 
+  gather(key = Variable,value=Missing) %>%
+  ggplot(aes(reorder(Variable,-Missing),Missing)) + geom_col(fill='lightblue',colour='black') + scale_y_continuous(labels = percent) +
+  labs(x='Variables',y='Missing Values') + coord_flip() + 
+  geom_text(aes(label=paste0(round(Missing*100,1),'%')),hjust=-.1,size=3)
+```
+
+The following plot shows that the prevalent missing pattern corresponds to the cobination of variables location, latitude and longitud. This pattern is followed by the cobination of the same variables with release year and then by the release year variable by itself.
+
+```{r missingPattern}
+extracat::visna(metadata,sort = 'b')
+```
+
+The following Heapmap show the distribution of missing values by language. 
+
+```{r missingByLanguage}
+metadata %>% select(language,artist_mbid,location,release_year,genre) %>% filter(!is.na(language)) %>% 
+  group_by(language) %>% summarise_all(function(x){sum(is.na(x))/length(x)}) %>% ungroup() %>% 
+  gather(variable,missing_rate,-language) %>% 
+  ggplot(aes(y=language,x=variable,fill=missing_rate)) + geom_tile(colour='white') + 
+  theme_bw() + scale_fill_gradientn(name="Missing Rate",labels=percent,
+                                    colours = c('lightyellow','yellow','orange','darkred')) +
+  labs(x='Variables',y='Language ISO 639-1 Code')
+```
+
 ## 3.2. Song Word Count
 
-Per song counts must be carefully considered, because they only count words which are in the most common 5000 words. Nevertheless, we can see that the mode is around 75 words, and there is a wide range of word counts.
+Per song counts must be carefully considered, because they only count words which are in the most common 5000 words. Nevertheless, we can see that the mode is around 75 words, and there is a wide range of word counts. When considering songs in this project, it is important to note that songs with different word counts will behave differently.
 
 ```{r}
 mxm_dup <- df_mxm_dataset
@@ -40,7 +81,7 @@ ggplot(word_count, aes(mxm_dup.sum)) +
 
 ## 3.3. Song Count Over Time
 
-The number of songs/year grows exponentially in size until ~2005, before it slows in growth rate and then declines.
+The number of songs/year grows exponentially in size until ~2005, before it slows in growth rate and then declines. This is important to note as the data is clearly biased to more recent music. Thus, it is not representitive of music from all points in history - the results from more recent year's analysis will most likely be more reliable.
 
 ```{r}
 # songs/year distrubution
@@ -54,7 +95,7 @@ ggplot(df_year_topic,aes(x=year, y=song_count))+
 
 ## 3.4. Song Count per Artist
 
-The dataset is skewed towards including few songs for each artist
+The dataset is skewed towards including few songs for each artist. When considering artists in this project, it should be noted that not all artists carry equally reliable information, as many artists are only represented by a single/few songs.
 
 ```{r}
 #songs/artist distribution

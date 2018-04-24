@@ -89,6 +89,8 @@ def main():
                         help='Path to embeddings data')
     parser.add_argument('path_to_artist_topics', type=str,
                         help='Path to artist topics file')
+    parser.add_argument('path_to_sentiment', type=str,
+                        help='Path to mean sentiment data')
     parser.add_argument('path_to_profiles', type=str,
                         help='Path to output CSV file with artists profiles')
     parser.add_argument('--min_songs', default=10, type=int,
@@ -99,6 +101,7 @@ def main():
     path_to_bag_of_words = args.path_to_bag_of_words
     path_to_embeddings = args.path_to_embeddings
     path_to_artist_topics = args.path_to_artist_topics
+    path_to_sentiment = args.path_to_sentiment
     path_to_profiles = args.path_to_profiles
     min_songs = args.min_songs
 
@@ -127,7 +130,7 @@ def main():
     artists = list(bow.artist_name_.unique())
 
     # top 5 songs for each artist
-    logger.info('Finding top 5 songs...')
+    logger.info('Finding top 5 words...')
     top_5 = (bow.groupby('artist_name_')
              .apply(sum_words, words=words)
              .apply(top_k_words, axis=1)
@@ -179,10 +182,24 @@ def main():
     df = pd.DataFrame(data)
 
     # add topic
+    logger.info('Adding topic...')
     topics = pd.read_feather(path_to_artist_topics)
     topics = topics[['artist_name', 'love', 'death', 'religion']]
-
     df = df.merge(topics, left_on='artist', right_on='artist_name')
+
+    # add sentiment
+    logger.info('Adding sentiment...')
+    sentiment = pd.read_feather(path_to_sentiment)
+    ids = bow[['artist_name_', 'artist_id_']].drop_duplicates()
+
+    sentiment = sentiment.merge(ids, on='artist_id_')[['artist_name_',
+                                                       'meanScore']]
+    df = df.merge(sentiment, left_on='artist', right_on='artist_name_')
+
+    # final processing
+    df.drop(columns=['artist_name', 'artist_name_'], inplace=True)
+    df.rename(columns={'meanScore': 'mean_sentiment'}, inplace=True)
+    df = df.round({'love': 2, 'death': 2, 'religion': 2, 'mean_sentiment': 2})
 
     nas = df.apply(lambda c: np.sum(c.isna()), axis=0) / df.shape[0] * 100
     logger.info('NA stats: {}'.format(nas))

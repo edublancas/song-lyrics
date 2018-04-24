@@ -1,0 +1,12 @@
+---
+title: Exploratory Data Analysis
+author: Eduardo Blancas Reyes (eb3079), 
+date: April 24, 2018
+output: html_document
+---
+
+# 1. Introduction
+
+# 2. Description of Data
+# 5. Executive Summary
+# 6. Conclusion

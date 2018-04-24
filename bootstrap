@@ -109,4 +109,5 @@ mkdir data/webapp
 ./process/transform/make_webapp_data data/transform/bag_of_words.feather \
     data/transform/embeddings.feather \
     data/transform/artist_topic_weights.feather \
-    data/webapp/profiles.csv \
+    data/transform/artist_sentiment_mean_score.feather \
+    data/webapp/profiles.csv

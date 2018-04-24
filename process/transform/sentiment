@@ -1,0 +1,7 @@
+ #!/usr/bin/env bash
+
+# Running the R script that wrangles the data
+Rscript ./lib/DataWrangling.R
+
+# Getting the artist sentiment mean score
+Rscript ./lib/artist_mean_sentiment.R

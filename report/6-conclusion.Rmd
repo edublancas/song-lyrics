@@ -1,0 +1,30 @@
+
+# 6. Conclusion
+
+## 6.1 Limitations:
+
+* The dataset was somewhat biased due to copyright constraints. This may have been due to particular production labels not consenting to use their content. Generally, labels don’t support a population of artists representative of entire music market, but focus on a particular genre or demographic. Therefore, the copyright constraints may have caused the distribution of songs to not be representative of all music. 
+
+* In order to reduce computation time, only the most common 5000 words in all songs were considered. While this is efficient, it does remove potential for finding insights in particularly unique words used by a subset of artists or during a short period in history.
+
+* A bag of words representation of data was used. Again, this representation saves computation time, but removes a lot of contextual information from each song (which words appear next to each other).
+
+## 6.2 Future Directions:
+* Topic modeling is computationally expensive due to the size of this dataset, it takes at least an hour to run each model, and the output must be manually considered to identify topics. Here are a couple additional analyses requiring many iterations of topic modeling that may produce interesting insights:
+  * Run topic models on specific locations (Germany, East Coast USA, West Coast USA, etc.) to investigate if there are topics which are only visible when considering specific parts of the world.
+  * Run topic models on subsets of dates to investigate if particular topics were only visible during certain times in history.
+  
+* Improve language identification. With the language imputing technique used, mistakes can be made for songs which have lyrics in multiple languages. There may be insights that can be discovered by being able to understand the distribution of languages within each song.
+
+* As mentioned in the limitations section, the copyright issues, bag of words representation, and only using the most common 5000 words may have restricted the insights possible to make with the data. In the future, lyrics could be scraped directly from the source to obtain a less restrictive and more representative dataset (ensuring that process does not violate any copyright laws).
+
+## 6.3 Lessons Learned:
+
+* Data quality is of utmost importance. Understanding the quality of data is dependent on understanding the process of collecting data. However, not all data collection techniques are explicitly defined. Therefore, any inconsistencies found within data must be explored. In this project we found a number of inconsistencies which displayed some flaws in the data collection process:
+  * Songs with similar names by the same artists are sometimes confused, and have identical bag of words representations. This is clearly incorrect.
+  * While the data set notes that different recorded tracks that comprise each song, this data is not recorded for the majority of the data set.
+  * Some songs with a primary artist and a featured artist are listed as a completely new artist.
+  
+* Creating and maintaining a clean, accurate, and reproducible data set is extremely beneficial. Often times when performing analyses we found that the data needed to be in a different format. Creating scripts to generate the updated data, instead of sharing multiple large files is extremely efficient, and ensures the same data will always be accessible to the entire team.
+
+* We learned the value of communication within a group through this project. We found that before we finalized our communication methods and work-streams, we were doing some duplicate analysis and working with slightly different datasets. Ensuring to always update the team and asking for feedback when confused proved to save time and produce better results.

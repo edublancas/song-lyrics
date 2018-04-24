@@ -1,3 +1,9 @@
+---
+output:
+  pdf_document: default
+  html_document: default
+---
+
 # 4. Main Analysis
 
 ## 4.1. Data cleaning
@@ -93,7 +99,7 @@ track metadata file is generated using the `./export_track_metadata` script and 
 * track_id - Unique identifier for the songs
 * title - track title
 * song_id - Another ID (undocumented)
-* release – Album name
+* release ??? Album name
 * artist_id - Artist unique ID
 * artist_mid - Musixmatch artist unique ID
 * artist_name - Artist name
@@ -137,7 +143,124 @@ similarity between artists.
 
 ## 4.2. Word distribution
 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo=TRUE,
+                      warning=FALSE,
+                      message=FALSE,
+                      fig.width=9,
+                      fig.height=9
+                      )
+```
+
+The require R packages for this analysis are the following:
+```{r sentiment_loadPackages}
+require(feather)
+require(stringr)
+require(tidyverse)
+require(tidytext)
+require(reshape2)
+```
+
+```{r loadDataset}
+
+songsDataClean <- read_feather('../data/transform/bag_of_words_clean.feather')
+```
+
+The following wordcloud is made out of the top 200 most frequent words in our dataset. We can see that the most frequent used word in this dataset are love, followed by words like time, feel, baby, yeah, heart, etc.
+
+```{r wordCloud}
+songsDataEng %>% select(-c(1:16)) %>% summarise_all(sum) %>% tidyr::gather(key=words,value=freq) %>%
+  with(wordcloud::wordcloud(words,freq,max.words = 200))
+```
+
 ## 4.3. Sentiment analysis
+
+The sentiment dataset from the TidyText package was used to obtain the sentiment for the words in our final data set. This dataset contains the following three general-purpose lexicons:
+
+1. AFINN from Finn [Årup Nielsen](http://www2.imm.dtu.dk/pubdb/views/publication_details.php?id=6010)
+2. bing from [Bing Liu and collaborators](https://www.cs.uic.edu/~liub/FBS/sentiment-analysis.html)
+3. nrc from [Saif Mohammad and Peter Turney.](http://saifmohammad.com/WebPages/NRC-Emotion-Lexicon.htm)
+
+All three of these lexicons are based on single English words. The AFINN lexicon assigns words a score between -5 and 5, with negative scores indicating negative sentiment and positive scores indicating positive sentiment. The bing lexicon categorizes the words as either positive or negative. The nrc lexicon classifies the words using the following categories: positive, negative, anger, anticipation, disgust, fear, joy, sadness, surprise, and trust. The tidytext package provides a function named get_sentiments() to get specific sentiment lexicons without the columns that are not used in that lexicon.
+
+To perform this analysis the following data wrangling steps where conducted:
+
+1. Filter our final dataset to get only the English songs. 
+2. Remove the words in the English dataset with zero counts. 
+3. Convert the dataset resulted from step 2 to tidy text format (words are in the rows, not in the columns).
+
+```{r sentiment_transformData}
+
+songsDataEng <- songsDataClean %>% filter(language_=='en')
+
+wordCount <- songsDataEng %>% select(-c(1:16)) %>% summarise_all(sum)
+
+songsDataEng <- songsDataEng %>% select(-which(wordCount==0)+16)
+```
+
+Once the data was wrangled we apply a series of data transformation to get the dataset needed to generate the visualization of interest (Figure 1 illustrates this process).
+
+![](figures/sentiment_transform.png){width=450px}
+
+By adding the bing sentiment lexicon to the previous word cloud, we can see the most frequent positive and negative words. Love is the most frequent positive word used as expected, follow by words like heaven, promise, beautiful, free, smile, sweet, ext. On the negative side we can see words like die, fall, pain, wrong, hard, cry, lies, etc.
+
+```{r sentimentWordCloud}
+songsDataClean %>% select(-c(1:16)) %>% summarise_all(sum) %>% 
+  tidyr::gather(key=word,value=freq) %>% inner_join(get_sentiments('bing')) %>% 
+  acast(word ~ sentiment,value.var = 'freq') %>% apply(2,function(x){ifelse(is.na(x),0,x)}) %>%
+  wordcloud::comparison.cloud(colors = c("#F8766D", "#00BFC4"),max.words = 200,random.order = F)
+```
+
+Using the nrc lexicon, let see how the different categories of sentiments varies across the song's release year. This graph shows that although positive words are the most frequent across all years, the gap between negative and positive seems to decreases with time. Is also relevant to mentioned that prior to 1978 the second most frequent sentiment was joy, but right after this year there seems to be a switch from joy to negative sentiments.
+
+```{r nrcYear}
+songsDataClean %>% select(9,17:ncol(songsDataEng)) %>% filter(!is.na(release_year_)) %>% 
+  group_by(release_year_) %>% summarise_all(sum) %>% ungroup() %>%
+  tidyr::gather(key=word,value=freq,-release_year_) %>% filter(freq>0) %>%
+  inner_join(get_sentiments('nrc')) %>%
+  group_by(release_year_,sentiment) %>% summarise(freq=sum(freq)) %>%
+  ggplot(aes(x=release_year_,y=(freq)/1000,group=sentiment,colour=fct_reorder(sentiment,freq,.desc = TRUE))) + 
+    xlim(1960,2010) + geom_line() + theme_bw() + 
+    labs(colour='Sentiment',y='Frequency (Thousands)',x='Song Release Year')
+```
+
+Let see how the nrc sentiments varies not only across year but also by genre. Looking at this visualization we can see how negative sentiment not only get closer to  positives sentiments but in actually surpasses it for some genres like Electronic, Electronic/Dance, Rock and Latin. It also important to note how the negative sentiment seems to be more predominant in almost all years for genres like hardcore and hip-hop. In the Country, Gospel & Religion and World or international genres the most predominant sentiment is positive in with a high margin with non positive sentiments. The Gospel & Religion genre is the only one in which three positive sentiment are the most frequent ones (positive, trust, joy).
+
+```{r nrcGenreYear,fig.height=12,fig.width=12}
+songsDataClean %>% select(9,10,17:ncol(songsDataEng)) %>% 
+  filter(!is.na(release_year_) & genre_ %in% names(sort(table(songsDataClean$genre_),decreasing = TRUE)[1:15])) %>% 
+  group_by(genre_,release_year_) %>% summarise_all(sum) %>% ungroup() %>%
+  tidyr::gather(key=word,value=freq,-genre_,-release_year_) %>% filter(freq>0) %>%
+  inner_join(get_sentiments('nrc')) %>%
+  group_by(genre_,release_year_,sentiment) %>% summarise(freq=sum(freq)) %>%
+  ggplot(aes(x=release_year_,y=freq,group=sentiment,colour=fct_reorder(sentiment,freq,.desc = TRUE))) + 
+    xlim(1960,2010) + geom_line() + theme_bw() +
+    labs(colour='Sentiment',y='Frequency',x='Song Release Year') +
+    facet_wrap(~genre_,scales = 'free_y',ncol = 3)
+```
+
+Using the AFFIN lexicon the following Cleveland Plot display the mean average sentiment score for the top 10 most popular singers per genre.  
+
+```{r affinGenreArtist,fig.height=15,fig.width=12}
+songsDataEng %>% filter(genre_ %in% names(sort(table(songsDataClean$genre_),decreasing = TRUE)[1:15])) %>%
+  select(7,10,15:ncol(songsDataEng)) %>%
+  plyr::ddply(.variables='genre_',
+               .fun=function(x)
+                {
+                  y <- x %>% group_by(artist_id_) %>% summarise(popularity=max(artist_familiarity_)) %>%
+                    arrange(desc(popularity))
+                  y <- y[1:10,'artist_id_',drop=FALSE]
+                  return(inner_join(x,y,by='artist_id_'))
+                }
+              ) %>% tidyr::gather(key=word,value=freq,-c(1:4)) %>% filter(freq>0) %>%
+  inner_join(get_sentiments('afinn')) %>% group_by(genre_,artist_id_,artist_name_) %>%
+  summarise(meanSentiment=sum(freq*score)/sum(freq)) %>% mutate(Sentiment=ifelse(meanSentiment<0,'Negative','Positive')) %>%
+  ggplot(aes(y=meanSentiment,x=artist_name_,colour=)) + geom_point(aes(colour=Sentiment),size=2) + 
+    coord_flip() + facet_wrap(~genre_,scales = 'free_y',ncol = 2) + theme_bw() + 
+    theme(panel.grid.major.y=element_blank()) + geom_segment(aes(xend=artist_name_),yend=-4) +
+    labs(y='Mean Sentiment Score',x='Artist Name')
+
+```
 
 ## 4.4. Distance-based comparisons
 
@@ -186,7 +309,7 @@ bow_columns_lyrics <- bow_columns[!endsWith(columns, '_')]
 
 We first take a look at the distance between years:
 
-```{r}
+```{r, fig.cap="Distance among the average song accross years"}
 by_year <- df %>% group_by(release_year_) %>%
                 do(mean_words(., columns_lyrics))
 
@@ -207,18 +330,18 @@ top_genres <- names(genre_[genre_ > 80])
 top_genres
 ```
 
-```{r}
+```{r, fig.cap="Distance among average songs accross top genres"}
 by_genre <- df %>% filter(genre_ %in% top_genres) %>% group_by(genre_) %>%
                 do(mean_words(., columns_lyrics))
 
 plot_matrix(by_genre, 'Song genre')
 ```
 
-We see that some rows are very different to the rest: Samba, Reggaeton, MPB ([Música popular brasileira](https://en.wikipedia.org/wiki/M%C3%BAsica_popular_brasileira)), Latin, Flamenco and Bachata. Most songs from these songs are in either Spanish or Portuguese, so it makes sense that they make use of different words.
+We see that some rows are very different to the rest: Samba, Reggaeton, MPB ([M??sica popular brasileira](https://en.wikipedia.org/wiki/M%C3%BAsica_popular_brasileira)), Latin, Flamenco and Bachata. Most songs from these songs are in either Spanish or Portuguese, so it makes sense that they make use of different words.
 
 We not filter by songs only in Spanish.
 
-```{r}
+```{r, fig.cap="Distance among average songs accross top genres (Spanish)"}
 by_genre_es <- df %>% filter(genre_ %in% top_genres, language_ == 'es') %>%
                     group_by(genre_) %>% do(mean_words(., columns_lyrics))
 
@@ -229,7 +352,7 @@ This plot is more informative, we see that Trance, House, Drum & Bass, Children'
 
 We now take a look at music in English.
 
-```{r}
+```{r, fig.cap="Distance among average songs accross top genres (English)"}
 by_genre_en <- df %>% filter(genre_ %in% top_genres, language_ == 'en') %>%
                     group_by(genre_) %>% do(mean_words(., columns_lyrics))
 
@@ -242,7 +365,7 @@ those songs.
 
 We took a look at Reggaeton music to find out more about this problem:
 
-```{r, fig.width=8, fig.height=6}
+```{r, fig.width=8, fig.height=6, fig.cap="Count of Reggaeton songs by language"}
 reggaeton <- df %>% filter(genre_ == 'Reggaeton')
 
 ggplot(reggaeton, aes(language_)) +
@@ -264,12 +387,12 @@ kable(reggaeton_en[, c('title_', 'artist_name_')])
 If we take a look at the lyrics of any of them, we will see that they mix
 a lot of English ann Spanish words, see for example, this verse from "Impacto" by Daddy Yankee:
 
-    ¡Hey!
-    Demuestra lo que hay, mama (¡hey!)
+    ??Hey!
+    Demuestra lo que hay, mama (??hey!)
     No pierdas el enfoque y...
-    ¡Sube! (hit me!)
-    ¡Sube! (hit me!)
-    ¡Sube! (hit me!, let's go!)
+    ??Sube! (hit me!)
+    ??Sube! (hit me!)
+    ??Sube! (hit me!, let's go!)
 
 Since the dataset only includes the top 5,000 words accross all songs, many Spanish word will not appear in the dataset but the English words will probably do. This will affect the language imputation for these songs since the non-zero counts will mostly be songs in English.
 
@@ -278,7 +401,7 @@ Since the dataset only includes the top 5,000 words accross all songs, many Span
 We now turn our attention to finding similar artists, to subset the number of
 comparisons, we first filter by genre, language (English) and then we take the top 30 artists (the ones with the most songs)
 
-```{r}
+```{r, fig.cap="Distance among Rock songs in English for the top 30 most popular artists"}
 rock_en <- df %>% filter(genre_ == 'Rock', language_ == 'en')
 rock_en_top <- names(sort(table(rock_en$artist_name_), decreasing=TRUE)[1:30])
 
@@ -291,7 +414,7 @@ plot_matrix(by_artist, 'Top 30 Rock artists (English)', groups=2)
 
 There are three bands that differ from the rest" Amorphis, Cannibal Corpse, and Napalm Death. Those three band are actually Metal bands, not Rock bands. Metal lyrics usually focus on [dark topics](https://en.wikipedia.org/wiki/Heavy_metal_lyrics), so it makes sense that those bands are different to the other bands but similar to each other.
 
-```{r}
+```{r, fig.cap="Distance among Pop songs in English for the top 30 most popular artists"}
 pop <- df %>% filter(genre_ == 'Pop', language_ == 'en')
 pop_top <- names(sort(table(pop$artist_name_), decreasing=TRUE)[1:30])
 
@@ -302,13 +425,13 @@ by_artist <- pop %>% filter(artist_name_ %in% pop_top) %>%
 plot_matrix(by_artist, 'Top 30 Pop artists (English)', groups=2)
 ```
 
-Here we see that Céline Dion looks brigther, meaning that her lyrics are different from the rest of the artists.
+Here we see that C??line Dion looks brigther, meaning that her lyrics are different from the rest of the artists.
 
 ### 4.4.4. Comparing songs form the same artist
 
 Finally, we compare songs from the two artists. First we take a look at 30 songs from the band Foo Fighters.
 
-```{r}
+```{r, fig.cap="Distance among 30 songs from the Foo Fighters band"}
 set.seed(10)
 
 ff <- df %>% filter(artist_name_ == 'Foo Fighters') %>% sample_n(30)
@@ -331,7 +454,7 @@ Looks like the heavy use of "skin" and "bones" is making that specific song be v
 
 Now we take a look at 30 songs from The Kooks:
 
-```{r}
+```{r, fig.cap="Distance among 30 songs from The Kooks band"}
 set.seed(10)
 
 kooks <- df %>% filter(artist_name_ == 'The Kooks') %>% sample_n(30)
@@ -350,7 +473,7 @@ kable(pairs)
 
 We see that rows 1, 3 and 4 correspond to the same song but a different version so it makes sense that they have the same lyrics. The second row does not match and the songs are actually different, the counts are as follows:
 
-```{r, fig.width=8, fig.height=6}
+```{r, fig.width=8, fig.height=6, fig.cap="Word count for two songs from The Kooks with different titles"}
 titles <- c('Always Free',
             'Always Where I Need To Be (NRK P3 Acoustic Session)')
 songs <- bow %>% filter(artist_name_ == 'The Kooks', title_ %in% titles)
