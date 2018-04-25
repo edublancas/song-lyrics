@@ -19,10 +19,10 @@ All our code is publicly available on [Github](https://github.com/edublancas/son
 * Aaron Sadholz (as5401)
     - Coded python topic modeling scrips
     - Wrote report section 4.5. Topic Modeling.
-    - Wrote report scection 6. Conclusion
-    
+    - Wrote report section 6. Conclusion
+
 * Eduardo Blancas Reyes (eb3079)
-    - Coded Python cleaning/processing scripts used in `boostrap` (except for topic modeling and sentiment analysis)
+    - Coded Python cleaning/processing scripts used in `bootstrap` (except for topic modeling and sentiment analysis)
     - Wrote report section 4.1 Data cleaning
     - Wrote report section 4.4. Distance-based comparisons
 
@@ -30,6 +30,6 @@ All our code is publicly available on [Github](https://github.com/edublancas/son
     - Coded R sentiment scripts
     - Wrote report section 3.1 Missing Data
     - Wrote report section 4.3 Sentiment analysis
-    
+
 * Valmik Patel (UNI: vp2382)
-    
+
