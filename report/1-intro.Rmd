@@ -31,7 +31,7 @@ All our code is publicly available on [Github](https://github.com/edublancas/son
     - Wrote report section 3.1 Missing Data
     - Wrote report section 4.3 Sentiment analysis
 
-* Valmik Patel (UNI: vp2382)
+* Valmik Patel (vp2382)
     - Made the interactive component
     - Wrote report section 1 Introduction
     - Wrote report section 2 Description of data
