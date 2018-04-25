@@ -1,6 +1,6 @@
 # 5. Executive Summary
 
-We explored song lyrics data from the Musixmatch + Million Songs dataset to derive conclusions about trends in song lyrics and music across time and geography. We asked questions to explore different facets of the dataset and identified some interesting trends. In this section, we will give a short summary of our findings and look at compelling trends in sentiment score, topics, and similar artists.
+We explored song lyrics data from the Musixmatch + Million Songs dataset to derive conclusions about trends in song lyrics and music across time and geography. We asked questions to explore different facets of the dataset and identified some interesting trends. In this section, we will give a short summary of our findings and look at compelling trends in sentiment score, topics, and similar artists.  
 
 ## From distance-based comparisons
 
@@ -23,6 +23,7 @@ Interestingly, love songs have become less common since the the 1950's. In the v
 ```{r, echo=FALSE, message=FALSE, warning=FALSE}
 library(feather)
 library(tidyverse)
+library(viridis)
 topic_year   <- read_feather('../data/transform/year_topic_weights.feather')
 
 df_parallel_coord <- data.frame(t(topic_year))[1:3,]
@@ -41,13 +42,13 @@ GGally::ggparcoord(df_parallel_coord,
                    scale='globalminmax',
                    columns = 32:87,
                    groupColumn='topic')+
-  theme(text = element_text(size=13),axis.text.x = element_text(angle=0, hjust=0.5))+
+  theme(text = element_text(size=15),axis.text.x = element_text(angle=0, hjust=0.5))+
   xlab('Year') +
   ylab('Topic Score')+
   ggtitle('Topic Relevance: 1955-2010')+
   scale_x_discrete(breaks=seq(1955, 2010, 5))+
-  geom_hline(yintercept = 0)
-
+  geom_hline(yintercept = 0)+
+  scale_color_viridis(discrete=TRUE)
 ```
 
 ## Sentiment Analysis
@@ -64,7 +65,7 @@ The must important observations of this analysis are the following:
 * When the sentiment trend over time is stratified by genre we observed that negative sentiment not only get closer to positives sentiments but in actually surpasses it for some genres like Electronic, Electronic/Dance, Rock and Latin. We also observed that negative sentiment seems to be more predominant in almost all years for genres like hardcore and hip-hop.
 
 The visualization below shows some of these observations:
-```{r nrcGenreYearExec,fig.height=12,fig.width=12}
+```{r nrcGenreYearExec,fig.height=12,fig.width=12,echo=FALSE, message=FALSE, warning=FALSE}
 songsDataClean %>% select(9,10,17:ncol(songsDataEng)) %>% 
   filter(!is.na(release_year_) & genre_ %in% names(sort(table(songsDataClean$genre_),decreasing = TRUE)[1:15])) %>% 
   group_by(genre_,release_year_) %>% summarise_all(sum) %>% ungroup() %>%
