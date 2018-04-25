@@ -1,6 +1,6 @@
 #!/usr/bin/env Rscript
 
 reqs <- c('tidyverse', 'rjson', 'dplyr', 'ggplot2', 'feather',
-          'reshape2', 'wordcloud', 'knitr', 'maps')
+          'reshape2', 'wordcloud', 'knitr', 'maps', 'extracat')
 
 install.packages(reqs)
