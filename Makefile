@@ -1,3 +1,5 @@
+.PHONY: requirements get_data bootstrap report
+
 requirements:
 	echo 'Installing R packages...'
 	./install_r_requirements
