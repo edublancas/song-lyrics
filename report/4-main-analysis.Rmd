@@ -160,8 +160,18 @@ songsDataClean <- read_feather('../data/transform/bag_of_words_clean.feather')
 
 The following word cloud is made out of the top 200 most frequent words in our dataset. We can see that the most frequent used word in this dataset are love, followed by words like time, feel, baby, yeah, heart, etc.
 
+```{r sentiment_transformData}
+
+songsDataEng <- songsDataClean %>% filter(language_=='en')
+
+wordCount <- songsDataEng %>% select(-c(1:16)) %>% summarise_all(sum)
+
+songsDataEng <- songsDataEng %>% select(-which(wordCount==0)+16)
+```
+
 ```{r wordCloud}
-songsDataEng %>% select(-c(1:16)) %>% summarise_all(sum) %>% tidyr::gather(key=words,value=freq) %>%
+songsDataEng
+songsData %>% select(-c(1:16)) %>% summarise_all(sum) %>% tidyr::gather(key=words,value=freq) %>%
   with(wordcloud::wordcloud(words,freq,max.words = 200))
 ```
 
@@ -180,15 +190,6 @@ To perform this analysis the following data wrangling steps where conducted:
 1. Filter our final dataset to get only the English songs. 
 2. Remove the words in the English dataset with zero counts. 
 3. Convert the dataset resulted from step 2 to tidy text format (words are in the rows, not in the columns).
-
-```{r sentiment_transformData}
-
-songsDataEng <- songsDataClean %>% filter(language_=='en')
-
-wordCount <- songsDataEng %>% select(-c(1:16)) %>% summarise_all(sum)
-
-songsDataEng <- songsDataEng %>% select(-which(wordCount==0)+16)
-```
 
 Once the data was wrangled we apply a series of data transformation to get the dataset needed to generate the visualization of interest (Figure 1 illustrates this process).
 
