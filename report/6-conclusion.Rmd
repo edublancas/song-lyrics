@@ -41,3 +41,5 @@ http://labrosa.ee.columbia.edu/millionsong/
 Song-lyrics Github repository, available at: https://github.com/edublancas/song-lyrics
 
 https://www.tidytextmining.com/tidytext.html
+
+bootstrap-combobox.js v1.1.6, Copyright 2012 Daniel Farrell
