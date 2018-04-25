@@ -106,6 +106,9 @@ cat data/raw/msd_beatunes_map.cls | awk -F  '\t' '{ print $1 "\t" $2}' > data/cl
 # generate data for web app
 mkdir data/webapp
 
+# compute sentiment
+./process/transform/sentiment
+
 ./process/transform/make_webapp_data data/transform/bag_of_words.feather \
     data/transform/embeddings.feather \
     data/transform/artist_topic_weights.feather \
