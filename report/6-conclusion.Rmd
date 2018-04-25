@@ -39,3 +39,5 @@ Million Song Dataset, official website by Thierry Bertin-Mahieux, available at:
 http://labrosa.ee.columbia.edu/millionsong/
 
 Song-lyrics Github repository, available at: https://github.com/edublancas/song-lyrics
+
+https://www.tidytextmining.com/tidytext.html
