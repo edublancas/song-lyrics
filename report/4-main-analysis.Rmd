@@ -37,7 +37,7 @@ them in a single file, the output is has the following format:
 ```
 
 The raw data contains stemmed words, but the authors also provide a reverse
-mapping to unstem them. We performed that operation in the same script.
+mapping to un-stem them. We performed that operation in the same script.
 
 After we got the data in JSON, we convert them to a binary format, we are
 using [Apache Feather](https://blog.cloudera.com/blog/2016/03/feather-a-fast-on-disk-format-for-data-frames-for-r-and-python-powered-by-apache-arrow/) since
@@ -57,7 +57,7 @@ is done using the  `./bag_of_words` script). The output looks like this:
 
 The `./bag_of_words` script contains some options. The dataset contains 5,000
 words in total, we can limit the output to the top k words, normalize the
-counts (convert them to proportions) and remove stopwords. We used these
+counts (convert them to proportions) and remove stop words. We used these
 options to generate several datasets for the analysis.
 
 ### 4.1.2. Language detection
@@ -115,14 +115,14 @@ track metadata file is generated using the `./export_track_metadata` script and 
 
 ### 4.1.5. Word embeddings
 
-Apart from using the bag of words representation, we generated a dense vector representation for each song using [word embeddings](https://en.wikipedia.org/wiki/Word_embedding), especifically, the 50 dimensional vectors in [GloVe](https://nlp.stanford.edu/projects/glove/). The process is as follows:
+Apart from using the bag of words representation, we generated a dense vector representation for each song using [word embeddings](https://en.wikipedia.org/wiki/Word_embedding), specifically, the 50 dimensional vectors in [GloVe](https://nlp.stanford.edu/projects/glove/). The process is as follows:
 
 Every song is represented as a vector $\mathbf{c} \in \mathbb{R}^{|W|}$, where $W$ is the set of words in our dataset. Every element $\mathbf{c}_{i}$ in $\mathbf{c}$ has a word associated with it and it represents the number of times that word is mentioned in the song. To convert this to a dense vector, we first normalized it:
 
 $$\mathbf{c}_{normalized} = \frac{\mathbf{c}}{\sum_{i=1}^{i=w}{\mathbf{c}_i}}$$
 
 
-Then, using the $w \in \mathbb{R}^{50}$ dense vectors in GloVe, we built a matrix where the ith row corresponds to the embedding for the ith word in $|W|$, then we compute the dense vector for every song as follows:
+Then, using the $w \in \mathbb{R}^{50}$ dense vectors in GloVe, we built a matrix where the ith row corresponds to the embedding for the i-th word in $|W|$, then we compute the dense vector for every song as follows:
 
 $$\mathbf{v}_{song} = \mathbf{c}_{normalized} \times M$$
 
@@ -132,13 +132,13 @@ Which give us a 50 dimensional vector for every row.
 
 Once we cleaned the data we generated 5 final datasets:
 
-1. `bag_of_words.feather` - Contains all the metadata and the counts for all the words (stopwords removed)
-2. `bag_of_words.feather` - Contains the counts top 1,000 words with the stopwords removed
+1. `bag_of_words.feather` - Contains all the metadata and the counts for all the words (stop words removed)
+2. `bag_of_words.feather` - Contains the counts top 1,000 words with the stop words removed
 3. `embeddings.feather` - Contains the metadata and the word embeddings representation (50 dimensions)
 4. `profiles.csv` - Summary for artists with at least 10 songs, this is the dataset used in the interactive component
 
 Datasets 2 and 3 are used when computing distance-based metrics to speedup computations, we assume that most of the interesting information is included in the top words. The word embeddings representation was also included since
-we found it has better results for some comparisons, especifically, to compare
+we found it has better results for some comparisons, specifically, to compare
 similarity between artists.
 
 ## 4.2. Word distribution
@@ -158,7 +158,7 @@ require(reshape2)
 songsDataClean <- read_feather('../data/transform/bag_of_words_clean.feather')
 ```
 
-The following wordcloud is made out of the top 200 most frequent words in our dataset. We can see that the most frequent used word in this dataset are love, followed by words like time, feel, baby, yeah, heart, etc.
+The following word cloud is made out of the top 200 most frequent words in our dataset. We can see that the most frequent used word in this dataset are love, followed by words like time, feel, baby, yeah, heart, etc.
 
 ```{r wordCloud}
 songsDataEng %>% select(-c(1:16)) %>% summarise_all(sum) %>% tidyr::gather(key=words,value=freq) %>%
@@ -324,7 +324,7 @@ We see that some rows are very different to the rest: Samba, Reggaeton, MPB ([M?
 
 We not filter by songs only in Spanish.
 
-```{r, fig.cap="Distance among average songs accross top genres (Spanish)"}
+```{r, fig.cap="Distance among average songs across top genres (Spanish)"}
 by_genre_es <- df %>% filter(genre_ %in% top_genres, language_ == 'es') %>%
                     group_by(genre_) %>% do(mean_words(., columns_lyrics))
 
@@ -335,7 +335,7 @@ This plot is more informative, we see that Trance, House, Drum & Bass, Children'
 
 We now take a look at music in English.
 
-```{r, fig.cap="Distance among average songs accross top genres (English)"}
+```{r, fig.cap="Distance among average songs across top genres (English)"}
 by_genre_en <- df %>% filter(genre_ %in% top_genres, language_ == 'en') %>%
                     group_by(genre_) %>% do(mean_words(., columns_lyrics))
 
@@ -368,16 +368,16 @@ kable(reggaeton_en[, c('title_', 'artist_name_')])
 ```
 
 If we take a look at the lyrics of any of them, we will see that they mix
-a lot of English ann Spanish words, see for example, this verse from "Impacto" by Daddy Yankee:
+a lot of English and Spanish words, see for example, this verse from "Impacto" by Daddy Yankee:
 
     ??Hey!
-    Demuestra lo que hay, mama (??hey!)
+    Demuestra lo que hay, mama (¡hey!)
     No pierdas el enfoque y...
-    ??Sube! (hit me!)
-    ??Sube! (hit me!)
-    ??Sube! (hit me!, let's go!)
+    ¡Sube! (hit me!)
+    ¡Sube! (hit me!)
+    ¡Sube! (hit me!, let's go!)
 
-Since the dataset only includes the top 5,000 words accross all songs, many Spanish word will not appear in the dataset but the English words will probably do. This will affect the language imputation for these songs since the non-zero counts will mostly be songs in English.
+Since the dataset only includes the top 5,000 words across all songs, many Spanish word will not appear in the dataset but the English words will probably do. This will affect the language imputation for these songs since the non-zero counts will mostly be songs in English.
 
 ### 4.4.3. Finding similar artists
 
@@ -395,7 +395,7 @@ by_artist <- rock_en %>% filter(artist_name_ %in% rock_en_top) %>%
 plot_matrix(by_artist, 'Top 30 Rock artists (English)', groups=2)
 ```
 
-There are three bands that differ from the rest" Amorphis, Cannibal Corpse, and Napalm Death. Those three band are actually Metal bands, not Rock bands. Metal lyrics usually focus on [dark topics](https://en.wikipedia.org/wiki/Heavy_metal_lyrics), so it makes sense that those bands are different to the other bands but similar to each other.
+There are three bands that differ from the rest: Amorphis, Cannibal Corpse, and Napalm Death. Those three band are actually Metal bands, not Rock bands. Metal lyrics usually focus on [dark topics](https://en.wikipedia.org/wiki/Heavy_metal_lyrics), so it makes sense that those bands are different to the other bands but similar to each other.
 
 ```{r, fig.cap="Distance among Pop songs in English for the top 30 most popular artists"}
 pop <- df %>% filter(genre_ == 'Pop', language_ == 'en')
@@ -408,7 +408,7 @@ by_artist <- pop %>% filter(artist_name_ %in% pop_top) %>%
 plot_matrix(by_artist, 'Top 30 Pop artists (English)', groups=2)
 ```
 
-Here we see that C??line Dion looks brigther, meaning that her lyrics are different from the rest of the artists.
+Here we see that C??line Dion looks brighter, meaning that her lyrics are different from the rest of the artists.
 
 ### 4.4.4. Comparing songs form the same artist
 
@@ -487,9 +487,9 @@ topic_artist <- read_feather('../data/transform/artist_topic_weights.feather')
 topic_year   <- read_feather('../data/transform/year_topic_weights.feather')
 ```
 
-Topic modeling is a powerful technique which allows for extracting the most common topics from a set of text documents (in this case song lyrics). It relys on an unstructured algorithm called Latent Dirochlet Allocation (LDA)  which finds groups of words which tend to appear in the same song. Each word is asigned a weight according to its relation to each topic. It is up to human discression to name the groups of words.
+Topic modeling is a powerful technique which allows for extracting the most common topics from a set of text documents (in this case song lyrics). It relies on an unstructured algorithm called Latent Dirichlet Allocation (LDA)  which finds groups of words which tend to appear in the same song. Each word is assigned a weight according to its relation to each topic. It is up to human discretion to name the groups of words.
 
-This was used to identify topics within our data. After finding 25 topics, by considering the most heaviliy weighted words, 3 topics with semantic meaning were identified: Love, Religion, and Death.
+This was used to identify topics within our data. After finding 25 topics, by considering the most heavily weighted words, 3 topics with semantic meaning were identified: Love, Religion, and Death.
 
 Here are the top 10 weighted words in each topic with clear semantic meaning:
 
@@ -497,9 +497,9 @@ Here are the top 10 weighted words in each topic with clear semantic meaning:
 * Death: life, die, run, dead, kill, dream, blood, death, scream, clear
 * Religion: us, god, live, dance, people, heaven, hand, stand, angel, beautiful
 
-Using these topic weights, each song can be scored to show how prevelent each topic is. In order to account for songs with many more words than others, these topic scores are divided by the number of words in each song to ensure correct equivilent scaling. However, just because a song has a higher religion score than death score does not mean it is more about religion, therefore, we must scale each topic to lie within common bounds. To do this, each song's topic score is ranked according to its sorted order, and then the ranking is scaled between 0 and 1.
+Using these topic weights, each song can be scored to show how prevalent each topic is. In order to account for songs with many more words than others, these topic scores are divided by the number of words in each song to ensure correct equivalent scaling. However, just because a song has a higher religion score than death score does not mean it is more about religion, therefore, we must scale each topic to lie within common bounds. To do this, each song's topic score is ranked according to its sorted order, and then the ranking is scaled between 0 and 1.
 
-Now we can begin to answer some fundemental questions with the topic data:
+Now we can begin to answer some fundamental questions with the topic data:
 
 * Do topics change around the world?
 * Have topics changed over time?
@@ -510,7 +510,7 @@ Here each year's songs topic weights were averaged. As we have seen previously, 
 
 * Love Songs have become less popular since the 1950's
 * Songs about religion and death have become more popular since the 1950's
-* In general, topics have become more consistant each year (based on preprocessing, each topic's mean lies at 0.5, and all topics aproach 0.5 over time).
+* In general, topics have become more consistent each year (based on preprocessing, each topic's mean lies at 0.5, and all topics approach 0.5 over time).
 
 ```{r}
 df_parallel_coord <- data.frame(t(topic_year))[1:3,]
@@ -556,7 +556,7 @@ ggplot(topic_loc_tidy) +
   ggtitle('Artist Location')
 ```
 
-In order to investigate topics around the world, each artist's topic scores are averaged. Only artists maintaining an average score of over 0.75 for a particular topic are considered to consistantly discuss that topic.  By using this cuttoff, have we defined approximately 11% of artists to speak heavily about death, ~14% of artists to conss speak heavily about love, and 11% of artists to speak heavily about religion. 
+In order to investigate topics around the world, each artist's topic scores are averaged. Only artists maintaining an average score of over 0.75 for a particular topic are considered to consistently discuss that topic.  By using this cutoff, have we defined approximately 11% of artists to speak heavily about death, ~14% of artists to speak heavily about love, and 11% of artists to speak heavily about religion. 
 
 Primary observations:
 
@@ -572,7 +572,7 @@ bardata <- data_to_plot %>% group_by(topic) %>% summarize(count = n())
 
 ggplot(bardata, aes(x = reorder(topic, count), y=count))+
   geom_col() + 
-  ggtitle('Artists Count Consistantly Referring to a Particular Topic')+
+  ggtitle('Artists Count Consistently Referring to a Particular Topic')+
   xlab('Topic')+
   ylab('Count')
 
@@ -600,6 +600,6 @@ ggplot(data_to_plot) +
 
 ### 4.5.3 Topic Related Hypotheses and Next Steps
 
-* We hypothosize that love songs have become relatively less popular over the past decades because more topics are now desirable to the audience to be discussed in music.
-* Topic modeling in individual years (or decades). Considering music from over the course of almost a century only allows for easily identifying topics which have always been discussed. By modeling topics from specific timeframes, we may be able to understand which unique topics only existed during specific points in history. Similarly, topic modeling could be performed in specific locations. Maybe there are region specific topics which were not weighted heavily enough to be identified when considering data from around the world.
-* The data suggests that the are a lot of artists discussing death in Europe and particuarly Germany. We could perform  topic modeling on other documents coming from these countries (like books perhaps) to see if this trend is limited to music, or the country's entire culture.
+* We hypothesize that love songs have become relatively less popular over the past decades because more topics are now desirable to the audience to be discussed in music.
+* Topic modeling in individual years (or decades). Considering music from over the course of almost a century only allows for easily identifying topics which have always been discussed. By modeling topics from specific time-frames, we may be able to understand which unique topics only existed during specific points in history. Similarly, topic modeling could be performed in specific locations. Maybe there are region specific topics which were not weighted heavily enough to be identified when considering data from around the world.
+* The data suggests that the are a lot of artists discussing death in Europe and particularly Germany. We could perform  topic modeling on other documents coming from these countries (like books perhaps) to see if this trend is limited to music, or the country's entire culture.

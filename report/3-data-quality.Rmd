@@ -85,7 +85,7 @@ ggplot(word_count, aes(mxm_dup.sum)) +
 The number of songs/year grows exponentially in size until ~2005, before it slows in growth rate and then declines. This is important to note as the data is clearly biased to more recent music. Thus, it is not representative of music from all points in history - the results from more recent year's analysis will most likely be more reliable.
 
 ```{r}
-# songs/year distrubution
+# songs/year distribution
 ggplot(df_year_topic,aes(x=year, y=song_count))+
   geom_point()+
   geom_line()+
