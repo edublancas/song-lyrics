@@ -53,6 +53,9 @@ var margin = {top: 120, right: 40, bottom: 20, left: 100},
 d3.select("#intro")
 	.style("left", (xOffset + 20)+"px");
 
+d3.select("#link")
+	.style("right",(xOffset + 20) + "px");
+
 // d3.select("#artist-info")
 // 	.style("left", (xOffset + 20)+"px")
 // 	.style("width", width+"px");

@@ -24,6 +24,32 @@ body {
 	cursor: pointer;
 }
 
+#link{
+	position: absolute;
+	top: 50px;
+	right: 20px;
+	width: 180px;
+	text-align: right;
+	color: #B5B5B5;
+	cursor: pointer;
+}
+
+#link a{
+	font-family: Oswald;
+  	font-size: 20px;
+  	font-weight: 300;
+  	color: white;
+  	-webkit-margin-before: 0.5em;
+  	-webkit-margin-after: 0.3em;
+  	text-decoration:none;
+}
+
+#link a:hover{
+    text-decoration: none;
+}
+
+
+
 #intro h2{
   font-family: Oswald;
   font-size: 24px;

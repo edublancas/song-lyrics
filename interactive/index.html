@@ -1,0 +1,90 @@
+
+<!DOCTYPE html>
+<meta charset="utf-8">
+	
+	<!-- Google fonts -->
+	<link href='http://fonts.googleapis.com/css?family=Oswald:400,300,700' rel='stylesheet' type='text/css'>
+	<link href='http://fonts.googleapis.com/css?family=Raleway:100,300' rel='stylesheet' type='text/css'>
+	<link href='http://fonts.googleapis.com/css?family=Open+Sans:400,600' rel='stylesheet' type='text/css'>
+
+	<!-- D3 -->
+	<script src="http://d3js.org/d3.v4.min.js"></script>
+	
+	<!-- jQuery -->
+	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+	
+	<!-- Bootstrap -->
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css">
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
+
+	<!-- Combobox script for the search box -->
+	<script src="bootstrap-combobox.js"></script>
+	<link href="bootstrap-combobox.css" rel="stylesheet">
+
+	<link rel="stylesheet" href="tooltip.css"/>
+	<link rel="stylesheet" href="d3.slider.css"/> 
+	<link rel="stylesheet" href="style.css"/>
+
+	<script src="showTooltip.js"></script>
+	<script src="createLegend.js"></script>
+	<script src="helperFunctions.js"></script>
+	
+<body>
+
+	<div id="intro">
+		<h2>Million Song Dataset</h2>
+		<span>Click here to explore a random artist or search for one in the adjacent search box.</span><br>
+	</div>
+
+	<div id = "link">
+		<a href="https://github.com/edublancas/song-lyrics" target="_blank">Project Repository</a>
+	</div>
+
+	<div class="form-group" id="searchBoxWrapper">			
+		<select id="searchBox" class="combobox input-large form-control" style="display: none;" onchange="searchArtist(this.value)">
+			 <option value="" selected="selected">Artist Name...</option>
+		</select>
+	</div>
+
+	<div id = "artist-info">
+		<div class = "artist name">
+			<div class = "helptext name">Artist Name</div>
+			<div class = "info name"></div>
+		</div>
+		<div class = "artist song">
+			<div class = "helptext song">No. of Songs</div>
+			<div class = "info song"></div>
+		</div>
+		<div class = "artist genres">
+			<div class = "helptext genres">Genres</div>
+			<div class = "info genres"></div>
+		</div>
+		<div class = "artist years">
+			<div class = "helptext years">Sentiment Score</div>
+			<div class = "info years"></div>
+		</div>
+		<div class = "artist score">
+			<div class = "helptext similar">Similar Artists</div>
+			<div class = "info score"></div>
+		</div>
+	</div>
+	
+	<!-- chart -->
+	<div id="chart"></div>
+	
+	<!-- Create div structure for Tooltip -->
+	<div id="tooltip">
+		<div id="tooltip-Container">
+			<div class="tooltip-band"></div>
+			<div class="tooltip-rule"></div>
+			<div id="tooltip-year"></div>
+			<div id="tooltip-album"></div>
+			<div id="tooltip-place"></div>
+			<div class="tooltip-tail"></div>
+		</div>
+	</div>
+
+	<script src="mainCode.js"></script>
+
+</body>
+</html>
