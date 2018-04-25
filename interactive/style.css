@@ -100,8 +100,10 @@ body {
 
 .axis text {
   stroke:#B5B5B5;
-  font-weight: 5;
+  font-weight: 100;
   font-size: 10px;
+  letter-spacing: 1px;
+
 }
 
 .legend {
