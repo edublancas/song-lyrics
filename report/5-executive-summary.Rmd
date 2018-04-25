@@ -53,7 +53,7 @@ GGally::ggparcoord(df_parallel_coord,
 
 ## Sentiment Analysis
 
-The sentiment dataset from the TidyText package was used to obtain the sentiment for the words in our final data set. By using the AFFIN, bing and nrc lexicons we explored the following topics:
+The sentiment dataset from the TidyText package was used to obtain the sentiment for the words in our final data set. By using several sentiment lexicons we explored the following topics:
 
 * Most frequent positive and negative words. 
 * How different sentiments categories (joy, trust, sadness, anger, etc) changes according to the songs release year and genre.
