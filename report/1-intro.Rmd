@@ -12,6 +12,8 @@ Music has evolved immensely throughout the years. This is evident in no place mo
 
 We explored and tried to answer different questions in the project. Primarily, we looked at how lyrics varied across time, band and geography. We looked at the sentiment scores and their variation across these factors. In addition, we explored the topics covered by the songs as well by using topic modeling on the song lyrics. The similarity of bands was also determined based on their choice of lyrics.
 
+All our code is publicly available on [Github](https://github.com/edublancas/song-lyrics).
+
 ## 1.1 Team members
 
 * Aaron Sadholz (as5401)

@@ -28,3 +28,14 @@
 * Creating and maintaining a clean, accurate, and reproducible data set is extremely beneficial. Often times when performing analyses we found that the data needed to be in a different format. Creating scripts to generate the updated data, instead of sharing multiple large files is extremely efficient, and ensures the same data will always be accessible to the entire team.
 
 * We learned the value of communication within a group through this project. We found that before we finalized our communication methods and work-streams, we were doing some duplicate analysis and working with slightly different datasets. Ensuring to always update the team and asking for feedback when confused proved to save time and produce better results.
+
+# 7. References
+
+Thierry Bertin-Mahieux, Daniel P.W. Ellis, Brian Whitman, and Paul Lamere. The
+Million Song Dataset. In Proceedings of the 12th International Society for Music
+Information Retrieval Conference (ISMIR 2011), 2011.
+
+Million Song Dataset, official website by Thierry Bertin-Mahieux, available at:
+http://labrosa.ee.columbia.edu/millionsong/
+
+Song-lyrics Github repository, available at: https://github.com/edublancas/song-lyrics
