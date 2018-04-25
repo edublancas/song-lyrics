@@ -94,5 +94,4 @@ vignettes/*.pdf
 # R Markdown Output
 *.html
 
-# interactive component data
-interactive/profiles.csv
+
