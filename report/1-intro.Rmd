@@ -14,6 +14,8 @@ We explored and tried to answer different questions in the project. Primarily, w
 
 All our code is publicly available on [Github](https://github.com/edublancas/song-lyrics).
 
+The interactive component of this project, which displays information on inidivudual artists is available [here](http://bl.ocks.org/valmikkpatel/raw/450a721204f0f3788133c045f700278f)
+
 ## 1.1 Team members
 
 * Aaron Sadholz (as5401)
