@@ -80,4 +80,4 @@ songsDataClean %>% select(9,10,17:ncol(songsDataEng)) %>%
 
 # 6 Interactive Component
 
-The interactive component of this project, which displays information on inidivudual artists is available [here](http://bl.ocks.org/valmikkpatel/raw/450a721204f0f3788133c045f700278f/).
+The interactive component of this project, which displays information on individual artists is available [here](http://bl.ocks.org/valmikkpatel/raw/450a721204f0f3788133c045f700278f/).
