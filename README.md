@@ -4,7 +4,7 @@ Exploratory Data Analysis and Visualization, Columbia University, Spring 2018.
 
 ## Project overview
 
-TODO: add executive summary here
+We explored song lyrics data from the Musixmatch + Million Songs dataset to derive conclusions about trends in song lyrics and music across time and geography. We asked questions to explore different facets of the dataset and identified some interesting trends.
 
 ## Folder structure
 
@@ -69,4 +69,4 @@ make report
 
 ## 4. Interactive component
 
-TODO: add instructions
+[See the interactive component section](interactive/README.md)
