@@ -26,8 +26,8 @@ We explored and tried to answer different questions in the project. Primarily, w
 
 * Jose
     - Coded R sentiment scripts
-    _ Wrote report section 3.1 Missing Data
-    _ Wrote report section 4.3 Sentiment analysis
+    - Wrote report section 3.1 Missing Data
+    - Wrote report section 4.3 Sentiment analysis
     
 * Valmik Patel (UNI: vp2382)
     
