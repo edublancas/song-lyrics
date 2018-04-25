@@ -1,3 +1,10 @@
-#Synopsis
+# Interactive Component
 
-The RS 500 was assembled by the editors of Rolling Stone, based on the results of two extensive polls conducted in 2003 and 2009. Here you can see the distribution of the top 500 albums according to their year of release.
+The interactive component, built in d3, allows you to explore data points such as sentiment scores, topic scores and similar artists for the top artists in the One Million Songs + Musixmatch dataset.
+
+[Click here](http://bl.ocks.org/valmikkpatel/raw/9eb73fe0c0b386859a5cff86b184568d/) to view the visualization.
+
+
+
+References:
+* bootstrap-combobox.js v1.1.6, Copyright 2012 Daniel Farrell
