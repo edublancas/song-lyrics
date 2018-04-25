@@ -1,6 +1,6 @@
 ---
 title: Exploratory Data Analysis
-author: Eduardo Blancas Reyes (eb3079), 
+author: Eduardo Blancas Reyes (eb3079), Valmik Patel (vp2382)
 date: April 24, 2018
 output: html_document
 ---
@@ -13,6 +13,8 @@ Music has evolved immensely throughout the years. This is evident in no place mo
 We explored and tried to answer different questions in the project. Primarily, we looked at how lyrics varied across time, band and geography. We looked at the sentiment scores and their variation across these factors. In addition, we explored the topics covered by the songs as well by using topic modeling on the song lyrics. The similarity of bands was also determined based on their choice of lyrics.
 
 All our code is publicly available on [Github](https://github.com/edublancas/song-lyrics).
+
+The interactive component of this project, which displays information on inidivudual artists is available [here](http://bl.ocks.org/valmikkpatel/raw/450a721204f0f3788133c045f700278f)
 
 ## 1.1 Team members
 
@@ -31,5 +33,8 @@ All our code is publicly available on [Github](https://github.com/edublancas/son
     - Wrote report section 3.1 Missing Data
     - Wrote report section 4.3 Sentiment analysis
 
-* Valmik Patel (UNI: vp2382)
+* Valmik Patel (vp2382)
+    - Made the interactive component
+    - Wrote report section 1 Introduction
+    - Wrote report section 2 Description of data
 

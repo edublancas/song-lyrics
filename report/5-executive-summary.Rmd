@@ -77,3 +77,7 @@ songsDataClean %>% select(9,10,17:ncol(songsDataEng)) %>%
     labs(colour='Sentiment',y='Frequency',x='Song Release Year') +
     facet_wrap(~genre_,scales = 'free_y',ncol = 3)
 ```
+
+# 6 Interactive Component
+
+The interactive component of this project, which displays information on inidivudual artists is available [here](http://bl.ocks.org/valmikkpatel/raw/450a721204f0f3788133c045f700278f/).
