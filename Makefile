@@ -21,7 +21,7 @@ report:
 	echo 'Building report...'
 	cat report/1-intro.Rmd report/2-data-description.Rmd \
 		report/3-data-quality.Rmd report/4-main-analysis.Rmd \
-		report/5-executive-summary.Rmd report/7-conclusion.Rmd > report/all.Rmd
-	./report/render report/all.Rmd
-	rm -f report/all.Rmd
-	echo 'Report in report/all.html'
+		report/5-executive-summary.Rmd report/7-conclusion.Rmd > report/final.Rmd
+	./report/render report/final.Rmd
+	rm -f report/final.Rmd
+	echo 'Report in report/final.html'
