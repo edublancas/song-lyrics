@@ -5,7 +5,7 @@
 
 * The dataset was somewhat biased due to copyright constraints. This may have been due to particular production labels not consenting to use their content. Generally, labels don’t support a population of artists representative of entire music market, but focus on a particular genre or demographic. Therefore, the copyright constraints may have caused the distribution of songs to not be representative of all music. 
 
-* In order to reduce computation time, only the most common 5000 words in all songs were considered. While this is efficient, it does remove potential for finding insights in particularly unique words used by a subset of artists or during a short period in history.
+* In order to reduce computation time, only the most common 5,000 words in all songs were considered. While this is efficient, it does remove potential for finding insights in particularly unique words used by a subset of artists or during a short period in history.
 
 * A bag of words representation of data was used. Again, this representation saves computation time, but removes a lot of contextual information from each song (which words appear next to each other).
 
