@@ -6,6 +6,11 @@ Exploratory Data Analysis and Visualization, Columbia University, Spring 2018.
 
 We explored song lyrics data from the Musixmatch + Million Songs dataset to derive conclusions about trends in song lyrics and music across time and geography. We asked questions to explore different facets of the dataset and identified some interesting trends.
 
+
+## Report
+
+The report for this project is available [here](https://blancas.io/song-lyrics/).
+
 ## Folder structure
 
 * `data/` - Data is dumped here, not included in the repository
