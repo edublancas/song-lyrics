@@ -83,7 +83,7 @@ record labels, hence, not being recognized as the same artist by the Musixmatch 
 
 ### 4.1.4. Extracting track metadata
 
-There there are some other datasets that contain track metadata. It is
+There are some other datasets that contain track metadata. It is
 important to mention that the Musixmatch dataset (the one with the lyrics data) is a subset of the [Million Song Dataset](https://labrosa.ee.columbia.edu/millionsong/) so we took the track IDs for such subset and only exported the metadata for those tracks.
 
 The datasets that contain the track metadata are `track_metadata.db`
@@ -94,7 +94,7 @@ track metadata file is generated using the `./export_track_metadata` script and 
 * track_id - Unique identifier for the songs
 * title - track title
 * song_id - Another ID (undocumented)
-* release ??? Album name
+* release - Album name
 * artist_id - Artist unique ID
 * artist_mid - Musixmatch artist unique ID
 * artist_name - Artist name
@@ -117,7 +117,7 @@ Every song is represented as a vector $\mathbf{c} \in \mathbb{R}^{|W|}$, where $
 $$\mathbf{c}_{normalized} = \frac{\mathbf{c}}{\sum_{i=1}^{i=w}{\mathbf{c}_i}}$$
 
 
-Then, using the $w \in \mathbb{R}^{50}$ dense vectors in GloVe, we built a matrix where the ith row corresponds to the embedding for the i-th word in $|W|$, then we compute the dense vector for every song as follows:
+Then, using the $w \in \mathbb{R}^{50}$ dense vectors in GloVe, we built a matrix where the i-th row corresponds to the embedding for the i-th word in $|W|$, then we compute the dense vector for every song as follows:
 
 $$\mathbf{v}_{song} = \mathbf{c}_{normalized} \times M$$
 
@@ -128,7 +128,7 @@ Which give us a 50 dimensional vector for every row.
 Once we cleaned the data we generated 5 final datasets:
 
 1. `bag_of_words.feather` - Contains all the metadata and the counts for all the words (stop words removed)
-2. `bag_of_words.feather` - Contains the counts top 1,000 words with the stop words removed
+2. `bag_of_words_top_1000.feather` - Contains the counts top 1,000 words with the stop words removed
 3. `embeddings.feather` - Contains the metadata and the word embeddings representation (50 dimensions)
 4. `profiles.csv` - Summary for artists with at least 10 songs, this is the dataset used in the interactive component
 
@@ -316,7 +316,7 @@ by_genre <- df %>% filter(genre_ %in% top_genres) %>% group_by(genre_) %>%
 plot_matrix(by_genre, 'Song genre')
 ```
 
-We see that some rows are very different to the rest: Samba, Reggaeton, MPB ([M??sica popular brasileira](https://en.wikipedia.org/wiki/M%C3%BAsica_popular_brasileira)), Latin, Flamenco and Bachata. Most songs from these songs are in either Spanish or Portuguese, so it makes sense that they make use of different words.
+We see that some rows are very different to the rest: Samba, Reggaeton, MPB ([Musica popular brasileira](https://en.wikipedia.org/wiki/M%C3%BAsica_popular_brasileira)), Latin, Flamenco and Bachata. Most songs from these songs are in either Spanish or Portuguese, so it makes sense that they make use of different words.
 
 We not filter by songs only in Spanish.
 
@@ -404,7 +404,7 @@ by_artist <- pop %>% filter(artist_name_ %in% pop_top) %>%
 plot_matrix(by_artist, 'Top 30 Pop artists (English)', groups=2)
 ```
 
-Here we see that C??line Dion looks brighter, meaning that her lyrics are different from the rest of the artists.
+Here we see that Celine Dion looks brighter, meaning that her lyrics are different from the rest of the artists.
 
 ### 4.4.4. Comparing songs form the same artist
 
