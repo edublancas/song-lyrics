@@ -98,12 +98,14 @@ songsDataClean %>% select(9,10,17:ncol(songsDataEng)) %>%
   tidyr::gather(key=word,value=freq,-genre_,-release_year_) %>% filter(freq>0) %>%
   inner_join(get_sentiments('nrc')) %>%
   group_by(genre_,release_year_,sentiment) %>% summarise(freq=sum(freq)) %>%
+  filter(sentiment %in% c('positive', 'negative'))  %>%
   ggplot(aes(x=release_year_,y=freq,group=sentiment,colour=fct_reorder(sentiment,freq,.desc = TRUE))) + 
     xlim(1960,2010) + geom_line() + theme_bw() +
     labs(colour='Sentiment',y='Frequency',x='Song Release Year') +
     facet_wrap(~genre_,scales = 'free_y',ncol = 3) +
     theme(text = element_text(size=14)) +
-    theme(strip.text.x = element_text(size = 14))
+    theme(strip.text.x = element_text(size = 14)) +
+    scale_color_viridis(discrete=TRUE, end=0.5)
 ```
 
 # 6. Interactive Component
