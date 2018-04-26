@@ -138,7 +138,7 @@ similarity between artists.
 
 ## 4.2. Word distribution
 
-The require R packages for this analysis are the following:
+The required R packages for this analysis are the following:
 
 ```{r sentiment_loadPackages}
 require(feather)
