@@ -1,6 +1,6 @@
 ---
 title: Exploratory Data Analysis
-author: Eduardo Blancas Reyes (eb3079), Valmik Patel (vp2382), Aaron Sadholz (as5401)
+author: Eduardo Blancas Reyes (eb3079), Valmik Patel (vp2382), Aaron Sadholz (as5401), Jose A Alvarado-Guzman (jaa2220)
 date: April 24, 2018
 output: html_document
 ---
@@ -28,7 +28,7 @@ The interactive component of this project, which displays information on individ
     - Wrote report section 4.1 Data cleaning
     - Wrote report section 4.4. Distance-based comparisons
 
-* Jose
+* Jose A Alvarado-Guzman (jaa2220)
     - Coded R sentiment scripts
     - Wrote report section 3.1 Missing Data
     - Wrote report section 4.3 Sentiment analysis
