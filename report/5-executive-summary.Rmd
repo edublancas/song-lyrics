@@ -1,8 +1,9 @@
+
 # 5. Executive Summary
 
 We explored song lyrics data from the Musixmatch + Million Songs dataset to derive conclusions about trends in song lyrics and music across time and geography. We asked questions to explore different facets of the dataset and identified some interesting trends. In this section, we will give a short summary of our findings and look at compelling trends in sentiment score, topics, and similar artists.  
 
-## Distance-based comparisons
+## 5.1 Distance-based comparisons
 
 Analyzing similarity at different levels gave us interesting information about the data. Since our dataset contains data from many languages (mostly English and Spanish) we saw that when comparing genres, some of them were much closer to each other since they share the language (some songs in certain music genres are mostly in Spanish).
 
@@ -33,7 +34,7 @@ plot_matrix(by_artist, 'Top 30 Rock artists (English)', groups=2)
 
 Furthermore, when comparing Rock artists, we found that lyrics in Metal music are different from the rest of the popular Rock sub-genres. This makes sense since Metal lyrics usually speak about [dark subjects such as Hell, injustice, mayhem, carnage and death](https://en.wikipedia.org/wiki/Heavy_metal_lyrics).
 
-## Topic Analysis
+## 5.2 Topic Analysis
 
 The topics love, death, and religion have always existed in song lyrics, however their relevance has changed over time. To understand this, we model the occurrence of words which relate to each topic:
 
@@ -74,7 +75,7 @@ GGally::ggparcoord(df_parallel_coord,
   scale_color_viridis(discrete=TRUE)
 ```
 
-## Sentiment Analysis
+## 5.3 Sentiment Analysis
 
 The sentiment dataset from the TidyText package was used to obtain the sentiment for the words in our final data set. By using several sentiment lexicons we explored the following topics:
 
