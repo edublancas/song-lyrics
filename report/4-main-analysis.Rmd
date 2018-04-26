@@ -161,8 +161,8 @@ songsDataEng <- songsDataEng %>% select(-which(wordCount==0)+16)
 ```
 
 ```{r wordCloud}
-songsDataClean %>% select(-c(1:16)) %>% summarise_all(sum) %>% tidyr::gather(key=words,value=freq) %>%
-   with(wordcloud::wordcloud(words,freq,max.words = 200))
+counts <- songsDataClean %>% select(-c(1:16)) %>% summarise_all(sum)
+wordcloud::wordcloud(names(counts), as.numeric(counts), max.words = 200)
 ```
 
 ## 4.3. Sentiment analysis
