@@ -7,13 +7,16 @@ Exploratory Data Analysis and Visualization, Columbia University, Spring 2018.
 We explored song lyrics data from the Musixmatch + Million Songs dataset to derive conclusions about trends in song lyrics and music across time and geography. We asked questions to explore different facets of the dataset and identified some interesting trends.
 
 
-## Report
+## Deliverables
 
 The report for this project is available [here](https://blancas.io/song-lyrics/).
+
+The interactive component, built in d3, allows you to explore data points such as sentiment scores, topic scores and similar artists for the top artists in the One Million Songs + Musixmatch dataset. [Click here](http://bl.ocks.org/valmikkpatel/raw/450a721204f0f3788133c045f700278f/) to view the interactive component.
 
 ## Folder structure
 
 * `data/` - Data is dumped here, not included in the repository
+* `interactive/` - Source code for interactive component
 * `experiments/` - Notebooks/scripts that we used to explore the data
 * `lib/` - R utility functions used in the project
 * `process/` - Scripts for downloading and processing the data (Python 3)
@@ -70,10 +73,3 @@ Build the final report.
 ```shell
 make report
 ```
-
-
-## 4. Interactive component
-
-The interactive component, built in d3, allows you to explore data points such as sentiment scores, topic scores and similar artists for the top artists in the One Million Songs + Musixmatch dataset.
-
-[Click here](http://bl.ocks.org/valmikkpatel/raw/450a721204f0f3788133c045f700278f/) to view the interactive component. Or it can be viewed after downloading this folder and running a local server.
