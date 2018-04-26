@@ -8,7 +8,30 @@ Analyzing similarity at different levels gave us interesting information about t
 
 When filtering only by songs that our algorithm labeled as English, we still notice groups of songs that are very different to the rest, when inspecting these songs we realized that most of them are Reggaeton music, a genre that originated in Puerto Rico. The lyrics of Reggaeton usually mix English and Spanish, so our algorithm had difficulties labeling these songs.
 
-Furthermore, when comparing artists, we found that lyrics in Metal music are different from the rest of the popular genres. This makes sense since Metal lyrics usually speak about [dark subjects such as Hell, injustice, mayhem, carnage and death](https://en.wikipedia.org/wiki/Heavy_metal_lyrics).
+```{r, echo=FALSE, message=FALSE, warning=FALSE, fig.cap="Distance among Rock songs in English for the top 30 most popular artists"}
+library(feather)
+library(dplyr)
+library(tidyr)
+library(reshape2)
+library(ggplot2)
+library(knitr)
+source('../lib/eduardo_util.R')
+
+df <- read_feather('../data/transform/embeddings.feather')
+columns <- colnames(df)
+columns_lyrics <- columns[!endsWith(columns, '_')]
+
+rock_en <- df %>% filter(genre_ == 'Rock', language_ == 'en')
+rock_en_top <- names(sort(table(rock_en$artist_name_), decreasing=TRUE)[1:30])
+
+by_artist <- rock_en %>% filter(artist_name_ %in% rock_en_top) %>%
+                group_by(artist_name_) %>%
+                do(mean_words(., columns_lyrics))
+
+plot_matrix(by_artist, 'Top 30 Rock artists (English)', groups=2)
+```
+
+Furthermore, when comparing Rock artists, we found that lyrics in Metal music are different from the rest of the popular Rock sub-genres. This makes sense since Metal lyrics usually speak about [dark subjects such as Hell, injustice, mayhem, carnage and death](https://en.wikipedia.org/wiki/Heavy_metal_lyrics).
 
 ## Topic Analysis
 
@@ -65,7 +88,7 @@ The must important observations of this analysis are the following:
 * When the sentiment trend over time is stratified by genre we observed that negative sentiment not only get closer to positives sentiments but in actually surpasses it for some genres like Electronic, Electronic/Dance, Rock and Latin. We also observed that negative sentiment seems to be more predominant in almost all years for genres like hardcore and hip-hop.
 
 The visualization below shows some of these observations:
-<!-- 
+
 ```{r nrcGenreYearExec,fig.height=12,fig.width=12,echo=FALSE, message=FALSE, warning=FALSE}
 songsDataClean %>% select(9,10,17:ncol(songsDataEng)) %>% 
   filter(!is.na(release_year_) & genre_ %in% names(sort(table(songsDataClean$genre_),decreasing = TRUE)[1:15])) %>% 
@@ -76,9 +99,10 @@ songsDataClean %>% select(9,10,17:ncol(songsDataEng)) %>%
   ggplot(aes(x=release_year_,y=freq,group=sentiment,colour=fct_reorder(sentiment,freq,.desc = TRUE))) + 
     xlim(1960,2010) + geom_line() + theme_bw() +
     labs(colour='Sentiment',y='Frequency',x='Song Release Year') +
-    facet_wrap(~genre_,scales = 'free_y',ncol = 3)
+    facet_wrap(~genre_,scales = 'free_y',ncol = 3) +
+    scale_color_viridis(discrete=TRUE)
 ```
- -->
-# 6 Interactive Component
+
+# 6. Interactive Component
 
 The interactive component of this project, which displays information on individual artists is available [here](http://bl.ocks.org/valmikkpatel/raw/450a721204f0f3788133c045f700278f/).

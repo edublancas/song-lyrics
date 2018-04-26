@@ -8,6 +8,10 @@ knitr::opts_chunk$set(echo=TRUE,
                       fig.width=9,
                       fig.height=9
                       )
+
+library(ggplot2)
+
+theme_set(theme_grey(base_size = 14))
 ```
 
 ```{r loadDatasets}

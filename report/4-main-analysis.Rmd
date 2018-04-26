@@ -149,25 +149,21 @@ require(reshape2)
 ```
 
 ```{r loadDataset}
-
 songsDataClean <- read_feather('../data/transform/bag_of_words_clean.feather')
 ```
 
 The following word cloud is made out of the top 200 most frequent words in our dataset. We can see that the most frequent used word in this dataset are love, followed by words like time, feel, baby, yeah, heart, etc.
 
 ```{r sentiment_transformData}
-
 songsDataEng <- songsDataClean %>% filter(language_=='en')
-
 wordCount <- songsDataEng %>% select(-c(1:16)) %>% summarise_all(sum)
-
 songsDataEng <- songsDataEng %>% select(-which(wordCount==0)+16)
 ```
 
 ```{r wordCloud}
-songsDataEng
-songsData %>% select(-c(1:16)) %>% summarise_all(sum) %>% tidyr::gather(key=words,value=freq) %>%
-  with(wordcloud::wordcloud(words,freq,max.words = 200))
+# songsDataEng
+# songsData %>% select(-c(1:16)) %>% summarise_all(sum) %>% tidyr::gather(key=words,value=freq) %>%
+#   with(wordcloud::wordcloud(words,freq,max.words = 200))
 ```
 
 ## 4.3. Sentiment analysis
@@ -186,21 +182,24 @@ To perform this analysis the following data wrangling steps where conducted:
 2. Remove the words in the English dataset with zero counts. 
 3. Convert the dataset resulted from step 2 to tidy text format (words are in the rows, not in the columns).
 
+
+# TODO: FIX THIS (missing figure and wrong label, it's not figure 1)
+
 Once the data was wrangled we apply a series of data transformation to get the dataset needed to generate the visualization of interest (Figure 1 illustrates this process).
 
-![](figures/sentiment_transform.png){width=450px}
+<!-- ![](figures/sentiment_transform.png){width=450px} -->
 
 By adding the bing sentiment lexicon to the previous word cloud, we can see the most frequent positive and negative words. Love is the most frequent positive word used as expected, follow by words like heaven, promise, beautiful, free, smile, sweet, ext. On the negative side we can see words like die, fall, pain, wrong, hard, cry, lies, etc.
 
-<!-- ```{r sentimentWordCloud}
+```{r sentimentWordCloud}
 songsDataClean %>% select(-c(1:16)) %>% summarise_all(sum) %>% 
   tidyr::gather(key=word,value=freq) %>% inner_join(get_sentiments('bing')) %>% 
   acast(word ~ sentiment,value.var = 'freq') %>% apply(2,function(x){ifelse(is.na(x),0,x)}) %>%
   wordcloud::comparison.cloud(colors = c("#F8766D", "#00BFC4"),max.words = 200,random.order = F)
-``` -->
+```
 
 Using the nrc lexicon, let see how the different categories of sentiments varies across the song's release year. This graph shows that although positive words are the most frequent across all years, the gap between negative and positive seems to decreases with time. Is also relevant to mentioned that prior to 1978 the second most frequent sentiment was joy, but right after this year there seems to be a switch from joy to negative sentiments.
-<!-- 
+
 ```{r nrcYear}
 songsDataClean %>% select(9,17:ncol(songsDataEng)) %>% filter(!is.na(release_year_)) %>% 
   group_by(release_year_) %>% summarise_all(sum) %>% ungroup() %>%
@@ -211,9 +210,9 @@ songsDataClean %>% select(9,17:ncol(songsDataEng)) %>% filter(!is.na(release_yea
     xlim(1960,2010) + geom_line() + theme_bw() + 
     labs(colour='Sentiment',y='Frequency (Thousands)',x='Song Release Year')
 ```
- -->
+
 Let see how the nrc sentiments varies not only across year but also by genre. Looking at this visualization we can see how negative sentiment not only get closer to  positives sentiments but in actually surpasses it for some genres like Electronic, Electronic/Dance, Rock and Latin. It also important to note how the negative sentiment seems to be more predominant in almost all years for genres like hardcore and hip-hop. In the Country, Gospel & Religion and World or international genres the most predominant sentiment is positive in with a high margin with non positive sentiments. The Gospel & Religion genre is the only one in which three positive sentiment are the most frequent ones (positive, trust, joy).
-<!-- 
+
 ```{r nrcGenreYear,fig.height=12,fig.width=12}
 songsDataClean %>% select(9,10,17:ncol(songsDataEng)) %>% 
   filter(!is.na(release_year_) & genre_ %in% names(sort(table(songsDataClean$genre_),decreasing = TRUE)[1:15])) %>% 
@@ -225,30 +224,30 @@ songsDataClean %>% select(9,10,17:ncol(songsDataEng)) %>%
     xlim(1960,2010) + geom_line() + theme_bw() +
     labs(colour='Sentiment',y='Frequency',x='Song Release Year') +
     facet_wrap(~genre_,scales = 'free_y',ncol = 3)
-``` -->
+```
 
 Using the AFFIN lexicon the following Cleveland Plot display the mean average sentiment score for the top 10 most popular singers per genre.  
 
-<!-- ```{r affinGenreArtist,fig.height=15,fig.width=12}
-songsDataEng %>% filter(genre_ %in% names(sort(table(songsDataClean$genre_),decreasing = TRUE)[1:15])) %>%
-  select(7,10,15:ncol(songsDataEng)) %>%
-  plyr::ddply(.variables='genre_',
-               .fun=function(x)
-                {
-                  y <- x %>% group_by(artist_id_) %>% summarise(popularity=max(artist_familiarity_)) %>%
-                    arrange(desc(popularity))
-                  y <- y[1:10,'artist_id_',drop=FALSE]
-                  return(inner_join(x,y,by='artist_id_'))
-                }
-              ) %>% tidyr::gather(key=word,value=freq,-c(1:4)) %>% filter(freq>0) %>%
-  inner_join(get_sentiments('afinn')) %>% group_by(genre_,artist_id_,artist_name_) %>%
-  summarise(meanSentiment=sum(freq*score)/sum(freq)) %>% mutate(Sentiment=ifelse(meanSentiment<0,'Negative','Positive')) %>%
-  ggplot(aes(y=meanSentiment,x=artist_name_,colour=)) + geom_point(aes(colour=Sentiment),size=2) + 
-    coord_flip() + facet_wrap(~genre_,scales = 'free_y',ncol = 2) + theme_bw() + 
-    theme(panel.grid.major.y=element_blank()) + geom_segment(aes(xend=artist_name_),yend=-4) +
-    labs(y='Mean Sentiment Score',x='Artist Name')
+```{r affinGenreArtist,fig.height=15,fig.width=12}
+# songsDataEng %>% filter(genre_ %in% names(sort(table(songsDataClean$genre_),decreasing = TRUE)[1:15])) %>%
+#   select(7,10,15:ncol(songsDataEng)) %>%
+#   plyr::ddply(.variables='genre_',
+#                .fun=function(x)
+#                 {
+#                   y <- x %>% group_by(artist_id_) %>% summarise(popularity=max(artist_familiarity_)) %>%
+#                     arrange(desc(popularity))
+#                   y <- y[1:10,'artist_id_',drop=FALSE]
+#                   return(inner_join(x,y,by='artist_id_'))
+#                 }
+#               ) %>% tidyr::gather(key=word,value=freq,-c(1:4)) %>% filter(freq>0) %>%
+#   inner_join(get_sentiments('afinn')) %>% group_by(genre_,artist_id_,artist_name_) %>%
+#   summarise(meanSentiment=sum(freq*score)/sum(freq)) %>% mutate(Sentiment=ifelse(meanSentiment<0,'Negative','Positive')) %>%
+#   ggplot(aes(y=meanSentiment,x=artist_name_,colour=)) + geom_point(aes(colour=Sentiment),size=2) + 
+#     coord_flip() + facet_wrap(~genre_,scales = 'free_y',ncol = 2) + theme_bw() + 
+#     theme(panel.grid.major.y=element_blank()) + geom_segment(aes(xend=artist_name_),yend=-4) +
+#     labs(y='Mean Sentiment Score',x='Artist Name')
 
-``` -->
+```
 
 ## 4.4. Distance-based comparisons
 
