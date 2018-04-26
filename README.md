@@ -9,7 +9,7 @@ We explored song lyrics data from the Musixmatch + Million Songs dataset to deri
 
 ## Deliverables
 
-The report for this project is available [here](https://blancas.io/song-lyrics/).
+The report for this project is available [here](https://blancas.io/song-lyrics/index.html).
 
 The interactive component, built in d3, allows you to explore data points such as sentiment scores, topic scores and similar artists for the top artists in the One Million Songs + Musixmatch dataset. [Click here](http://bl.ocks.org/valmikkpatel/raw/450a721204f0f3788133c045f700278f/) to view the interactive component.
 
@@ -37,7 +37,7 @@ git clone https://github.com/edublancas/song-lyrics
 cd song-lyrics
 ```
 
-## 0. Software requirements
+### 0. Software requirements
 
 This project requires Python 3 and R.
 
@@ -47,7 +47,7 @@ To install Python and R required packages:
 make requirements
 ```
 
-## 1. Get raw data
+### 1. Get raw data
 
 The following command fetches all the datasets we used, it will create a new data/ folder in the current working directory raw data will be stored in data/raw.
 
@@ -58,7 +58,7 @@ make get_data
 
 Note: [GLoVe](https://nlp.stanford.edu/projects/glove/) gives some problems when trying to download it using `wget`, it's better to download it manually, put the uncompressed data in  `data/raw`.
 
-## 2. Process data
+### 2. Process data
 
 This script runs all the cleaning, processing we did on the data and it outputs the final datasets we used in the report and the interactive component.
 
@@ -66,7 +66,7 @@ This script runs all the cleaning, processing we did on the data and it outputs 
 make bootstrap
 ```
 
-## 3. Build report
+### 3. Build report
 
 Build the final report.
 
