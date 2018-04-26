@@ -544,7 +544,8 @@ topic_loc_tidy$topic <- as.factor(topic_loc_tidy$topic)
 ggplot(topic_loc_tidy) +
   borders("world", colour="gray50", fill="gray80") +
   geom_point(aes(x=longitude, y=latitude) , color = 'red', size=0.1, alpha=.25)+
-  ggtitle('Artist Location')
+  ggtitle('Artist Location')+
+  coord_fixed()
 ```
 
 In order to investigate topics around the world, each artist's topic scores are averaged. Only artists maintaining an average score of over 0.75 for a particular topic are considered to consistently discuss that topic.  By using this cutoff, have we defined approximately 11% of artists to speak heavily about death, ~14% of artists to speak heavily about love, and 11% of artists to speak heavily about religion. 
@@ -575,7 +576,8 @@ ggplot(data_to_plot) +
   geom_jitter(aes(x=longitude, y=latitude, color=topic) , size=1, alpha=.4)+
   xlim(-125, -67)+
   ylim(25,50)+
-  ggtitle('"Topic Heavy" Arists in USA')
+  ggtitle('"Topic Heavy" Arists in USA')+
+  coord_fixed()
 ```
 
 ```{r}
@@ -585,7 +587,8 @@ ggplot(data_to_plot) +
   coord_fixed(ratio = 1)+
   xlim( -10, 40)+
   ylim(40,75)+
-  ggtitle('"Topic Heavy" Arists in Europe')
+  ggtitle('"Topic Heavy" Arists in Europe')+
+  coord_fixed()
 
 ```
 
