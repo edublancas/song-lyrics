@@ -57,7 +57,7 @@ plot_matrix <- function(data, title, grouping_column=1, only_upper_half=TRUE,
     ggplot(distances, aes(x=row, y=col)) +
         geom_tile(aes(fill=Distance), color="white") + 
         coord_fixed() +
-        theme(axis.text.x = element_text(angle=45, hjust=1, size=11)) +
+        theme(axis.text.x = element_text(angle=60, hjust=1, size=11)) +
         xlab("") +
         ylab("") +
         ggtitle(title)

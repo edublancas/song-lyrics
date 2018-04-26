@@ -9,6 +9,9 @@ Analyzing similarity at different levels gave us interesting information about t
 
 When filtering only by songs that our algorithm labeled as English, we still notice groups of songs that are very different to the rest, when inspecting these songs we realized that most of them are Reggaeton music, a genre that originated in Puerto Rico. The lyrics of Reggaeton usually mix English and Spanish, so our algorithm had difficulties labeling these songs.
 
+Furthermore, when comparing Rock artists, we found that lyrics in Metal music are different from the rest of the popular Rock sub-genres. This makes sense since Metal lyrics usually speak about [dark subjects such as Hell, injustice, mayhem, carnage and death](https://en.wikipedia.org/wiki/Heavy_metal_lyrics).
+
+
 ```{r, echo=FALSE, message=FALSE, warning=FALSE, fig.cap="Distance among Rock songs in English for the top 30 most popular artists"}
 library(feather)
 library(dplyr)
@@ -31,8 +34,6 @@ by_artist <- rock_en %>% filter(artist_name_ %in% rock_en_top) %>%
 
 plot_matrix(by_artist, 'Top 30 Rock artists (English)', groups=2)
 ```
-
-Furthermore, when comparing Rock artists, we found that lyrics in Metal music are different from the rest of the popular Rock sub-genres. This makes sense since Metal lyrics usually speak about [dark subjects such as Hell, injustice, mayhem, carnage and death](https://en.wikipedia.org/wiki/Heavy_metal_lyrics).
 
 ## 5.2 Topic Analysis
 
