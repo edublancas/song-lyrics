@@ -101,7 +101,7 @@ cat data/raw/msd_beatunes_map.cls | awk -F  '\t' '{ print $1 "\t" $2}' > data/cl
 
 
 # assign topics to artists
-./topic_modeling
+./process/transform/topic_modeling
 
 # generate data for web app
 mkdir data/webapp

@@ -4,10 +4,11 @@ import numpy as np
 from tqdm import tqdm
 from sklearn.decomposition import LatentDirichletAllocation
 
+print('Running topic modeling...')
+
 print('Load bag_of_words_top_1000.feather')
 
-bag_of_words_top_1000 = pd.read_feather(
-    '../../data/transform/bag_of_words_top_1000.feather')
+bag_of_words_top_1000 = pd.read_feather('data/transform/bag_of_words_top_1000.feather')
 
 
 def corpus_topics_top_words(model, features, no_top_words):
