@@ -102,7 +102,8 @@ songsDataClean %>% select(9,10,17:ncol(songsDataEng)) %>%
     xlim(1960,2010) + geom_line() + theme_bw() +
     labs(colour='Sentiment',y='Frequency',x='Song Release Year') +
     facet_wrap(~genre_,scales = 'free_y',ncol = 3) +
-    scale_color_viridis(discrete=TRUE)
+    theme(text = element_text(size=14)) +
+    theme(strip.text.x = element_text(size = 14))
 ```
 
 # 6. Interactive Component
