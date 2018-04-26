@@ -23,6 +23,5 @@ report:
 		report/3-data-quality.Rmd report/4-main-analysis.Rmd \
 		report/5-executive-summary.Rmd report/7-conclusion.Rmd > report/final.Rmd
 	./report/render report/final.Rmd
-	rm -f report/final.Rmd
 	mv report/final.html index.html
 	echo 'Report in index.html'

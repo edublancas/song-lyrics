@@ -1,0 +1,921 @@
+---
+title: Exploratory Data Analysis
+author: Eduardo Blancas Reyes (eb3079), Valmik Patel (vp2382), Aaron Sadholz (as5401), Jose A Alvarado-Guzman (jaa2220)
+date: April 24, 2018
+output: html_document
+---
+
+# 1. Introduction
+
+Music has evolved immensely throughout the years. This is evident in no place more than it is in song lyrics. Lyrics have evolved over time across genres and geographies reflecting the current affairs of that time and the evolution of culture. We wanted to explore these relationships between lyrics, time, geography, and genre. Thus we decided to have song lyrics exploration as the topic for our project.
+
+
+We explored and tried to answer different questions in the project. Primarily, we looked at how lyrics varied across time, band and geography. We looked at the sentiment scores and their variation across these factors. In addition, we explored the topics covered by the songs as well by using topic modeling on the song lyrics. The similarity of bands was also determined based on their choice of lyrics.
+
+All our code is publicly available on [Github](https://github.com/edublancas/song-lyrics).
+
+The interactive component of this project, which displays information on individual artists is available [here](http://bl.ocks.org/valmikkpatel/raw/450a721204f0f3788133c045f700278f).
+
+This report is available [online](https://blancas.io/song-lyrics/index.html).
+
+## 1.1 Team members
+
+* Aaron Sadholz (as5401)
+    - Coded python topic modeling scrips
+    - Wrote report section 4.5. Topic Modeling.
+    - Wrote report section 6. Conclusion
+
+* Eduardo Blancas Reyes (eb3079)
+    - Coded Python cleaning/processing scripts used in `bootstrap` (except for topic modeling and sentiment analysis)
+    - Wrote report section 4.1 Data cleaning
+    - Wrote report section 4.4. Distance-based comparisons
+
+* Jose A Alvarado-Guzman (jaa2220)
+    - Coded R sentiment scripts
+    - Wrote report section 3.1 Missing Data
+    - Wrote report section 4.3 Sentiment analysis
+
+* Valmik Patel (vp2382)
+    - Made the interactive component
+    - Wrote report section 1 Introduction
+    - Wrote report section 2 Description of data
+
+
+# 2. Description of Data
+
+We used the million songs database along with the Musixmatch database for this project. These datasets were created by The Laboratory for the Recognition and Organization of Speech and Audio (LabROSA) at Columbia University. The million songs dataset contains data points like song name, artist name, year, song length and tempo for a million songs released between 1922-2011 chosen by LabROSA. The Musixmatch dataset contains data about lyrics of around 515,000 of these songs. The other songs are not covered due to copyright limitations. For this dataset, the words in the lyrics were stemmed and we are given the occurrences of top 5000 stemmed words in all songs. This was again done to deal with copyright issues.
+
+The data was collected using csv files provided by LabROSA. The csv files were preprocessed and cleaned and converted to feather files for efficient reading into R. The majority of the songs in the dataset come from the period of 20 years from 1990 to 2010. We have lyrics data from 515576 songs by 72665 artists. Artist based in the US account for the majority of the songs and more than 40,000 artists have less than 5 songs in the dataset. Although this is not an all encompassing list of songs, it still is a huge dataset that can tell us about some compelling trends in song lyrics.
+
+
+# 3. Data Quality
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo=TRUE,
+                      warning=FALSE,
+                      message=FALSE,
+                      fig.width=9,
+                      fig.height=9
+                      )
+
+library(ggplot2)
+
+theme_set(theme_grey(base_size = 14))
+```
+
+```{r loadDatasets}
+library(feather)
+library(tidyverse)
+library(scales)
+
+df_mxm_dataset <-      read_feather("../data/transform/mxm_dataset.feather")
+df_top_1000_dataset <- read_feather("../data/transform/bag_of_words_top_1000.feather")
+df_artist_topic <-     read_feather("../data/transform/artist_topic_weights.feather")
+df_year_topic <-       read_feather("../data/transform/year_topic_weights.feather")
+```
+
+## 3.1. Missing Data
+
+Besides the top 5,000 must frequent words in the lyrics of the Million Songs dataset, our dataset also include an additional 16 variables describing the songs and artists. These variables are used in this section to explore missing values among them.  The following bar chart present the missing vales rate per variable. We can see that 10 of this 16 variables are missing value free and more than half of the songs on our dataset have missing artist location information (location, latitude and longitude). Is also important to mention that a little over 17% of the song in our dataset have missing genre.  
+
+```{r loadDataSets}
+songsData <- read_feather('../data/transform/bag_of_words_clean.feather')
+metadata<-select(songsData,1:16)
+names(metadata)<-gsub('_$','',names(metadata))
+metadata %>% summarise_all(function(x){sum(is.na(x) | str_trim(x)=='')/length(x)}) %>% 
+  gather(key = Variable,value=Missing) %>%
+  ggplot(aes(reorder(Variable,-Missing),Missing)) + geom_col(fill='lightblue',colour='black') + scale_y_continuous(labels = percent) +
+  labs(x='Variables',y='Missing Values') + coord_flip() + 
+  geom_text(aes(label=paste0(round(Missing*100,1),'%')),hjust=-.1,size=3)
+```
+
+The following plot shows that the prevalent missing pattern corresponds to the combination of variables location, latitude and longitude. This pattern is followed by the combination of the same variables with release year and then by the release year variable by itself.
+
+```{r missingPattern}
+extracat::visna(metadata,sort = 'b')
+```
+
+The following heat map show the distribution of missing values by language. 
+
+```{r missingByLanguage}
+metadata %>% select(language,artist_mbid,location,release_year,genre) %>% filter(!is.na(language)) %>% 
+  group_by(language) %>% summarise_all(function(x){sum(is.na(x))/length(x)}) %>% ungroup() %>% 
+  gather(variable,missing_rate,-language) %>% 
+  ggplot(aes(y=language,x=variable,fill=missing_rate)) + geom_tile(colour='white') + 
+  theme_bw() + scale_fill_gradientn(name="Missing Rate",labels=percent,
+                                    colours = c('lightyellow','yellow','orange','darkred')) +
+  labs(x='Variables',y='Language ISO 639-1 Code')
+```
+
+## 3.2. Song Word Count
+
+Per song counts must be carefully considered, because they only count words which are in the most common 5,000 words. Nevertheless, we can see that the mode is around 75 words, and there is a wide range of word counts. When considering songs in this project, it is important to note that songs with different word counts will behave differently.
+
+```{r}
+mxm_dup <- df_mxm_dataset
+mxm_dup$track_id <-NULL
+mxm_dup <- transform(mxm_dup, sum=rowSums(mxm_dup))
+word_count <- data.frame(df_mxm_dataset$track_id, mxm_dup$sum)
+
+ggplot(word_count, aes(mxm_dup.sum)) +
+  geom_histogram(binwidth=25)+
+  scale_x_continuous(limits = c(0,1250))+
+  ggtitle('Song Word Counts')+
+  xlab('Word Count')+
+  ylab('Song Count')
+
+ggplot(word_count, aes(mxm_dup.sum)) +
+  geom_histogram(binwidth=1)+
+  scale_x_continuous(limits = c(0,100))+
+  ggtitle('Song Word Counts (low word count)')+
+  xlab('Word Count')+
+  ylab('Song Count')
+```
+
+
+## 3.3. Song Count Over Time
+
+The number of songs/year grows exponentially in size until ~2005, before it slows in growth rate and then declines. This is important to note as the data is clearly biased to more recent music. Thus, it is not representative of music from all points in history - the results from more recent year's analysis will most likely be more reliable.
+
+```{r}
+# songs/year distribution
+ggplot(df_year_topic,aes(x=year, y=song_count))+
+  geom_point()+
+  geom_line()+
+  xlab('Year')+
+  ylab('Song Count')+
+  ggtitle('Song Count/Year')
+```
+
+## 3.4. Song Count per Artist
+
+The dataset is skewed towards including few songs for each artist. When considering artists in this project, it should be noted that not all artists carry equally reliable information, as many artists are only represented by a single/few songs.
+
+```{r}
+#songs/artist distribution
+ggplot(df_artist_topic,aes(song_count))+
+  geom_histogram(binwidth=1)+
+  xlab('Song Count')+
+  ylab('Number of Artists')+
+  ggtitle('Song Count/Artist')
+```
+
+
+
+
+# 4. Main Analysis
+
+## 4.1. Data cleaning
+
+On this section, we explain the process to go from the raw data to the clean
+datasets we used for the analysis. All this process can be performed using the
+`./bootstrap` script.
+
+### 4.1.1. Converting the data to a tabular format
+
+The first step to work with the datasets was to put them in a better format
+for cleaning.
+
+The Musixmatch dataset is divided in two files .txt files (train and test),
+these plain text files contain the counts for the 5,000 words. We first
+converted both files to JSON using the `./txt2json` script and then combined
+them in a single file, the output is has the following format:
+
+```json
+[
+    {
+        "track_id": "a track id"
+        "bac_of_words": {
+            "word_id_1": "count for word with id 1",
+            "word_id_2": "count for word with id 2",
+            ...
+        }
+    },
+    ...
+]
+```
+
+The raw data contains stemmed words, but the authors also provide a reverse
+mapping to un-stem them. We performed that operation in the same script.
+
+After we got the data in JSON, we convert them to a binary format, we are
+using [Apache Feather](https://blog.cloudera.com/blog/2016/03/feather-a-fast-on-disk-format-for-data-frames-for-r-and-python-powered-by-apache-arrow/) since
+it has good interoperability with Python and R (this JSON to Feather format
+is done using the  `./bag_of_words` script). The output looks like this:
+
++------------------+----------------------------------+----------------------------------+
+| track_id         | word_id_1                        | word_id_2                        |
++==================+==================================+==================================+
+| a track id       | count for word with id 1         | count for word with id 2         |
++------------------+----------------------------------+----------------------------------+
+| another track id | another count for word with id 1 | another count for word with id 2 |
++------------------+----------------------------------+----------------------------------+
+| ...              | ...                              | ...                              |
++------------------+----------------------------------+----------------------------------+
+
+
+The `./bag_of_words` script contains some options. The dataset contains 5,000
+words in total, we can limit the output to the top k words, normalize the
+counts (convert them to proportions) and remove stop words. We used these
+options to generate several datasets for the analysis.
+
+### 4.1.2. Language detection
+
+During the first iterations of the project we noticed that it is important
+to know the language of the song. For example, when analyzing which artists
+are far from each other in term of the words they use, we were just seeing
+difference in language. For that reason we decided to detect the language
+so we could use it for our analysis.
+
+We do this using the [langdetect](https://github.com/Mimino666/langdetect) library (this is done in the `./language_detection`) script. This script
+generates a `language.feather` file that maps songs with their language.
+
+To detect the language we take every word with non-zero count, generate a "sentence" by joining all words in a string, separating them by one space and pass the string to the  `detect()` in the `langdetect` library.
+
+### 4.1.3. Fixing artist name and ID
+
+We performed some cleaning in the artist name and ID. We found that for
+the same artist ID, some songs had more than one artist name, this happened
+when some artist had collaborations. For example, an artist with ID `A1` may
+have artist names `Noel Gallagher`, `Noel Gallagher; Richard Ashcroft`, `Noel Gallagher; Richard Ashcroft; Ian Brown`. We grouped the songs by artist ID
+and assigned the most common artist name to all the songs.
+
+After cleaning the name we notice another problem: some artist names had
+more than one artist ID, this happened in a small number of cases but we cleaned the data as well. We grouped the songs by artist name and assigned
+the first artist ID in the group. This problem may be due to artists changing
+record labels, hence, not being recognized as the same artist by the Musixmatch portal.
+
+### 4.1.4. Extracting track metadata
+
+There are some other datasets that contain track metadata. It is
+important to mention that the Musixmatch dataset (the one with the lyrics data) is a subset of the [Million Song Dataset](https://labrosa.ee.columbia.edu/millionsong/) so we took the track IDs for such subset and only exported the metadata for those tracks.
+
+The datasets that contain the track metadata are `track_metadata.db`
+(included in the original raw data),  `msd_beatunes_map.cls` (we got that
+data from [here](http://www.tagtraum.com/)) and `language.feather`. The
+track metadata file is generated using the `./export_track_metadata` script and it contains the following columns (NAs information included):
+
+* track_id - Unique identifier for the songs
+* title - track title
+* song_id - Another ID (undocumented)
+* release - Album name
+* artist_id - Artist unique ID
+* artist_mid - Musixmatch artist unique ID
+* artist_name - Artist name
+* duration - Track duration (seconds)
+* artist_familiarity - Undocumented
+* artist_hottnesss - Undocumented
+* release_year - Track release year (26.27% NAs)
+* genre - Artist genre (17.37% NAs)
+* latitude - Artist latitude (58.29% NAs)
+* longitude - Artist longitude (58.29% NAs)
+* location - Location string such as "New York" (58.29% NAs)
+* language - Song language (0.04% NAs)
+
+### 4.1.5. Word embeddings
+
+Apart from using the bag of words representation, we generated a dense vector representation for each song using [word embeddings](https://en.wikipedia.org/wiki/Word_embedding), specifically, the 50 dimensional vectors in [GloVe](https://nlp.stanford.edu/projects/glove/). The process is as follows:
+
+Every song is represented as a vector $\mathbf{c} \in \mathbb{R}^{|W|}$, where $W$ is the set of words in our dataset. Every element $\mathbf{c}_{i}$ in $\mathbf{c}$ has a word associated with it and it represents the number of times that word is mentioned in the song. To convert this to a dense vector, we first normalized it:
+
+$$\mathbf{c}_{normalized} = \frac{\mathbf{c}}{\sum_{i=1}^{i=w}{\mathbf{c}_i}}$$
+
+
+Then, using the $w \in \mathbb{R}^{50}$ dense vectors in GloVe, we built a matrix where the i-th row corresponds to the embedding for the i-th word in $|W|$, then we compute the dense vector for every song as follows:
+
+$$\mathbf{v}_{song} = \mathbf{c}_{normalized} \times M$$
+
+Which give us a 50 dimensional vector for every row.
+
+### 4.1.6. Generating clean datasets
+
+Once we cleaned the data we generated 5 final datasets:
+
+1. `bag_of_words.feather` - Contains all the metadata and the counts for all the words (stop words removed)
+2. `bag_of_words_top_1000.feather` - Contains the counts top 1,000 words with the stop words removed
+3. `embeddings.feather` - Contains the metadata and the word embeddings representation (50 dimensions)
+4. `profiles.csv` - Summary for artists with at least 10 songs, this is the dataset used in the interactive component
+
+Datasets 2 and 3 are used when computing distance-based metrics to speedup computations, we assume that most of the interesting information is included in the top words. The word embeddings representation was also included since
+we found it has better results for some comparisons, specifically, to compare
+similarity between artists.
+
+## 4.2. Word distribution
+
+The required R packages for this analysis are the following:
+
+```{r sentiment_loadPackages}
+require(feather)
+require(stringr)
+require(tidyverse)
+require(tidytext)
+require(reshape2)
+```
+
+```{r loadDataset}
+songsDataClean <- read_feather('../data/transform/bag_of_words_clean.feather')
+```
+
+The following word cloud is made out of the top 200 most frequent words in our dataset. We can see that the most frequent used word in this dataset are love, followed by words like time, feel, baby, yeah, heart, etc.
+
+```{r sentiment_transformData}
+songsDataEng <- songsDataClean %>% filter(language_=='en')
+wordCount <- songsDataEng %>% select(-c(1:16)) %>% summarise_all(sum)
+songsDataEng <- songsDataEng %>% select(-which(wordCount==0)+16)
+```
+
+```{r wordCloud}
+counts <- songsDataClean %>% select(-c(1:16)) %>% summarise_all(sum)
+wordcloud::wordcloud(names(counts), as.numeric(counts), max.words = 200)
+```
+
+## 4.3. Sentiment analysis
+
+The sentiment dataset from the TidyText package was used to obtain the sentiment for the words in our final data set. This dataset contains the following three general-purpose lexicons:
+
+1. AFINN from Finn [Årup Nielsen](http://www2.imm.dtu.dk/pubdb/views/publication_details.php?id=6010)
+2. bing from [Bing Liu and collaborators](https://www.cs.uic.edu/~liub/FBS/sentiment-analysis.html)
+3. nrc from [Saif Mohammad and Peter Turney.](http://saifmohammad.com/WebPages/NRC-Emotion-Lexicon.htm)
+
+All three of these lexicons are based on single English words. The AFINN lexicon assigns words a score between -5 and 5, with negative scores indicating negative sentiment and positive scores indicating positive sentiment. The bing lexicon categorizes the words as either positive or negative. The nrc lexicon classifies the words using the following categories: positive, negative, anger, anticipation, disgust, fear, joy, sadness, surprise, and trust. The tidytext package provides a function named get_sentiments() to get specific sentiment lexicons without the columns that are not used in that lexicon.
+
+To perform this analysis the following data wrangling steps where conducted:
+
+1. Filter our final dataset to get only the English songs. 
+2. Remove the words in the English dataset with zero counts. 
+3. Convert the dataset resulted from step 2 to tidy text format (words are in the rows, not in the columns).
+
+Once the data was wrangled we apply a series of data transformation to get the dataset needed to generate the visualization of interest. The figure below illustrates this process.
+
+![](figures/sentiment_transform.png){width=450px}
+
+By adding the bing sentiment lexicon to the previous word cloud, we can see the most frequent positive and negative words. Love is the most frequent positive word used as expected, follow by words like heaven, promise, beautiful, free, smile, sweet, ext. On the negative side we can see words like die, fall, pain, wrong, hard, cry, lies, etc.
+
+```{r sentimentWordCloud}
+songsDataClean %>% select(-c(1:16)) %>% summarise_all(sum) %>% 
+  tidyr::gather(key=word,value=freq) %>% inner_join(get_sentiments('bing')) %>% 
+  acast(word ~ sentiment,value.var = 'freq') %>% apply(2,function(x){ifelse(is.na(x),0,x)}) %>%
+  wordcloud::comparison.cloud(colors = c("#F8766D", "#00BFC4"),max.words = 200,random.order = F)
+```
+
+Using the nrc lexicon, let see how the different categories of sentiments varies across the song's release year. This graph shows that although positive words are the most frequent across all years, the gap between negative and positive seems to decreases with time. Is also relevant to mentioned that prior to 1978 the second most frequent sentiment was joy, but right after this year there seems to be a switch from joy to negative sentiments.
+
+```{r nrcYear}
+songsDataClean %>% select(9,17:ncol(songsDataEng)) %>% filter(!is.na(release_year_)) %>% 
+  group_by(release_year_) %>% summarise_all(sum) %>% ungroup() %>%
+  tidyr::gather(key=word,value=freq,-release_year_) %>% filter(freq>0) %>%
+  inner_join(get_sentiments('nrc')) %>%
+  group_by(release_year_,sentiment) %>% summarise(freq=sum(freq)) %>%
+  ggplot(aes(x=release_year_,y=(freq)/1000,group=sentiment,colour=fct_reorder(sentiment,freq,.desc = TRUE))) + 
+    xlim(1960,2010) + geom_line() + theme_bw() + 
+    labs(colour='Sentiment',y='Frequency (Thousands)',x='Song Release Year')
+```
+
+Let see how the nrc sentiments varies not only across year but also by genre. Looking at this visualization we can see how negative sentiment not only get closer to  positives sentiments but in actually surpasses it for some genres like Electronic, Electronic/Dance, Rock and Latin. It also important to note how the negative sentiment seems to be more predominant in almost all years for genres like hardcore and hip-hop. In the Country, Gospel & Religion and World or international genres the most predominant sentiment is positive in with a high margin with non positive sentiments. The Gospel & Religion genre is the only one in which three positive sentiment are the most frequent ones (positive, trust, joy).
+
+```{r nrcGenreYear,fig.height=12,fig.width=12}
+songsDataClean %>% select(9,10,17:ncol(songsDataEng)) %>% 
+  filter(!is.na(release_year_) & genre_ %in% names(sort(table(songsDataClean$genre_),decreasing = TRUE)[1:15])) %>% 
+  group_by(genre_,release_year_) %>% summarise_all(sum) %>% ungroup() %>%
+  tidyr::gather(key=word,value=freq,-genre_,-release_year_) %>% filter(freq>0) %>%
+  inner_join(get_sentiments('nrc')) %>%
+  group_by(genre_,release_year_,sentiment) %>% summarise(freq=sum(freq)) %>%
+  ggplot(aes(x=release_year_,y=freq,group=sentiment,colour=fct_reorder(sentiment,freq,.desc = TRUE))) + 
+    xlim(1960,2010) + geom_line() + theme_bw() +
+    labs(colour='Sentiment',y='Frequency',x='Song Release Year') +
+    facet_wrap(~genre_,scales = 'free_y',ncol = 3)
+```
+
+Using the AFFIN lexicon the following Cleveland Plot display the mean average sentiment score for the top 10 most popular singers per genre.  
+
+```{r affinGenreArtist,fig.height=15,fig.width=12}
+ songsDataEng %>% filter(genre_ %in% names(sort(table(songsDataClean$genre_),decreasing = TRUE)[1:15])) %>%
+   select(7,10,15:ncol(songsDataEng)) %>%
+   plyr::ddply(.variables='genre_',
+                .fun=function(x)
+                 {
+                   y <- x %>% group_by(artist_id_) %>% summarise(popularity=max(artist_familiarity_)) %>%
+                     arrange(desc(popularity))
+                   y <- y[1:10,'artist_id_',drop=FALSE]
+                   return(inner_join(x,y,by='artist_id_'))
+                 }
+               ) %>% tidyr::gather(key=word,value=freq,-c(1:4)) %>% filter(freq>0) %>%
+   inner_join(get_sentiments('afinn')) %>% group_by(genre_,artist_id_,artist_name_) %>%
+   summarise(meanSentiment=sum(freq*score)/sum(freq)) %>% mutate(Sentiment=ifelse(meanSentiment<0,'Negative','Positive')) %>%
+   ggplot(aes(y=meanSentiment,x=artist_name_)) + geom_point(aes(colour=Sentiment),size=2) + 
+     coord_flip() + facet_wrap(~genre_,scales = 'free_y',ncol = 2) + theme_bw() + 
+     theme(panel.grid.major.y=element_blank()) + geom_segment(aes(xend=artist_name_),yend=-4) +
+     labs(y='Mean Sentiment Score',x='Artist Name')
+
+```
+
+## 4.4. Distance-based comparisons
+
+One of the things we are interested on is to find which observations are more similar/different to each other. Using the word embeddings representation of
+our data, we computed pairwise euclidean distance between observations at different levels to find similar elements.
+
+Since we have more than 200,000 songs it is hard to visualize them all at once, so we need to group them in some way. For this part we decided to group based on the following columns: year, genre and artist name. When grouping songs, we took the mean of the group to represent it.
+
+We make use of the `plot_matrix()` function which can be found in the `util.R` file. The function just computes the distance between pairs and plots them, there is also a `sort` parameter that clusters the observations and them orders them depending on the cluster they got assigned to, this helps to visualize better.
+
+```{r}
+library(feather)
+library(dplyr)
+library(tidyr)
+library(reshape2)
+library(ggplot2)
+library(knitr)
+source('../lib/eduardo_util.R')
+```
+
+```{r}
+# load embeddings data data and
+df <- read_feather('../data/transform/embeddings.feather')
+bow <- read_feather('../data/transform/bag_of_words.feather')
+
+# get columns corresponding to the metadata words
+columns <- colnames(df)
+columns_metadata <- columns[endsWith(columns, '_')]
+columns_lyrics <- columns[!endsWith(columns, '_')]
+
+bow_columns <- colnames(bow)
+bow_columns_metadata <- bow_columns[endsWith(columns, '_')]
+bow_columns_lyrics <- bow_columns[!endsWith(columns, '_')]
+```
+
+### 4.4.1. Comparing years
+
+We first take a look at the distance between years:
+
+```{r, fig.cap="Distance among the average song accross years"}
+by_year <- df %>% group_by(release_year_) %>%
+                do(mean_words(., columns_lyrics))
+
+plot_matrix(by_year, "Release year", sort=FALSE)
+```
+
+We see that for any given year, the more we move (either to following or previous years) the distance increases. We can see that the greatest distance is between the latest data (2000s) and the earliest data (1920s).
+
+### 4.4.2. Comparing genres
+
+We have `r length(unique(df$genre_))` different genres in the data, so in order to visualize better we filtered by the most popular genres defined as the ones with more than 80 songs.
+
+```{r}
+# get only genres that have more than 80 songs
+genre_ <- table(df$genre_)
+top_genres <- names(genre_[genre_ > 80])
+
+top_genres
+```
+
+```{r, fig.cap="Distance among average songs accross top genres"}
+by_genre <- df %>% filter(genre_ %in% top_genres) %>% group_by(genre_) %>%
+                do(mean_words(., columns_lyrics))
+
+plot_matrix(by_genre, 'Song genre')
+```
+
+We see that some rows are very different to the rest: Samba, Reggaeton, MPB ([Musica popular brasileira](https://en.wikipedia.org/wiki/M%C3%BAsica_popular_brasileira)), Latin, Flamenco and Bachata. Most songs from these songs are in either Spanish or Portuguese, so it makes sense that they make use of different words.
+
+We not filter by songs only in Spanish.
+
+```{r, fig.cap="Distance among average songs across top genres (Spanish)"}
+by_genre_es <- df %>% filter(genre_ %in% top_genres, language_ == 'es') %>%
+                    group_by(genre_) %>% do(mean_words(., columns_lyrics))
+
+plot_matrix(by_genre_es, 'Song genre (only songs in Spanish)', groups=2)
+```
+
+This plot is more informative, we see that Trance, House, Drum & Bass, Children's Music and World songs in Spanish are the genres that are most different to the rest.
+
+We now take a look at music in English.
+
+```{r, fig.cap="Distance among average songs across top genres (English)"}
+by_genre_en <- df %>% filter(genre_ %in% top_genres, language_ == 'en') %>%
+                    group_by(genre_) %>% do(mean_words(., columns_lyrics))
+
+plot_matrix(by_genre_en, 'Song genre (only songs in English)', groups=2)
+```
+
+Here we see that Samba, Reggaeton and Bachata are the genres that are different, songs from those three genres are usually not in English, which
+suggests that our language imputation algorithm is having trouble labeling
+those songs.
+
+We took a look at Reggaeton music to find out more about this problem:
+
+```{r, fig.width=8, fig.height=6, fig.cap="Count of Reggaeton songs by language"}
+reggaeton <- df %>% filter(genre_ == 'Reggaeton')
+
+ggplot(reggaeton, aes(language_)) +
+    geom_bar() +
+    xlab("Language") +
+    ylab("Count") +
+    ggtitle("Reggaeton songs by language")
+```
+
+Most of the songs are labeled as Spanish but a couple of them in English and even one in Italian.
+
+These are the Reggaeton songs in English:
+
+```{r}
+reggaeton_en <- bow %>% filter(genre_ == 'Reggaeton', language_ == 'en')
+kable(reggaeton_en[, c('title_', 'artist_name_')])
+```
+
+If we take a look at the lyrics of any of them, we will see that they mix
+a lot of English and Spanish words, see for example, this verse from "Impacto" by Daddy Yankee:
+
+    Hey!
+    Demuestra lo que hay, mama (¡hey!)
+    No pierdas el enfoque y...
+    ¡Sube! (hit me!)
+    ¡Sube! (hit me!)
+    ¡Sube! (hit me!, let's go!)
+
+Since the dataset only includes the top 5,000 words across all songs, many Spanish word will not appear in the dataset but the English words will probably do. This will affect the language imputation for these songs since the non-zero counts will mostly be songs in English.
+
+### 4.4.3. Finding similar artists
+
+We now turn our attention to finding similar artists, to subset the number of
+comparisons, we first filter by genre, language (English) and then we take the top 30 artists (the ones with the most songs)
+
+```{r, fig.cap="Distance among Rock songs in English for the top 30 most popular artists"}
+rock_en <- df %>% filter(genre_ == 'Rock', language_ == 'en')
+rock_en_top <- names(sort(table(rock_en$artist_name_), decreasing=TRUE)[1:30])
+
+by_artist <- rock_en %>% filter(artist_name_ %in% rock_en_top) %>%
+                group_by(artist_name_) %>%
+                do(mean_words(., columns_lyrics))
+
+plot_matrix(by_artist, 'Top 30 Rock artists (English)', groups=2)
+```
+
+There are three bands that differ from the rest: Amorphis, Cannibal Corpse, and Napalm Death. Those three band are actually Metal bands, not Rock bands. Metal lyrics usually focus on [dark topics](https://en.wikipedia.org/wiki/Heavy_metal_lyrics), so it makes sense that those bands are different to the other bands but similar to each other.
+
+```{r, fig.cap="Distance among Pop songs in English for the top 30 most popular artists"}
+pop <- df %>% filter(genre_ == 'Pop', language_ == 'en')
+pop_top <- names(sort(table(pop$artist_name_), decreasing=TRUE)[1:30])
+
+by_artist <- pop %>% filter(artist_name_ %in% pop_top) %>%
+                group_by(artist_name_) %>%
+                do(mean_words(., columns_lyrics))
+
+plot_matrix(by_artist, 'Top 30 Pop artists (English)', groups=2)
+```
+
+Here we see that Celine Dion looks brighter, meaning that her lyrics are different from the rest of the artists.
+
+### 4.4.4. Comparing songs form the same artist
+
+Finally, we compare songs from the two artists. First we take a look at 30 songs from the band Foo Fighters.
+
+```{r, fig.cap="Distance among 30 songs from the Foo Fighters band"}
+set.seed(10)
+
+ff <- df %>% filter(artist_name_ == 'Foo Fighters') %>% sample_n(30)
+ff <- ff[c('title_', columns_lyrics)]
+
+plot_matrix(ff, 'Foo Fighters (30 sample songs)', groups=2)
+```
+
+We see a clear outlier here, the song ["Skin And Bones"](https://genius.com/Foo-fighters-skin-and-bones-lyrics), the chorus looks like this:
+
+
+    Skin and bones
+    Skin and bones
+    Skin and bones, don't you know?
+    Skin and bones
+    Skin and bones
+    Skin and bones, don't you know?
+
+Looks like the heavy use of "skin" and "bones" is making that specific song be very different from the rest.
+
+Now we take a look at 30 songs from The Kooks:
+
+```{r, fig.cap="Distance among 30 songs from The Kooks band"}
+set.seed(10)
+
+kooks <- df %>% filter(artist_name_ == 'The Kooks') %>% sample_n(30)
+kooks <- kooks[c('title_', columns_lyrics)]
+
+plot_matrix(kooks, 'The Kooks (30 sample songs)', groups=2)
+```
+
+We see some black squares outside the diagonal of the matrix. those correspond to the following pairs:
+
+```{r}
+distances <- pairwise_distances(kooks, groups=2)
+pairs <- distances %>% filter(row != col, Distance == 0)
+kable(pairs)
+```
+
+We see that rows 1, 3 and 4 correspond to the same song but a different version so it makes sense that they have the same lyrics. The second row does not match and the songs are actually different, the counts are as follows:
+
+```{r, fig.width=8, fig.height=6, fig.cap="Word count for two songs from The Kooks with different titles"}
+titles <- c('Always Free',
+            'Always Where I Need To Be (NRK P3 Acoustic Session)')
+songs <- bow %>% filter(artist_name_ == 'The Kooks', title_ %in% titles)
+
+song_1 <- top_k_words(songs, bow_columns_lyrics, row=1, k=10)
+song_2 <- top_k_words(songs, bow_columns_lyrics, row=2, k=10)
+
+df <- t(data.frame(song_1, song_2))
+rownames(df) <- titles
+df <- melt(df)
+colnames(df) <- c('Title', 'Word', 'Count')
+
+ggplot(df, aes(x=Word, y=Count, fill=Title)) +
+    geom_bar(stat="identity", position=position_dodge()) +
+    ggtitle("Two songs from The Kooks") +
+    theme(axis.text.x = element_text(angle=45, hjust=1))
+```
+
+We see that both songs have the exact same counts for the top 10 words (they have actually the same counts for all words). This suggests that some of the counts may be wrong. When this dataset was created, the authors performed entity resolution between the 1 million song dataset and the Musixmatch dataset so it may be the case that some matches are wrong. Since for this particular case the artist is the same and the title is similar, they mismatched the lyrics.
+
+## 4.5. Topic modeling
+
+```{r}
+library(feather)
+library(tidyverse)
+
+topic_artist <- read_feather('../data/transform/artist_topic_weights.feather')
+topic_year   <- read_feather('../data/transform/year_topic_weights.feather')
+```
+
+Topic modeling is a powerful technique which allows for extracting the most common topics from a set of text documents (in this case song lyrics). It relies on an unstructured algorithm called Latent Dirichlet Allocation (LDA)  which finds groups of words which tend to appear in the same song. Each word is assigned a weight according to its relation to each topic. It is up to human discretion to name the groups of words.
+
+This was used to identify topics within our data. After finding 25 topics, by considering the most heavily weighted words, 3 topics with semantic meaning were identified: Love, Religion, and Death.
+
+Here are the top 10 weighted words in each topic with clear semantic meaning:
+
+* Love: love, heart, sweet, true, give, enough, darling, touch, vision, found
+* Death: life, die, run, dead, kill, dream, blood, death, scream, clear
+* Religion: us, god, live, dance, people, heaven, hand, stand, angel, beautiful
+
+Using these topic weights, each song can be scored to show how prevalent each topic is. In order to account for songs with many more words than others, these topic scores are divided by the number of words in each song to ensure correct equivalent scaling. However, just because a song has a higher religion score than death score does not mean it is more about religion, therefore, we must scale each topic to lie within common bounds. To do this, each song's topic score is ranked according to its sorted order, and then the ranking is scaled between 0 and 1.
+
+Now we can begin to answer some fundamental questions with the topic data:
+
+* Do topics change around the world?
+* Have topics changed over time?
+
+### 4.5.1. How have topics changed over time?
+
+Here each year's songs topic weights were averaged. As we have seen previously, the number of songs each year in the dataset has generally grown over time. Thus it makes sense that we see a lot of noise in earlier years. Once sufficient data is available (around 1955), we can start to make observations.
+
+* Love Songs have become less popular since the 1950's
+* Songs about religion and death have become more popular since the 1950's
+* In general, topics have become more consistent each year (based on preprocessing, each topic's mean lies at 0.5, and all topics approach 0.5 over time).
+
+```{r}
+df_parallel_coord <- data.frame(t(topic_year))[1:3,]
+colnames(df_parallel_coord) <- topic_year$year
+df_parallel_coord$topic<-rownames(df_parallel_coord)
+
+GGally::ggparcoord(df_parallel_coord,
+                   scale='globalminmax',
+                   columns = 1:87,
+                   groupColumn='topic') +
+  theme(text = element_text(size=5),axis.text.x = element_text(angle=90, hjust=1))+
+  xlab('Year') +
+  ylab('Topic Average Weight')+
+  ggtitle('Topics Over Time')
+```
+
+```{r}
+df_parallel_coord <- data.frame(t(topic_year))[1:3,]
+colnames(df_parallel_coord) <- topic_year$year
+df_parallel_coord$topic<-rownames(df_parallel_coord)
+
+GGally::ggparcoord(df_parallel_coord,
+                   scale='globalminmax',
+                   columns = 32:87,
+                   groupColumn='topic')+
+  theme(text = element_text(size=10),axis.text.x = element_text(angle=90, hjust=1))+
+  xlab('Year') +
+  ylab('Topic Average Weight')+
+  ggtitle('Topics Over Time (when sufficient data available)')
+```
+
+### 4.5.2 How do topics differ across the world?
+
+To consider topics across geography, we first explore the location of artists in the dataset: Artists are scattered around the globe, with major "hubs" being the USA and Europe (particularly the UK).
+
+```{r}
+topic_loc_tidy <- gather(topic_artist, 'topic', 'weight', c(3,6,7))
+topic_loc_tidy$topic <- as.factor(topic_loc_tidy$topic)
+
+ggplot(topic_loc_tidy) +
+  borders("world", colour="gray50", fill="gray80") +
+  geom_point(aes(x=longitude, y=latitude) , color = 'red', size=0.1, alpha=.25)+
+  ggtitle('Artist Location')+
+  coord_fixed()
+```
+
+In order to investigate topics around the world, each artist's topic scores are averaged. Only artists maintaining an average score of over 0.75 for a particular topic are considered to consistently discuss that topic.  By using this cutoff, have we defined approximately 11% of artists to speak heavily about death, ~14% of artists to speak heavily about love, and 11% of artists to speak heavily about religion. 
+
+Primary observations:
+
+* Love is the most common topic to define an artist's content.
+* Europe sees far more artists discussing death, particularly Germany.
+* The United States is dominated by artists discussing love and religion, with few discussing death. 
+
+```{r}
+data_to_plot <- select(topic_loc_tidy, longitude, latitude, topic, weight) %>%
+  filter(weight>0.75)
+
+bardata <- data_to_plot %>% group_by(topic) %>% summarize(count = n())
+
+ggplot(bardata, aes(x = reorder(topic, count), y=count))+
+  geom_col() + 
+  ggtitle('Artists Count Consistently Referring to a Particular Topic')+
+  xlab('Topic')+
+  ylab('Count')
+
+```
+
+```{r}
+ggplot(data_to_plot) +
+  borders("usa", colour="gray50", fill="gray80") +
+  geom_jitter(aes(x=longitude, y=latitude, color=topic) , size=1, alpha=.4)+
+  xlim(-125, -67)+
+  ylim(25,50)+
+  ggtitle('"Topic Heavy" Arists in USA')+
+  coord_fixed()
+```
+
+```{r}
+ggplot(data_to_plot) +
+  borders("world", colour="gray50", fill="gray80") +
+  geom_point(aes(x=longitude, y=latitude, color=topic) , size=1, alpha=.5)+
+  coord_fixed(ratio = 1)+
+  xlim( -10, 40)+
+  ylim(40,75)+
+  ggtitle('"Topic Heavy" Arists in Europe')+
+  coord_fixed()
+
+```
+
+### 4.5.3 Topic Related Hypotheses and Next Steps
+
+* We hypothesize that love songs have become relatively less popular over the past decades because more topics are now desirable to the audience to be discussed in music.
+* Topic modeling in individual years (or decades). Considering music from over the course of almost a century only allows for easily identifying topics which have always been discussed. By modeling topics from specific time-frames, we may be able to understand which unique topics only existed during specific points in history. Similarly, topic modeling could be performed in specific locations. Maybe there are region specific topics which were not weighted heavily enough to be identified when considering data from around the world.
+* The data suggests that the are a lot of artists discussing death in Europe and particularly Germany. We could perform  topic modeling on other documents coming from these countries (like books perhaps) to see if this trend is limited to music, or the country's entire culture.
+
+# 5. Executive Summary
+
+We explored song lyrics data from the Musixmatch + Million Songs dataset to derive conclusions about trends in song lyrics and music across time and geography. We asked questions to explore different facets of the dataset and identified some interesting trends. In this section, we will give a short summary of our findings and look at compelling trends in sentiment score, topics, and similar artists.  
+
+## 5.1 Distance-based comparisons
+
+Analyzing similarity at different levels gave us interesting information about the data. Since our dataset contains data from many languages (mostly English and Spanish) we saw that when comparing genres, some of them were much closer to each other since they share the language (some songs in certain music genres are mostly in Spanish).
+
+When filtering only by songs that our algorithm labeled as English, we still notice groups of songs that are very different to the rest, when inspecting these songs we realized that most of them are Reggaeton music, a genre that originated in Puerto Rico. The lyrics of Reggaeton usually mix English and Spanish, so our algorithm had difficulties labeling these songs.
+
+Furthermore, when comparing Rock artists, we found that lyrics in Metal music are different from the rest of the popular Rock sub-genres. This makes sense since Metal lyrics usually speak about [dark subjects such as Hell, injustice, mayhem, carnage and death](https://en.wikipedia.org/wiki/Heavy_metal_lyrics).
+
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE, fig.cap="Distance among Rock songs in English for the top 30 most popular artists"}
+library(feather)
+library(dplyr)
+library(tidyr)
+library(reshape2)
+library(ggplot2)
+library(knitr)
+source('../lib/eduardo_util.R')
+
+df <- read_feather('../data/transform/embeddings.feather')
+columns <- colnames(df)
+columns_lyrics <- columns[!endsWith(columns, '_')]
+
+rock_en <- df %>% filter(genre_ == 'Rock', language_ == 'en')
+rock_en_top <- names(sort(table(rock_en$artist_name_), decreasing=TRUE)[1:30])
+
+by_artist <- rock_en %>% filter(artist_name_ %in% rock_en_top) %>%
+                group_by(artist_name_) %>%
+                do(mean_words(., columns_lyrics))
+
+plot_matrix(by_artist, 'Top 30 Rock artists (English)', groups=2)
+```
+
+## 5.2 Topic Analysis
+
+The topics love, death, and religion have always existed in song lyrics, however their relevance has changed over time. To understand this, we model the occurrence of words which relate to each topic:
+
+* The topic love comes from the words: love, heart, sweet, etc.
+* The topic death comes from the words: death, die, scream, etc.
+* The topic religion comes from the words: god, heaven, angel, etc.
+
+Interestingly, love songs have become less common since the the 1950's. In the visualization below, the average topic score is 0, and a positive or negative score indicates if each year has had above or below the average amount of that topic (the score can range from -1 to 1). Clearly the popularity of love songs have decreased significantly from 1955 to 1980, since then stabilizing at the average.
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+library(feather)
+library(tidyverse)
+library(viridis)
+topic_year   <- read_feather('../data/transform/year_topic_weights.feather')
+
+df_parallel_coord <- data.frame(t(topic_year))[1:3,]
+colnames(df_parallel_coord) <- topic_year$year
+df_parallel_coord$topic<-rownames(df_parallel_coord)
+
+# scaled for most intuitive understanding for non technical audience mean is 0, max is +1, min is -1
+for (i in colnames(df_parallel_coord)){
+  col<-toString(i)
+  if (col != 'topic'){
+      df_parallel_coord[col] <- 2*df_parallel_coord[col]-1
+  }
+}
+
+GGally::ggparcoord(df_parallel_coord,
+                   scale='globalminmax',
+                   columns = 32:87,
+                   groupColumn='topic')+
+  theme(text = element_text(size=15),axis.text.x = element_text(angle=0, hjust=0.5))+
+  xlab('Year') +
+  ylab('Topic Score')+
+  ggtitle('Topic Relevance: 1955-2010')+
+  scale_x_discrete(breaks=seq(1955, 2010, 5))+
+  geom_hline(yintercept = 0)+
+  scale_color_viridis(discrete=TRUE)
+```
+
+## 5.3 Sentiment Analysis
+
+The sentiment dataset from the TidyText package was used to obtain the sentiment for the words in our final data set. By using several sentiment lexicons we explored the following topics:
+
+* Most frequent positive and negative words. 
+* How different sentiments categories (joy, trust, sadness, anger, etc) changes according to the songs release year and genre.
+* Mean sentiment score distribution for the top 10 most popular artists by genre.
+
+The must important observations of this analysis are the following:
+
+* Words with positive sentiments are more frequents across all years, however the gap between positive and negative sentiments seems to decrease with time.
+* When the sentiment trend over time is stratified by genre we observed that negative sentiment not only get closer to positives sentiments but in actually surpasses it for some genres like Electronic, Electronic/Dance, Rock and Latin. We also observed that negative sentiment seems to be more predominant in almost all years for genres like hardcore and hip-hop.
+
+The visualization below shows some of these observations:
+
+```{r nrcGenreYearExec,fig.height=12,fig.width=12,echo=FALSE, message=FALSE, warning=FALSE}
+songsDataClean %>% select(9,10,17:ncol(songsDataEng)) %>% 
+  filter(!is.na(release_year_) & genre_ %in% names(sort(table(songsDataClean$genre_),decreasing = TRUE)[1:15])) %>% 
+  group_by(genre_,release_year_) %>% summarise_all(sum) %>% ungroup() %>%
+  tidyr::gather(key=word,value=freq,-genre_,-release_year_) %>% filter(freq>0) %>%
+  inner_join(get_sentiments('nrc')) %>%
+  group_by(genre_,release_year_,sentiment) %>% summarise(freq=sum(freq)) %>%
+  filter(sentiment %in% c('positive', 'negative'))  %>%
+  ggplot(aes(x=release_year_,y=freq,group=sentiment,colour=fct_reorder(sentiment,freq,.desc = TRUE))) + 
+    xlim(1960,2010) + geom_line() + theme_bw() +
+    labs(colour='Sentiment',y='Frequency',x='Song Release Year') +
+    facet_wrap(~genre_,scales = 'free_y',ncol = 3) +
+    theme(text = element_text(size=14)) +
+    theme(strip.text.x = element_text(size = 14)) +
+    scale_color_viridis(discrete=TRUE, end=0.5)
+```
+
+# 6. Interactive Component
+
+The interactive component of this project, which displays information on individual artists is available [here](http://bl.ocks.org/valmikkpatel/raw/450a721204f0f3788133c045f700278f/).
+
+# 7. Conclusion
+
+## 7.1 Limitations
+
+* The dataset was somewhat biased due to copyright constraints. This may have been due to particular production labels not consenting to use their content. Generally, labels don’t support a population of artists representative of entire music market, but focus on a particular genre or demographic. Therefore, the copyright constraints may have caused the distribution of songs to not be representative of all music. 
+
+* In order to reduce computation time, only the most common 5,000 words in all songs were considered. While this is efficient, it does remove potential for finding insights in particularly unique words used by a subset of artists or during a short period in history.
+
+* A bag of words representation of data was used. Again, this representation saves computation time, but removes a lot of contextual information from each song (which words appear next to each other).
+
+## 7.2 Future Directions
+* Topic modeling is computationally expensive due to the size of this dataset, it takes at least an hour to run each model, and the output must be manually considered to identify topics. Here are a couple additional analyses requiring many iterations of topic modeling that may produce interesting insights:
+  * Run topic models on specific locations (Germany, East Coast USA, West Coast USA, etc.) to investigate if there are topics which are only visible when considering specific parts of the world.
+  * Run topic models on subsets of dates to investigate if particular topics were only visible during certain times in history.
+  
+* Improve language identification. With the language imputing technique used, mistakes can be made for songs which have lyrics in multiple languages. There may be insights that can be discovered by being able to understand the distribution of languages within each song.
+
+* As mentioned in the limitations section, the copyright issues, bag of words representation, and only using the most common 5000 words may have restricted the insights possible to make with the data. In the future, lyrics could be scraped directly from the source to obtain a less restrictive and more representative dataset (ensuring that process does not violate any copyright laws).
+
+## 7.3 Lessons Learned
+
+* Data quality is of utmost importance. Understanding the quality of data is dependent on understanding the process of collecting data. However, not all data collection techniques are explicitly defined. Therefore, any inconsistencies found within data must be explored. In this project we found a number of inconsistencies which displayed some flaws in the data collection process:
+  * Songs with similar names by the same artists are sometimes confused, and have identical bag of words representations. This is clearly incorrect.
+  * While the data set notes that different recorded tracks that comprise each song, this data is not recorded for the majority of the data set.
+  * Some songs with a primary artist and a featured artist are listed as a completely new artist.
+  
+* Creating and maintaining a clean, accurate, and reproducible data set is extremely beneficial. Often times when performing analyses we found that the data needed to be in a different format. Creating scripts to generate the updated data, instead of sharing multiple large files is extremely efficient, and ensures the same data will always be accessible to the entire team.
+
+* We learned the value of communication within a group through this project. We found that before we finalized our communication methods and work-streams, we were doing some duplicate analysis and working with slightly different datasets. Ensuring to always update the team and asking for feedback when confused proved to save time and produce better results.
+
+# 8. References
+
+Thierry Bertin-Mahieux, Daniel P.W. Ellis, Brian Whitman, and Paul Lamere. The
+Million Song Dataset. In Proceedings of the 12th International Society for Music
+Information Retrieval Conference (ISMIR 2011), 2011.
+
+Million Song Dataset, official website by Thierry Bertin-Mahieux, available at:
+http://labrosa.ee.columbia.edu/millionsong/
+
+Song-lyrics Github repository, available at: https://github.com/edublancas/song-lyrics
+
+https://www.tidytextmining.com/tidytext.html
+
+bootstrap-combobox.js v1.1.6, Copyright 2012 Daniel Farrell
