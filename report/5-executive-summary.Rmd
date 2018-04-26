@@ -65,6 +65,7 @@ The must important observations of this analysis are the following:
 * When the sentiment trend over time is stratified by genre we observed that negative sentiment not only get closer to positives sentiments but in actually surpasses it for some genres like Electronic, Electronic/Dance, Rock and Latin. We also observed that negative sentiment seems to be more predominant in almost all years for genres like hardcore and hip-hop.
 
 The visualization below shows some of these observations:
+<!-- 
 ```{r nrcGenreYearExec,fig.height=12,fig.width=12,echo=FALSE, message=FALSE, warning=FALSE}
 songsDataClean %>% select(9,10,17:ncol(songsDataEng)) %>% 
   filter(!is.na(release_year_) & genre_ %in% names(sort(table(songsDataClean$genre_),decreasing = TRUE)[1:15])) %>% 
@@ -77,7 +78,7 @@ songsDataClean %>% select(9,10,17:ncol(songsDataEng)) %>%
     labs(colour='Sentiment',y='Frequency',x='Song Release Year') +
     facet_wrap(~genre_,scales = 'free_y',ncol = 3)
 ```
-
+ -->
 # 6 Interactive Component
 
 The interactive component of this project, which displays information on individual artists is available [here](http://bl.ocks.org/valmikkpatel/raw/450a721204f0f3788133c045f700278f/).
