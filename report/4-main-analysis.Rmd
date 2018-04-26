@@ -161,9 +161,8 @@ songsDataEng <- songsDataEng %>% select(-which(wordCount==0)+16)
 ```
 
 ```{r wordCloud}
-# songsDataEng
-# songsData %>% select(-c(1:16)) %>% summarise_all(sum) %>% tidyr::gather(key=words,value=freq) %>%
-#   with(wordcloud::wordcloud(words,freq,max.words = 200))
+ songsDataClean %>% select(-c(1:16)) %>% summarise_all(sum) %>% tidyr::gather(key=words,value=freq) %>%
+   with(wordcloud::wordcloud(words,freq,max.words = 200))
 ```
 
 ## 4.3. Sentiment analysis
@@ -182,12 +181,9 @@ To perform this analysis the following data wrangling steps where conducted:
 2. Remove the words in the English dataset with zero counts. 
 3. Convert the dataset resulted from step 2 to tidy text format (words are in the rows, not in the columns).
 
+Once the data was wrangled we apply a series of data transformation to get the dataset needed to generate the visualization of interest. The figure below illustrates this process.
 
-# TODO: FIX THIS (missing figure and wrong label, it's not figure 1)
-
-Once the data was wrangled we apply a series of data transformation to get the dataset needed to generate the visualization of interest (Figure 1 illustrates this process).
-
-<!-- ![](figures/sentiment_transform.png){width=450px} -->
+![](figures/sentiment_transform.png){width=450px}
 
 By adding the bing sentiment lexicon to the previous word cloud, we can see the most frequent positive and negative words. Love is the most frequent positive word used as expected, follow by words like heaven, promise, beautiful, free, smile, sweet, ext. On the negative side we can see words like die, fall, pain, wrong, hard, cry, lies, etc.
 
